@@ -83,7 +83,7 @@ export default function PortfolioCard({ project, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2"
+      className="group relative h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer transform transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2"
       onMouseMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect()
         const x = ((e.clientX - rect.left) / rect.width - 0.5) * 30
@@ -108,31 +108,31 @@ export default function PortfolioCard({ project, onClick }) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
       
       {/* Content */}
-      <div className="relative h-full p-8 flex flex-col justify-between z-10">
+      <div className="relative h-full p-4 sm:p-6 md:p-8 flex flex-col justify-between z-10">
         {/* Top Section */}
         <div>
-          <div className="text-xs text-white/60 uppercase tracking-wider mb-2">
+          <div className="text-xs text-white/60 uppercase tracking-wider mb-1 sm:mb-2">
             {project.industry.replace(/([A-Z])/g, ' $1').trim()}
           </div>
-          <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
+          <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 leading-tight">
             {project.title}
           </h3>
-          <p className="text-white/80 text-sm md:text-base leading-relaxed max-w-sm">
+          <p className="text-white/80 text-xs sm:text-sm md:text-base leading-relaxed max-w-sm">
             {project.tagline}
           </p>
         </div>
 
         {/* Bottom Section */}
         <div className="mt-auto">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
             <div className="h-px flex-1 bg-white/20 group-hover:bg-white/40 transition-colors"></div>
-            <span className="text-white/60 text-sm group-hover:text-white transition-colors">
+            <span className="text-white/60 text-xs sm:text-sm group-hover:text-white transition-colors">
               View Project
             </span>
             <div className="h-px flex-1 bg-white/20 group-hover:bg-white/40 transition-colors"></div>
           </div>
           <div className="flex items-center justify-center gap-2 text-white/80 group-hover:text-white transition-colors">
-            <span className="text-sm font-medium">Explore</span>
+            <span className="text-xs sm:text-sm font-medium">Explore</span>
             <span className="transform group-hover:translate-x-1 transition-transform">→</span>
           </div>
         </div>
