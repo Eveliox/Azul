@@ -1,19 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { shadows } from '../constants/designSystem'
-import LiveSitePreview from './LiveSitePreview'
 
 export default function ProjectModal({ project, isOpen, onClose }) {
-  const [showDemo, setShowDemo] = useState(false)
-
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        if (showDemo) {
-          setShowDemo(false)
-        } else {
-          onClose()
-        }
-      }
+      if (e.key === 'Escape') onClose()
     }
 
     if (isOpen) {
@@ -25,7 +16,7 @@ export default function ProjectModal({ project, isOpen, onClose }) {
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = 'unset'
     }
-  }, [isOpen, onClose, showDemo])
+  }, [isOpen, onClose])
 
   if (!isOpen || !project) return null
 
@@ -42,7 +33,7 @@ export default function ProjectModal({ project, isOpen, onClose }) {
         <div className={`relative h-64 bg-gradient-to-br ${project.gradient} overflow-hidden`}>
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
           <div className="absolute inset-0 bg-black/20"></div>
-          
+
           {/* Close button */}
           <button
             onClick={onClose}
@@ -120,7 +111,7 @@ export default function ProjectModal({ project, isOpen, onClose }) {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-800/50">
-            {project.liveUrl ? (
+            {project.liveUrl && (
               <a
                 href={project.liveUrl}
                 target="_blank"
@@ -129,16 +120,6 @@ export default function ProjectModal({ project, isOpen, onClose }) {
               >
                 Visit Live Site →
               </a>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowDemo(true)
-                }}
-                className="flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl font-semibold text-white hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-105"
-              >
-                View Full Demo →
-              </button>
             )}
             <button
               onClick={onClose}
@@ -149,14 +130,6 @@ export default function ProjectModal({ project, isOpen, onClose }) {
           </div>
         </div>
       </div>
-
-      {/* Live Site Preview */}
-      <LiveSitePreview 
-        project={project}
-        isOpen={showDemo}
-        onClose={() => setShowDemo(false)}
-      />
     </div>
   )
 }
-

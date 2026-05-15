@@ -2,61 +2,6 @@ import { gradients } from '../constants/designSystem'
 
 export const portfolioProjects = [
   {
-    id: 1,
-    industry: "restaurant",
-    title: "Bella Vista Restaurant",
-    tagline: "Elevated waterfront dining experience",
-    shortDescription: "Premium fine dining platform",
-    description: "An elegant, high-performance restaurant platform designed for discerning clientele. Seamlessly integrates reservation management, curated menu presentation, and private event coordination with sophisticated design and flawless user experience.",
-    gradient: gradients.restaurant,
-    backgroundImage: "/waterfront.jpg",
-    features: [
-      "Advanced reservation management system",
-      "Curated menu presentation with dietary accommodations",
-      "Private event booking and coordination",
-      "Seamless payment integration"
-    ],
-    techStack: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"]
-  },
-  {
-    id: 2,
-    industry: "fitness",
-    title: "FitZone Gym & Wellness",
-    tagline: "Transform your body, transform your life",
-    shortDescription: "Membership-based fitness dashboard",
-    description: "A comprehensive fitness platform with class scheduling, membership management, and personalized workout tracking.",
-    gradient: gradients.fitness,
-    backgroundImage: "/gym-bg.jpg",
-    features: [
-      "Advanced class booking with waitlists",
-      "Member portal with progress analytics",
-      "Trainer profiles and schedules",
-      "On-demand workout video library",
-      "Nutrition planning tools",
-      "Mobile app integration"
-    ],
-    techStack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Stripe"]
-  },
-  {
-    id: 3,
-    industry: "realEstate",
-    title: "Prime Properties",
-    tagline: "Find your dream home",
-    shortDescription: "MLS-integrated real estate portal",
-    description: "A high-converting real estate platform featuring property listings, virtual tours, and intelligent lead generation.",
-    gradient: gradients.realEstate,
-    backgroundImage: "/house4.jpg",
-    features: [
-      "Advanced property search with maps",
-      "360° virtual tour integration",
-      "Intelligent lead capture forms",
-      "Mortgage calculator",
-      "Neighborhood insights",
-      "Agent contact system"
-    ],
-    techStack: ["React", "Google Maps API", "Firebase", "SendGrid", "Tailwind CSS"]
-  },
-  {
     id: 4,
     industry: "construction",
     title: "Aspire Roofing Services",
@@ -75,6 +20,25 @@ export const portfolioProjects = [
       "Contact information integration"
     ],
     techStack: ["React", "Tailwind CSS", "Modern Web Design"]
+  },
+  {
+    id: 5,
+    industry: "wellness",
+    title: "Hello You Wellness Center",
+    tagline: "Personalized wellness, physician-supervised",
+    shortDescription: "Medical wellness clinic platform",
+    description: "A modern site for a Miami-based medical wellness clinic offering physician-supervised treatments including IV therapy, hormone therapy, peptide programs, aesthetics, and assisted weight loss. Features a service catalog, integrated booking, and a clean conversion-focused design.",
+    gradient: gradients.wellness,
+    backgroundImage: "/vitality.png",
+    liveUrl: "https://helloyouwellness.com/",
+    features: [
+      "Detailed service and treatment pages",
+      "Cal.com booking integration for consultations",
+      "Google Maps location embed",
+      "Optimized images via Next.js",
+      "Mobile-responsive, conversion-focused design",
+      "Clear CTAs across every section"
+    ],
+    techStack: ["Next.js", "React", "Cal.com", "Google Maps API"]
   }
 ]
-

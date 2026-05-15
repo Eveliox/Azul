@@ -9,6 +9,7 @@ export const gradients = {
   travel: "from-blue-400 via-blue-500 to-blue-700",
   finance: "from-blue-500 via-blue-600 to-blue-800",
   construction: "from-purple-500 via-purple-600 to-purple-700",
+  wellness: "from-teal-400 via-blue-500 to-blue-700",
   default: "from-gray-600 via-gray-700 to-gray-800"
 }
 

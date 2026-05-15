@@ -99,10 +99,11 @@ export default function PortfolioCard({ project, onClick }) {
             </span>
             <span className="text-white/40">•</span>
             <span className="text-xs text-white/70 font-medium px-2 py-0.5 bg-white/10 rounded-full backdrop-blur-sm">
-              {project.industry === 'restaurant' ? 'Restaurant' : 
-               project.industry === 'fitness' ? 'Fitness' : 
+              {project.industry === 'restaurant' ? 'Restaurant' :
+               project.industry === 'fitness' ? 'Fitness' :
                project.industry === 'realEstate' ? 'Real Estate' :
                project.industry === 'construction' ? 'Construction' :
+               project.industry === 'wellness' ? 'Wellness' :
                project.industry.replace(/([A-Z])/g, ' $1').trim()}
             </span>
           </div>

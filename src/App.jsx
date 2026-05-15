@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Lenis from 'lenis'
 import ServiceCard from './components/ServiceCard'
 import PortfolioCard from './components/PortfolioCard'
 import ProjectModal from './components/ProjectModal'
 import PricingCard from './components/PricingCard'
+import Reveal, { RevealItem } from './components/Reveal'
+import MagneticButton from './components/MagneticButton'
 import { portfolioProjects } from './data/portfolioProjects'
 import { spacing, shadows } from './constants/designSystem'
 
@@ -22,6 +25,40 @@ function App() {
     setIsModalOpen(false)
     setSelectedProject(null)
   }
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      smoothTouch: false,
+    })
+
+    let rafId
+    const raf = (time) => {
+      lenis.raf(time)
+      rafId = requestAnimationFrame(raf)
+    }
+    rafId = requestAnimationFrame(raf)
+
+    const handleAnchorClick = (e) => {
+      const anchor = e.target.closest('a[href^="#"]')
+      if (!anchor) return
+      const href = anchor.getAttribute('href')
+      if (!href || href === '#') return
+      const target = document.querySelector(href)
+      if (!target) return
+      e.preventDefault()
+      lenis.scrollTo(target, { offset: -80 })
+    }
+    document.addEventListener('click', handleAnchorClick)
+
+    return () => {
+      document.removeEventListener('click', handleAnchorClick)
+      cancelAnimationFrame(rafId)
+      lenis.destroy()
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 overflow-x-hidden w-full">
@@ -118,10 +155,31 @@ function App() {
         <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
         <div className="absolute bottom-1/4 left-1/4 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
 
+        {/* Subtle dot grid overlay with radial fade */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.15]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(96,165,250,0.45) 1px, transparent 0)',
+            backgroundSize: '32px 32px',
+            maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
+          }}
+        ></div>
+        {/* Slowly drifting conic gradient accent */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute -top-1/4 left-1/2 -translate-x-1/2 w-[140%] aspect-square opacity-30 animate-spin-slow"
+            style={{
+              background: 'conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(59,130,246,0.15) 90deg, transparent 180deg, rgba(96,165,250,0.12) 270deg, transparent 360deg)',
+              filter: 'blur(60px)',
+            }}
+          ></div>
+        </div>
+
         <div className="relative z-10 max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             {/* Left Content */}
-            <div className="space-y-6 sm:space-y-8">
+            <Reveal direction="up" duration={0.9} amount={0.3} className="space-y-6 sm:space-y-8">
               <div className="space-y-4 sm:space-y-6">
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[1.1] tracking-tight break-words" style={{ letterSpacing: '-0.02em' }}>
                   <span className="text-gray-100">Beautiful Web</span>
@@ -143,29 +201,29 @@ function App() {
                   We craft stunning, high-performance websites and web applications that drive results. From elegant landing pages to powerful SaaS platforms.
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4 w-full sm:w-auto">
-                <a 
+                <MagneticButton
                   href="https://calendly.com/purplexmythzz/30min"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group px-6 sm:px-8 md:px-10 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base text-white hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 transform hover:scale-105 relative overflow-hidden text-center w-full sm:w-auto min-h-[48px] flex items-center justify-center"
+                  strength={0.4}
+                  className="group px-6 sm:px-8 md:px-10 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base text-white hover:shadow-2xl hover:shadow-blue-500/40 transition-shadow duration-300 relative overflow-hidden text-center w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center will-change-transform"
                 >
                   <span className="relative z-10 break-words">Book a Free Consultation</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </a>
-                <a 
-                  href="#portfolio" 
+                </MagneticButton>
+                <a
+                  href="#portfolio"
                   className="px-6 sm:px-8 md:px-10 py-4 sm:py-5 border-2 border-gray-700 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base hover:border-blue-500 hover:bg-blue-500/10 transition-all duration-300 text-center flex items-center justify-center group text-gray-300 w-full sm:w-auto min-h-[48px]"
                 >
                   <span className="break-words">See Examples</span>
                   <span className="ml-2 transform group-hover:translate-x-1 transition-transform flex-shrink-0">→</span>
                 </a>
               </div>
-            </div>
+            </Reveal>
 
             {/* Right Visual */}
-            <div className="hidden lg:block relative">
+            <Reveal direction="left" duration={1} delay={0.15} amount={0.3} className="hidden lg:block relative">
               <div className="relative">
                 {/* Glass morphism card */}
                 <div className="bg-gray-800/80 backdrop-blur-2xl rounded-3xl p-8 border-2 border-gray-700 shadow-2xl">
@@ -192,14 +250,14 @@ function App() {
                 <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-500/30 to-blue-600/40 rounded-2xl rotate-12 opacity-50 blur-xl"></div>
                 <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-blue-500/30 rounded-2xl -rotate-12 opacity-40 blur-xl"></div>
               </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* About Section */}
       <section id="about" className={`py-20 sm:py-24 md:py-28 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gray-900`}>
-        <div className="text-center mb-12 sm:mb-16">
+        <Reveal direction="up" className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent" style={{ letterSpacing: '-0.02em' }}>
             About Azul
           </h2>
@@ -207,11 +265,11 @@ function App() {
             We're a premium web development studio dedicated to creating beautiful, high-performance digital experiences that drive real results for businesses across all industries.
           </p>
           <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 mx-auto rounded-full"></div>
-        </div>
+        </Reveal>
 
         {/* Mission & Values */}
-        <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-6xl mx-auto mb-12 sm:mb-16 md:mb-20">
-          <div className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl relative overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
+        <Reveal stagger={0.15} className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 max-w-6xl mx-auto mb-12 sm:mb-16 md:mb-20">
+          <RevealItem className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl relative overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative z-10">
               <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-gray-100">Our Mission</h3>
@@ -219,8 +277,8 @@ function App() {
                 To empower businesses with stunning, high-performance websites and web applications that not only look incredible but drive measurable growth and success.
               </p>
             </div>
-          </div>
-          <div className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl relative overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
+          </RevealItem>
+          <RevealItem className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl relative overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative z-10">
               <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-gray-100">Our Values</h3>
@@ -228,25 +286,25 @@ function App() {
                 Quality, innovation, and client success are at the heart of everything we do. We believe in building long-term partnerships and delivering solutions that exceed expectations.
               </p>
             </div>
-          </div>
-        </div>
+          </RevealItem>
+        </Reveal>
 
         {/* Team Section */}
-        <div className="text-center mb-8 sm:mb-12">
+        <Reveal direction="up" className="text-center mb-8 sm:mb-12">
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent" style={{ letterSpacing: '-0.02em' }}>
             Meet the Team
           </h3>
           <p className="text-base sm:text-lg text-gray-400">The talented developers behind Azul</p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+        </Reveal>
+        <Reveal stagger={0.18} className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {/* Evelio Gonzalez */}
-          <div className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 group transform hover:-translate-y-1">
+          <RevealItem className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 group transform hover:-translate-y-1">
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-4 sm:mb-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-blue-600/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <img 
-                  src="/evelio.jpg" 
-                  alt="Evelio Gonzalez" 
+                <img
+                  src="/headshot.jpg"
+                  alt="Evelio Gonzalez"
                   className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full object-cover border-4 border-gray-700 group-hover:border-blue-500 transition-all duration-300 shadow-xl"
                 />
               </div>
@@ -268,27 +326,27 @@ function App() {
                 LinkedIn
               </a>
             </div>
-          </div>
+          </RevealItem>
 
-          {/* David Cabrera */}
-          <div className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 group transform hover:-translate-y-1">
+          {/* Felipe Trujillo */}
+          <RevealItem className="bg-gray-800 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 group transform hover:-translate-y-1">
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-4 sm:mb-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-blue-600/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <img 
-                  src="/david.jpg" 
-                  alt="David Cabrera" 
+                <img
+                  src="/felipeHeadshot.jpg"
+                  alt="Felipe Trujillo"
                   className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full object-cover border-4 border-gray-700 group-hover:border-blue-500 transition-all duration-300 shadow-xl"
                 />
               </div>
-              <h4 className="text-xl sm:text-2xl font-bold mb-2 text-gray-100">David Cabrera</h4>
+              <h4 className="text-xl sm:text-2xl font-bold mb-2 text-gray-100">Felipe Trujillo</h4>
               <p className="text-blue-400 mb-2 font-medium text-sm sm:text-base">Co-Founder & Lead Developer</p>
               <p className="text-gray-500 mb-3 sm:mb-4 text-xs sm:text-sm font-medium italic">Backend, Cloud, DevOps</p>
               <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base px-2">
                 Experienced developer specializing in modern web technologies and scalable application architecture.
               </p>
               <a 
-                href="https://www.linkedin.com/in/davidacabrerawrestling/" 
+                href="https://www.linkedin.com/in/felipetrujillo0281751/"
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 rounded-lg sm:rounded-xl font-semibold text-white text-sm sm:text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
@@ -299,11 +357,11 @@ function App() {
                 LinkedIn
               </a>
             </div>
-          </div>
-        </div>
+          </RevealItem>
+        </Reveal>
 
         {/* What We Offer */}
-        <div className="mt-12 sm:mt-16 md:mt-20 max-w-6xl mx-auto px-4">
+        <Reveal direction="up" className="mt-12 sm:mt-16 md:mt-20 max-w-6xl mx-auto px-4">
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 shadow-2xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-600/5 opacity-50"></div>
             <div className="relative z-10">
@@ -330,44 +388,54 @@ function App() {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* What We Do */}
       <section className={`py-20 sm:py-24 md:py-28 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gray-900`}>
-        <div className="text-center mb-12 sm:mb-16">
+        <Reveal direction="up" className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent" style={{ letterSpacing: '-0.02em' }}>
             What We Do
           </h2>
           <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 mx-auto rounded-full"></div>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 max-w-7xl mx-auto">
-          <ServiceCard 
-            title="Websites"
-            description="Custom websites tailored to your brand and goals."
-          />
-          <ServiceCard 
-            title="Webapps"
-            description="Interactive web applications that solve real problems."
-          />
-          <ServiceCard 
-            title="UI/UX & SEO"
-            description="Beautiful designs optimized for search and conversions."
-          />
-          <ServiceCard 
-            title="Performance & Security"
-            description="Fast, secure sites that protect your data and users."
-          />
-          <ServiceCard 
-            title="Maintenance"
-            description="Ongoing support to keep your site running smoothly."
-          />
-        </div>
+        </Reveal>
+        <Reveal stagger={0.08} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 max-w-7xl mx-auto">
+          <RevealItem>
+            <ServiceCard
+              title="Websites"
+              description="Custom websites tailored to your brand and goals."
+            />
+          </RevealItem>
+          <RevealItem>
+            <ServiceCard
+              title="Webapps"
+              description="Interactive web applications that solve real problems."
+            />
+          </RevealItem>
+          <RevealItem>
+            <ServiceCard
+              title="UI/UX & SEO"
+              description="Beautiful designs optimized for search and conversions."
+            />
+          </RevealItem>
+          <RevealItem>
+            <ServiceCard
+              title="Performance & Security"
+              description="Fast, secure sites that protect your data and users."
+            />
+          </RevealItem>
+          <RevealItem>
+            <ServiceCard
+              title="Maintenance"
+              description="Ongoing support to keep your site running smoothly."
+            />
+          </RevealItem>
+        </Reveal>
       </section>
 
       {/* Portfolio Section - "Built for Every Industry" */}
       <section id="portfolio" className={`py-20 sm:py-24 md:py-28 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 relative bg-gray-800`}>
-        <div className="text-center mb-16 sm:mb-20 md:mb-24">
+        <Reveal direction="up" className="text-center mb-16 sm:mb-20 md:mb-24">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 sm:mb-8 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent">
             Built for Every Industry
           </h2>
@@ -375,17 +443,18 @@ function App() {
             Explore our portfolio of stunning websites across diverse industries
           </p>
           <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 mx-auto rounded-full"></div>
-        </div>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-7xl mx-auto">
+        </Reveal>
+
+        <Reveal stagger={0.12} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-7xl mx-auto">
           {portfolioProjects.map((project) => (
-            <PortfolioCard 
-              key={project.id}
-              project={project}
-              onClick={() => handleProjectClick(project)}
-            />
+            <RevealItem key={project.id}>
+              <PortfolioCard
+                project={project}
+                onClick={() => handleProjectClick(project)}
+              />
+            </RevealItem>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* Project Modal */}
@@ -397,7 +466,7 @@ function App() {
 
       {/* Process Section */}
       <section className={`py-20 sm:py-24 md:py-28 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gray-900`}>
-        <div className="text-center mb-12 sm:mb-16">
+        <Reveal direction="up" className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent" style={{ letterSpacing: '-0.02em' }}>
             Our Process
           </h2>
@@ -405,9 +474,9 @@ function App() {
             A transparent, structured approach to bringing your vision to life
           </p>
           <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 mx-auto rounded-full"></div>
-        </div>
+        </Reveal>
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-6 sm:gap-8">
+          <Reveal stagger={0.12} className="grid md:grid-cols-4 gap-6 sm:gap-8">
             {[
               {
                 step: "01",
@@ -430,7 +499,7 @@ function App() {
                 description: "We launch your project and provide ongoing support to ensure everything runs smoothly."
               }
             ].map((item, idx) => (
-              <div key={idx} className="relative">
+              <RevealItem key={idx} className="relative">
                 <div className="bg-gray-800 border-2 border-gray-700 rounded-2xl p-6 sm:p-8 hover:border-blue-500/50 transition-all duration-300 group h-full">
                   <div className="text-4xl sm:text-5xl font-black text-blue-500/20 mb-4">{item.step}</div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-100 mb-3 sm:mb-4">{item.title}</h3>
@@ -443,21 +512,21 @@ function App() {
                     </svg>
                   </div>
                 )}
-              </div>
+              </RevealItem>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Pricing Section */}
       <section id="pricing" className={`py-20 sm:py-24 md:py-28 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gray-900 overflow-visible`}>
-        <div className="text-center mb-12 sm:mb-16 px-4">
+        <Reveal direction="up" className="text-center mb-12 sm:mb-16 px-4">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent overflow-visible" style={{ letterSpacing: '-0.02em', lineHeight: '1.1' }}>
             Pricing
           </h2>
           <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 mx-auto rounded-full"></div>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto mb-8 sm:mb-12">
+        </Reveal>
+        <Reveal stagger={0.15} className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto mb-8 sm:mb-12">
           {[
             {
               title: "Starter Website",
@@ -523,9 +592,9 @@ function App() {
               ]
             }
           ].map((plan, idx) => (
-            <div key={idx} className={`bg-gray-800 rounded-xl sm:rounded-xl p-6 sm:p-8 border-2 transition-all duration-300 hover:shadow-xl overflow-visible ${
-              plan.highlighted 
-                ? 'border-blue-500 shadow-xl shadow-blue-500/30 md:scale-105' 
+            <RevealItem key={idx} className={`bg-gray-800 rounded-xl sm:rounded-xl p-6 sm:p-8 border-2 transition-all duration-300 hover:shadow-xl overflow-visible ${
+              plan.highlighted
+                ? 'border-blue-500 shadow-xl shadow-blue-500/30 md:scale-105'
                 : 'border-gray-700 hover:border-blue-500/50'
             }`}>
               <h3 className="text-lg sm:text-xl font-semibold text-gray-100 mb-2">{plan.title}</h3>
@@ -566,25 +635,25 @@ function App() {
               >
                 Get Started
               </a>
-            </div>
+            </RevealItem>
           ))}
-        </div>
-        <div className="text-center max-w-3xl mx-auto px-4">
+        </Reveal>
+        <Reveal direction="fade" className="text-center max-w-3xl mx-auto px-4">
           <p className="text-gray-400 text-sm sm:text-base md:text-lg leading-relaxed">
             <span className="font-semibold text-gray-300">Note:</span> Prices depend on project complexity. Schedule a call so we can give you a personalized quote tailored to your specific needs.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       {/* FAQ Section */}
       <section className={`py-20 sm:py-24 md:py-28 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gray-800`}>
-        <div className="text-center mb-12 sm:mb-16">
+        <Reveal direction="up" className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent" style={{ letterSpacing: '-0.02em' }}>
             Frequently Asked Questions
           </h2>
           <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 mx-auto rounded-full"></div>
-        </div>
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        </Reveal>
+        <Reveal stagger={0.08} className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {[
             {
               question: "How long does a website take?",
@@ -611,7 +680,7 @@ function App() {
               answer: "We offer ongoing support and maintenance packages. You can request changes, updates, or new features anytime. We're here to help your website grow with your business."
             }
           ].map((faq, idx) => (
-            <div key={idx} className="bg-gray-900 border-2 border-gray-700 rounded-xl sm:rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
+            <RevealItem key={idx} className="bg-gray-900 border-2 border-gray-700 rounded-xl sm:rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all duration-300">
               <button
                 onClick={() => setExpandedFAQ(expandedFAQ === idx ? null : idx)}
                 className="w-full px-6 sm:px-8 py-4 sm:py-5 text-left flex items-center justify-between group"
@@ -631,21 +700,21 @@ function App() {
                   <p className="text-gray-400 leading-relaxed text-sm sm:text-base">{faq.answer}</p>
                 </div>
               )}
-            </div>
+            </RevealItem>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* Contact Section */}
       <section id="contact" className={`py-20 sm:py-24 md:py-28 lg:py-32 px-4 sm:px-6 md:px-8 lg:px-12 bg-gray-800`}>
-        <div className="text-center mb-12 sm:mb-16">
+        <Reveal direction="up" className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 bg-clip-text text-transparent" style={{ letterSpacing: '-0.02em' }}>
             Get In Touch
           </h2>
           <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 mx-auto rounded-full"></div>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
-          <div className="bg-gray-900 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl">
+        </Reveal>
+        <Reveal stagger={0.18} className="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
+          <RevealItem className="bg-gray-900 border-2 border-gray-700 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl">
             <form 
               action="https://formspree.io/f/meovalvq" 
               method="POST"
@@ -709,8 +778,8 @@ function App() {
                 We respond within 24 hours
               </p>
             </form>
-          </div>
-          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/20 border-2 border-blue-500/30 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl flex flex-col items-center justify-center text-center">
+          </RevealItem>
+          <RevealItem className="bg-gradient-to-br from-blue-500/10 to-blue-600/20 border-2 border-blue-500/30 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
               <span className="text-3xl sm:text-4xl">📅</span>
             </div>
@@ -718,14 +787,15 @@ function App() {
             <p className="text-gray-400 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
               Book a free consultation to discuss your project and explore how we can help bring your vision to life.
             </p>
-            <a
+            <MagneticButton
               href="https://calendly.com/purplexmythzz/30min"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 sm:px-8 md:px-10 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base text-white hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-105 inline-block mb-6"
+              strength={0.4}
+              className="px-6 sm:px-8 md:px-10 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base text-white hover:shadow-2xl hover:shadow-blue-500/30 transition-shadow duration-300 inline-flex items-center justify-center mb-6 will-change-transform"
             >
               Open Calendly
-            </a>
+            </MagneticButton>
             {/* Social Links */}
             <div className="flex items-center gap-4 pt-6 border-t border-blue-500/20 w-full justify-center">
               <a 
@@ -751,8 +821,8 @@ function App() {
                 </svg>
               </a>
             </div>
-          </div>
-        </div>
+          </RevealItem>
+        </Reveal>
       </section>
 
       {/* Footer */}
