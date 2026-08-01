@@ -6,39 +6,58 @@ export const portfolioProjects = [
     industry: "construction",
     title: "Aspire Roofing Services",
     tagline: "Stronger roofs, built right the first time",
-    shortDescription: "Professional roofing services website",
-    description: "A modern, professional website for Aspire Roofing Services featuring service information, contact forms, and a gallery showcasing their roofing expertise. The site highlights their comprehensive services including shingle, tile, metal, and flat-roof installations.",
+    shortDescription: "Full Growth Suite client — roofing",
+    description: "A Growth Suite client running the full Azul stack — website, automated review requests, local SEO content, and connected lead capture. We built the conversion-focused site and now handle their ongoing growth so the owner can stay on the roof, not on marketing.",
     gradient: gradients.construction,
     backgroundImage: "/aspire-roofing-preview.png",
     liveUrl: "https://aspireroofingservices.com/",
     features: [
-      "Service information pages",
-      "Contact form with free estimate requests",
-      "Service gallery showcase",
-      "Mobile-responsive design",
-      "Professional hero section with call-to-action",
-      "Contact information integration"
+      "Website build + hosting",
+      "Automated 5-star review requests",
+      "Local Proof SEO content (bilingual)",
+      "Missed-call text-back",
+      "Lead capture connected to CRM",
+      "Mobile-optimized, conversion-focused"
     ],
-    techStack: ["React", "Tailwind CSS", "Modern Web Design"]
+    techStack: ["Azul Growth Suite", "React", "Tailwind CSS"]
   },
   {
     id: 5,
     industry: "wellness",
     title: "Hello You Wellness Center",
     tagline: "Personalized wellness, physician-supervised",
-    shortDescription: "Medical wellness clinic platform",
-    description: "A modern site for a Miami-based medical wellness clinic offering physician-supervised treatments including IV therapy, hormone therapy, peptide programs, aesthetics, and assisted weight loss. Features a service catalog, integrated booking, and a clean conversion-focused design.",
+    shortDescription: "Full Growth Suite client — medical wellness",
+    description: "A Miami-based medical wellness clinic offering physician-supervised treatments. We built the site and run the full growth system — bilingual review automation, booking integration, and local SEO — so the team can focus on patients, not marketing.",
     gradient: gradients.wellness,
     backgroundImage: "/vitality.png",
     liveUrl: "https://helloyouwellness.com/",
     features: [
-      "Detailed service and treatment pages",
-      "Cal.com booking integration for consultations",
-      "Google Maps location embed",
-      "Optimized images via Next.js",
-      "Mobile-responsive, conversion-focused design",
-      "Clear CTAs across every section"
+      "Conversion-focused website",
+      "Cal.com booking integration",
+      "Automated review requests (EN/ES)",
+      "Local SEO content pipeline",
+      "Google Maps + service-area content",
+      "Ongoing site maintenance & support"
     ],
-    techStack: ["Next.js", "React", "Cal.com", "Google Maps API"]
+    techStack: ["Azul Growth Suite", "Next.js", "Cal.com"]
+  },
+  {
+    id: 6,
+    industry: "finance",
+    title: "Caley Insurance",
+    tagline: "Coverage that actually protects your business",
+    shortDescription: "Full Growth Suite client — insurance",
+    description: "A Miami-area insurance agency running the full Azul stack. We built a modern, conversion-focused site and connected it to the growth system — bilingual quote capture, automated review requests, and local SEO content that helps them get found for insurance searches across South Florida.",
+    gradient: gradients.finance,
+    liveUrl: "https://www.caleyinsurance.com/",
+    features: [
+      "Modern, conversion-focused website",
+      "Quote request form connected to CRM",
+      "Automated review requests (EN/ES)",
+      "Bilingual local SEO content",
+      "Missed-call text-back",
+      "Mobile-optimized for local searches"
+    ],
+    techStack: ["Azul Growth Suite", "React", "Modern Web Stack"]
   }
 ]

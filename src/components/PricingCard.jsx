@@ -1,28 +1,91 @@
-export default function PricingCard({ title, price, features, highlighted = false }) {
+export default function PricingCard({
+  icon,
+  title,
+  price,
+  priceSuffix = '/mo',
+  priceNote,
+  badge,
+  badgeTone = 'blue',
+  features = [],
+  ctaLabel = 'Get Started',
+  ctaHref = '#contact',
+  comingSoon = false,
+}) {
+  const badgeTones = {
+    blue: 'bg-blue-50 text-blue-700',
+    green: 'bg-emerald-50 text-emerald-700',
+    gray: 'bg-gray-100 text-gray-500',
+  }
+
   return (
-    <div className={`bg-gray-800 rounded-xl sm:rounded-xl p-6 sm:p-8 border-2 transition-all duration-300 hover:shadow-xl ${
-      highlighted 
-        ? 'border-blue-500 shadow-xl shadow-blue-500/30 md:scale-105' 
-        : 'border-gray-700 hover:border-blue-500/50'
-    }`}>
-      <h3 className="text-lg sm:text-xl font-semibold text-gray-100 mb-2">{title}</h3>
-      <div className="text-2xl sm:text-3xl font-bold text-blue-500 mb-4 sm:mb-6">{price}</div>
-      <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
-        {features.map((feature, index) => (
-          <li key={index} className="text-xs sm:text-sm text-gray-400 flex items-start">
-            <span className="text-blue-500 mr-2 sm:mr-3 font-bold">✓</span>
-            {feature}
+    <div
+      className={`relative flex flex-col h-full bg-white border rounded-2xl p-7 transition-all duration-200 ${
+        comingSoon
+          ? 'border-gray-200/70 opacity-70'
+          : 'border-gray-200/70 hover:border-gray-300 hover:-translate-y-0.5'
+      }`}
+    >
+      <div className="w-11 h-11 rounded-lg bg-blue-500 flex items-center justify-center mb-6">
+        {icon}
+      </div>
+
+      <div className="mb-1">
+        {comingSoon ? (
+          <div className="text-[11px] font-semibold tracking-[0.16em] text-gray-400 uppercase mb-1">Coming Soon</div>
+        ) : (
+          <>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl sm:text-[2.25rem] font-semibold tracking-tight text-gray-900" style={{ letterSpacing: '-0.03em' }}>{price}</span>
+              <span className="text-sm text-gray-500 font-medium">{priceSuffix}</span>
+            </div>
+            {priceNote && <div className="text-xs text-gray-500 mt-1">{priceNote}</div>}
+          </>
+        )}
+      </div>
+
+      <h3 className="text-lg font-semibold tracking-tight text-gray-900 mb-3 mt-3">{title}</h3>
+
+      {badge && (
+        <div
+          className={`inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10.5px] font-medium mb-5 ${badgeTones[badgeTone] || badgeTones.blue}`}
+        >
+          {badge}
+        </div>
+      )}
+
+      <ul className="space-y-2.5 mb-7 flex-1">
+        {features.map((feature, i) => (
+          <li key={i} className="flex items-start gap-2 text-sm text-gray-600 leading-snug">
+            <svg
+              className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{feature}</span>
           </li>
         ))}
       </ul>
-      <button className={`w-full py-2.5 sm:py-3 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-300 ${
-        highlighted
-          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg hover:shadow-blue-500/30'
-          : 'bg-gray-700 text-gray-200 hover:bg-gray-600 border-2 border-gray-600'
-      }`}>
-        Get Started
-      </button>
+
+      {comingSoon ? (
+        <button
+          disabled
+          className="w-full py-2.5 rounded-lg font-semibold text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
+        >
+          {ctaLabel}
+        </button>
+      ) : (
+        <a
+          href={ctaHref}
+          target={ctaHref?.startsWith('http') ? '_blank' : undefined}
+          rel={ctaHref?.startsWith('http') ? 'noopener noreferrer' : undefined}
+          className="w-full py-2.5 rounded-lg font-semibold text-sm text-center transition-colors duration-200 bg-gray-900 text-white hover:bg-black block"
+        >
+          {ctaLabel}
+        </a>
+      )}
     </div>
   )
 }
-
