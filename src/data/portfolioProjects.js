@@ -49,6 +49,7 @@ export const portfolioProjects = [
     shortDescription: "Full Growth Suite client — insurance",
     description: "A Miami-area insurance agency running the full Azul stack. We built a modern, conversion-focused site and connected it to the growth system — bilingual quote capture, automated review requests, and local SEO content that helps them get found for insurance searches across South Florida.",
     gradient: gradients.finance,
+    backgroundImage: "/caley-insurance-preview.jpg",
     liveUrl: "https://www.caleyinsurance.com/",
     features: [
       "Modern, conversion-focused website",
@@ -59,5 +60,25 @@ export const portfolioProjects = [
       "Mobile-optimized for local searches"
     ],
     techStack: ["Azul Growth Suite", "React", "Modern Web Stack"]
+  },
+  {
+    id: 7,
+    industry: "medical",
+    title: "Sanos Medical Group",
+    tagline: "Primary care that meets you in your language",
+    shortDescription: "Full Growth Suite client — primary care",
+    description: "A Miami-based primary care practice offering annual physicals, preventive care, chronic condition management, weight management, and GLP-1 therapy — plus virtual visits statewide. We built a bilingual website and run the full growth system so patients can find them, book with them, and leave reviews in English or Spanish.",
+    gradient: gradients.medical,
+    backgroundImage: "/sanos-medical-preview.jpg",
+    liveUrl: "https://sanosmedical.com/en",
+    features: [
+      "Bilingual (EN/ES) website with language toggle",
+      "Online appointment booking",
+      "Automated review requests after visits",
+      "Local SEO for Miami primary care searches",
+      "Missed-call text-back for after-hours",
+      "HIPAA-aware lead capture"
+    ],
+    techStack: ["Azul Growth Suite", "Modern Web Stack", "Bilingual CMS"]
   }
 ]
