@@ -192,149 +192,256 @@ function App() {
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className={`relative pt-12 pb-16 sm:pt-16 sm:pb-20 md:pt-20 md:pb-24 lg:pt-24 lg:pb-28 px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden bg-white`}>
-        {/* Warm ambient gradient — top-right subtle blue, bottom-left soft cream */}
-        <div className="pointer-events-none absolute top-0 right-0 w-[45rem] h-[45rem] bg-gradient-to-br from-blue-100/50 via-blue-50/30 to-transparent rounded-full blur-3xl -translate-y-1/3 translate-x-1/3"></div>
-        <div className="pointer-events-none absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-gradient-to-tr from-amber-50/40 to-transparent rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
-
-        {/* Subtle dot grid overlay */}
+      {/* Hero Section — centered stack with full-width dashboard mockup below */}
+      <section className={`relative pt-14 pb-20 sm:pt-16 sm:pb-24 md:pt-20 md:pb-28 lg:pt-24 lg:pb-32 px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden bg-slate-50/70`}>
+        {/* Tight blueprint grid — precise geometric backbone (larger cells on mobile) */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          className="pointer-events-none absolute inset-0 hidden sm:block"
           style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.5) 1px, transparent 0)',
-            backgroundSize: '28px 28px',
-            maskImage: 'radial-gradient(ellipse at top, black 15%, transparent 65%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at top, black 15%, transparent 65%)',
+            backgroundImage: `
+              linear-gradient(rgba(15,23,42,0.06) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)
+            `,
+            backgroundSize: '56px 56px',
+            maskImage: 'radial-gradient(ellipse at center top, black 20%, transparent 80%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center top, black 20%, transparent 80%)',
+          }}
+        ></div>
+        {/* Mobile grid — wider cells to feel less cramped */}
+        <div
+          className="pointer-events-none absolute inset-0 sm:hidden"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(15,23,42,0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            maskImage: 'radial-gradient(ellipse at center top, black 15%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center top, black 15%, transparent 75%)',
           }}
         ></div>
 
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 sm:gap-12 lg:gap-16 items-center">
-            {/* Left Content */}
-            <Reveal direction="up" duration={0.9} amount={0.3} className="space-y-5 sm:space-y-6">
-              <div className="space-y-4 sm:space-y-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-[13px] font-medium">
-                  <span className="relative flex w-1.5 h-1.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75 animate-ping"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
-                  </span>
-                  {c.hero.badge}
+        {/* Vertical light beam — center focal point (scales down on mobile) */}
+        <div
+          className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[24rem] sm:w-[32rem] md:w-[42rem] h-full"
+          style={{
+            background: 'linear-gradient(180deg, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0.10) 20%, rgba(59,130,246,0.04) 45%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        ></div>
+
+        {/* Sharp bright core of the beam — smaller, more intense */}
+        <div
+          className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[8rem] sm:w-[11rem] md:w-[14rem] h-[24rem] sm:h-[30rem] md:h-[36rem]"
+          style={{
+            background: 'linear-gradient(180deg, rgba(96,165,250,0.25) 0%, rgba(96,165,250,0.10) 40%, transparent 80%)',
+            filter: 'blur(40px)',
+          }}
+        ></div>
+
+        {/* Two soft color pools for depth — hidden on mobile to reduce clutter */}
+        <div className="pointer-events-none absolute top-1/3 -left-20 w-[28rem] h-[28rem] bg-gradient-radial from-indigo-200/30 via-indigo-100/10 to-transparent rounded-full blur-3xl hidden sm:block"></div>
+        <div className="pointer-events-none absolute top-1/4 -right-20 w-[28rem] h-[28rem] bg-gradient-radial from-sky-200/30 via-sky-100/10 to-transparent rounded-full blur-3xl hidden sm:block"></div>
+
+        {/* White wash at bottom — clean cut into next section */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 sm:h-64 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
+
+        {/* Subtle grain overlay — premium film texture (lower opacity on mobile) */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.25] sm:opacity-[0.4] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`,
+            backgroundSize: '200px 200px',
+          }}
+        ></div>
+
+        {/* Centered content stack */}
+        <div className="relative z-10 max-w-4xl mx-auto text-center">
+          <Reveal direction="up" duration={0.9} amount={0.3} className="space-y-6 sm:space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs sm:text-[13px] font-medium">
+              <span className="relative flex w-1.5 h-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75 animate-ping"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+              </span>
+              {c.hero.badge}
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-gray-900 leading-[1.05]" style={{ letterSpacing: '-0.035em' }}>
+              <span>{c.hero.headline[0]} {c.hero.headline[1]}</span>
+              <br />
+              <span>{c.hero.headline[2]}</span>{' '}
+              <span className="hl-mark text-gray-900">
+                {c.hero.headline[3]}
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg md:text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto">
+              {c.hero.subtitle}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-2">
+              <MagneticButton
+                href="https://calendly.com/purplexmythzz/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+                strength={0.3}
+                className="group px-7 py-3.5 bg-gray-900 hover:bg-black text-white rounded-lg font-semibold text-sm transition-colors duration-200 text-center inline-flex items-center justify-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(0,0,0,0.25)] will-change-transform w-full sm:w-auto"
+              >
+                <span>{c.hero.ctaPrimary}</span>
+                <span className="transform group-hover:translate-x-0.5 transition-transform">→</span>
+              </MagneticButton>
+              <a
+                href="#pricing"
+                className="px-7 py-3.5 rounded-lg font-semibold text-sm text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 hover:bg-white transition-colors duration-200 text-center flex items-center justify-center w-full sm:w-auto"
+              >
+                {c.hero.ctaSecondary}
+              </a>
+            </div>
+
+            {/* Trust row — stars + client proof (centered) */}
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 pt-4">
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {[0,1,2,3,4].map(i => (
+                    <svg key={i} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
                 </div>
-                <h1 className="text-display-xl text-gray-900 break-words">
-                  <span>{c.hero.headline[0]}</span>
-                  <br />
-                  <span>{c.hero.headline[1]}</span>
-                  <br />
-                  <span>{c.hero.headline[2]}</span>{' '}
-                  <span className="hl-mark text-gray-900">
-                    {c.hero.headline[3]}
-                  </span>
-                </h1>
-                <p className="text-base sm:text-lg text-gray-500 leading-relaxed max-w-xl break-words">
-                  {c.hero.subtitle}
-                </p>
+                <span className="text-sm text-gray-600"><span className="font-semibold text-gray-900">4.9</span> {lang === 'es' ? 'promedio' : 'avg client rating'}</span>
               </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 pt-1 w-full sm:w-auto">
-                <MagneticButton
-                  href="https://calendly.com/purplexmythzz/30min"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  strength={0.3}
-                  className="group px-6 py-3.5 bg-gray-900 hover:bg-black text-white rounded-lg font-semibold text-sm transition-colors duration-200 text-center w-full sm:w-auto inline-flex items-center justify-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(0,0,0,0.25)] will-change-transform"
-                >
-                  <span>{c.hero.ctaPrimary}</span>
-                  <span className="transform group-hover:translate-x-0.5 transition-transform">→</span>
-                </MagneticButton>
-                <a
-                  href="#pricing"
-                  className="px-6 py-3.5 rounded-lg font-semibold text-sm text-gray-700 hover:text-gray-900 hover:bg-white/70 transition-colors duration-200 text-center flex items-center justify-center w-full sm:w-auto"
-                >
-                  {c.hero.ctaSecondary}
-                </a>
+              <div className="h-4 w-px bg-gray-200 hidden sm:block"></div>
+              <div className="text-sm text-gray-600">
+                {lang === 'es' ? 'Usado por ' : 'Trusted by '}
+                <a href="#portfolio" className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">Aspire Roofing</a>, <a href="#portfolio" className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">Caley Insurance</a>{lang === 'es' ? ' y más' : ' + more'}
               </div>
+            </div>
+          </Reveal>
+        </div>
 
-              {/* Trust row — rating + client proof */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-3 pt-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-1">
-                    {[0,1,2,3,4].map(i => (
-                      <svg key={i} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600"><span className="font-semibold text-gray-900">4.9</span> avg client rating</span>
+        {/* Full-width Dashboard Mockup — the money shot */}
+        <Reveal direction="up" duration={1} delay={0.2} amount={0.15} className="relative z-10 max-w-6xl mx-auto mt-12 sm:mt-14 md:mt-16 lg:mt-20">
+          <div className="relative">
+            {/* Ambient blue glow behind mockup (scales down on mobile) */}
+            <div className="pointer-events-none absolute -inset-x-4 -inset-y-3 sm:-inset-x-10 sm:-inset-y-6 bg-gradient-to-br from-blue-500/10 via-blue-400/5 to-transparent blur-3xl"></div>
+
+            <div className="relative bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.18),0_0_0_1px_rgba(15,23,42,0.03)] sm:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.2),0_0_0_1px_rgba(15,23,42,0.03)] overflow-hidden">
+              {/* Mock browser/app chrome */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
                 </div>
-                <div className="h-4 w-px bg-gray-200 hidden sm:block"></div>
-                <div className="text-sm text-gray-600">
-                  Trusted by <a href="#portfolio" className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">Aspire Roofing</a>, <a href="#portfolio" className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">Caley Insurance</a> + more
-                </div>
+                <div className="text-[11px] text-gray-400 font-mono">azul.app/dashboard</div>
+                <div className="w-16"></div>
               </div>
 
-              {/* Compact checkmarks — inline chips instead of 2-col grid */}
-              <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
-                {c.hero.trust.map((item) => (
-                  <div key={item} className="flex items-center gap-1.5 text-xs sm:text-[13px] text-gray-600">
-                    <svg className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-
-            {/* Right Visual — Product Panel */}
-            <Reveal direction="left" duration={1} delay={0.15} amount={0.3} className="hidden lg:block relative">
-              <div className="relative">
-                {/* Subtle ambient glow behind panel */}
-                <div className="absolute -inset-10 bg-blue-500/[0.04] blur-3xl rounded-full"></div>
-
-                <div className="relative bg-white rounded-2xl p-7 border border-gray-200/80 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15),0_0_0_1px_rgba(15,23,42,0.03)]">
-                  {/* Panel header */}
-                  <div className="flex items-center justify-between mb-6 pb-5 border-b border-gray-100">
-                    <div>
-                      <div className="text-[10px] uppercase tracking-[0.14em] text-gray-400 font-semibold mb-1.5">Dashboard</div>
-                      <div className="text-sm font-semibold text-gray-900">{c.hero.dashboard.title}</div>
+              {/* Dashboard body — 3 col: sidebar / main / right rail */}
+              <div className="grid grid-cols-12 min-h-[380px] sm:min-h-[420px] lg:min-h-[460px]">
+                {/* LEFT SIDEBAR — hidden on smallest screens for readability */}
+                <div className="hidden sm:block sm:col-span-3 lg:col-span-2 border-r border-gray-100 p-3 lg:p-4 bg-gray-50/40">
+                  {/* Profile */}
+                  <div className="flex items-center gap-2.5 pb-4 mb-4 border-b border-gray-100">
+                    <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-[10px] lg:text-xs font-semibold">AR</div>
+                    <div className="hidden lg:block min-w-0">
+                      <div className="text-[11px] font-semibold text-gray-900 truncate">Aspire Roofing</div>
+                      <div className="text-[10px] text-gray-500 truncate">{lang === 'es' ? 'Cliente Fundador' : 'Founding Client'}</div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 font-medium px-2.5 py-1 rounded-full bg-emerald-50">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      {c.hero.dashboard.live}
-                    </div>
                   </div>
-
-                  {/* Stat cards */}
-                  {(() => {
-                    const statIcons = [
-                      <svg key="0" className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-9a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
-                      <svg key="1" className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>,
-                      <svg key="2" className="w-3.5 h-3.5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>,
-                      <svg key="3" className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
-                    ]
-                    return (
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        {c.hero.dashboard.stats.map((stat, i) => (
-                          <div key={i} className="bg-gray-50/70 rounded-xl p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                              {statIcons[i]}
-                              <div className="text-[10px] uppercase tracking-[0.12em] text-gray-500 font-semibold">{stat.label}</div>
-                            </div>
-                            <div className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">{stat.value}</div>
-                            <div className="text-[11px] text-emerald-600 font-semibold">↗ {stat.delta}</div>
-                          </div>
-                        ))}
+                  {/* Menu */}
+                  <div className="text-[10px] uppercase tracking-[0.12em] text-gray-400 font-semibold mb-2 hidden lg:block">Menu</div>
+                  <nav className="space-y-1">
+                    {[
+                      { label: lang === 'es' ? 'Panel' : 'Dashboard', active: true, icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+                      { label: lang === 'es' ? 'Reseñas' : 'Reviews', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' },
+                      { label: 'Leads', icon: 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-9a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0z' },
+                      { label: 'SEO', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
+                      { label: lang === 'es' ? 'Llamadas' : 'Calls', icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' },
+                      { label: lang === 'es' ? 'Ajustes' : 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+                    ].map((item, i) => (
+                      <div key={i} className={`flex items-center gap-2 px-2 py-1.5 rounded-md ${item.active ? 'bg-blue-500 text-white' : 'text-gray-600'}`}>
+                        <svg className={`w-3.5 h-3.5 flex-shrink-0 ${item.active ? 'text-white' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
+                        <span className="text-[11px] font-medium hidden lg:inline truncate">{item.label}</span>
                       </div>
-                    )
-                  })()}
+                    ))}
+                  </nav>
+                </div>
 
-                  {/* Recent activity */}
-                  <div className="bg-gray-50/70 rounded-xl p-4">
-                    <div className="text-[10px] uppercase tracking-[0.12em] font-semibold text-gray-500 mb-3">{c.hero.dashboard.recentActivity}</div>
-                    <div className="space-y-2.5">
+                {/* MAIN CENTER — full width on mobile, shrinks as sidebar/rail appear */}
+                <div className="col-span-12 sm:col-span-9 lg:col-span-7 p-4 sm:p-5 md:p-6 lg:border-r lg:border-gray-100 sm:border-r sm:border-gray-100">
+                  {/* Greeting + progress */}
+                  <div className="flex items-start justify-between mb-5">
+                    <div>
+                      <div className="text-lg sm:text-xl font-semibold tracking-tight text-gray-900">{lang === 'es' ? '¡Hola, Aspire! 👋' : 'Hi Aspire! 👋'}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{lang === 'es' ? 'Aquí está tu resumen semanal' : "Here's your growth this week"}</div>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-2">
+                      <div className="text-[11px] text-gray-500 font-medium">78% {lang === 'es' ? 'meta' : 'goal'}</div>
+                      <div className="relative w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="absolute inset-y-0 left-0 w-[78%] bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Two big colorful cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                    {/* Reviews card */}
+                    <div className="relative bg-gradient-to-br from-rose-100 via-rose-50 to-orange-50 rounded-xl p-4 overflow-hidden">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/80 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-rose-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                        </div>
+                        <button className="text-gray-500 text-lg leading-none">···</button>
+                      </div>
+                      <div className="text-xs font-medium text-rose-900 leading-snug mb-3 pr-6">
+                        {lang === 'es' ? 'Nuevas reseñas 5-estrellas capturadas' : 'New 5-star reviews captured'}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex -space-x-1.5">
+                          <div className="w-5 h-5 rounded-full bg-rose-300 border-2 border-white"></div>
+                          <div className="w-5 h-5 rounded-full bg-orange-300 border-2 border-white"></div>
+                          <div className="w-5 h-5 rounded-full bg-amber-300 border-2 border-white"></div>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-900">+12</div>
+                      </div>
+                    </div>
+                    {/* Leads card */}
+                    <div className="relative bg-gradient-to-br from-blue-100 via-blue-50 to-indigo-50 rounded-xl p-4 overflow-hidden">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/80 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-9a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </div>
+                        <button className="text-gray-500 text-lg leading-none">···</button>
+                      </div>
+                      <div className="text-xs font-medium text-blue-900 leading-snug mb-3 pr-6">
+                        {lang === 'es' ? 'Nuevos leads del sitio web' : 'New leads from your site'}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex -space-x-1.5">
+                          <div className="w-5 h-5 rounded-full bg-blue-300 border-2 border-white"></div>
+                          <div className="w-5 h-5 rounded-full bg-indigo-300 border-2 border-white"></div>
+                          <div className="w-5 h-5 rounded-full bg-sky-300 border-2 border-white"></div>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-900">+47</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Activity table */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-semibold text-gray-900">{lang === 'es' ? 'Actividad reciente' : 'Recent activity'}</div>
+                      <div className="flex items-center gap-1">
+                        <button className="text-[11px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium">{lang === 'es' ? 'Activo' : 'Active'}</button>
+                        <button className="text-[11px] px-2 py-0.5 rounded-md text-gray-500 font-medium">{lang === 'es' ? 'Completado' : 'Completed'}</button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
                       {c.hero.dashboard.activity.map((a, i) => {
                         const dotColor = { blue: 'bg-blue-500', green: 'bg-emerald-500', yellow: 'bg-amber-500' }[a.dot] || 'bg-blue-500'
                         return (
-                          <div key={i} className="flex items-center justify-between text-[11px]">
+                          <div key={i} className="flex items-center justify-between text-[11px] py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="flex items-center gap-2 text-gray-700">
                               <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
                               {a.text}
@@ -346,10 +453,61 @@ function App() {
                     </div>
                   </div>
                 </div>
+
+                {/* RIGHT RAIL — Today's Schedule */}
+                <div className="hidden lg:block col-span-3 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm font-semibold text-gray-900">{lang === 'es' ? 'Hoy' : "Today's Schedule"}</div>
+                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  </div>
+
+                  {/* Discovery call card */}
+                  <div className="bg-gray-50/60 rounded-xl p-3 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[10px] uppercase tracking-[0.12em] text-gray-500 font-semibold">{lang === 'es' ? 'En 30 min' : 'In 30 min'}</div>
+                      <div className="text-[10px] text-blue-600 font-medium">+ {lang === 'es' ? 'Unirse' : 'Join'}</div>
+                    </div>
+                    <div className="text-xs font-semibold text-gray-900 mb-3">{lang === 'es' ? 'Llamada con Miguel' : 'Discovery Call · Miguel'}</div>
+                    <div className="bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-lg p-2.5 flex items-center justify-between">
+                      <div className="flex -space-x-1.5">
+                        <div className="w-5 h-5 rounded-full bg-emerald-200 border-2 border-emerald-400"></div>
+                        <div className="w-5 h-5 rounded-full bg-emerald-100 border-2 border-emerald-400"></div>
+                        <div className="w-5 h-5 rounded-full bg-emerald-300 border-2 border-emerald-400"></div>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-white text-[10px] font-semibold">
+                        <span className="w-1 h-1 rounded-full bg-white animate-pulse"></span>
+                        28:15
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Project progress */}
+                  <div className="pt-3 border-t border-gray-100">
+                    <div className="text-[10px] uppercase tracking-[0.12em] text-gray-500 font-semibold mb-2">{lang === 'es' ? 'Este mes' : 'This month'}</div>
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="text-xs font-semibold text-gray-900">{lang === 'es' ? 'Reseñas' : 'Reviews'}</div>
+                        <div className="text-[11px] text-gray-500 font-medium">156 / 200</div>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full w-[78%] bg-gradient-to-r from-rose-400 to-rose-500 rounded-full"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="text-xs font-semibold text-gray-900">{lang === 'es' ? 'Leads' : 'Leads'}</div>
+                        <div className="text-[11px] text-gray-500 font-medium">47 / 60</div>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full w-[78%] bg-gradient-to-r from-blue-400 to-blue-500 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </Reveal>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Trust strip — headline stats */}
@@ -665,7 +823,7 @@ function App() {
                     rel="noopener noreferrer"
                     className="block text-center text-xs text-gray-400 hover:text-white mt-3 transition-colors underline underline-offset-4"
                   >
-                    {lang === 'es' ? 'O empiece ahora — pagar en línea →' : 'Or start now — pay online →'}
+                    {lang === 'es' ? 'O empiece ahora, pagar en línea →' : 'Or start now, pay online →'}
                   </a>
                 )}
                 <div className="text-center text-xs text-gray-500 mt-4">{c.pricing.bundle.microcopy}</div>
