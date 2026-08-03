@@ -9,6 +9,8 @@ export default function PricingCard({
   features = [],
   ctaLabel = 'Get Started',
   ctaHref = '#contact',
+  buyNowHref,
+  buyNowLabel = 'Buy now →',
   comingSoon = false,
 }) {
   const badgeTones = {
@@ -77,14 +79,26 @@ export default function PricingCard({
           {ctaLabel}
         </button>
       ) : (
-        <a
-          href={ctaHref}
-          target={ctaHref?.startsWith('http') ? '_blank' : undefined}
-          rel={ctaHref?.startsWith('http') ? 'noopener noreferrer' : undefined}
-          className="w-full py-2.5 rounded-lg font-semibold text-sm text-center transition-colors duration-200 bg-gray-900 text-white hover:bg-black block"
-        >
-          {ctaLabel}
-        </a>
+        <>
+          <a
+            href={ctaHref}
+            target={ctaHref?.startsWith('http') ? '_blank' : undefined}
+            rel={ctaHref?.startsWith('http') ? 'noopener noreferrer' : undefined}
+            className="w-full py-2.5 rounded-lg font-semibold text-sm text-center transition-colors duration-200 bg-gray-900 text-white hover:bg-black block"
+          >
+            {ctaLabel}
+          </a>
+          {buyNowHref && (
+            <a
+              href={buyNowHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center text-xs text-gray-500 hover:text-blue-600 mt-2 transition-colors underline underline-offset-4"
+            >
+              {buyNowLabel}
+            </a>
+          )}
+        </>
       )}
     </div>
   )

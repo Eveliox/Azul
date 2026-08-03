@@ -210,6 +210,7 @@ export const content = {
           price: '$199',
           priceNote: '+ $499 setup',
           badge: 'Free mockup',
+          stripeLinkKey: 'websiteSetup',
           features: [
             'Modern conversion-focused design',
             'Chat widget included',
@@ -610,6 +611,7 @@ export const content = {
           price: '$199',
           priceNote: '+ $499 setup',
           badge: 'Mockup gratis',
+          stripeLinkKey: 'websiteSetup',
           features: [
             'Diseño moderno enfocado en conversión',
             'Chat widget incluido',

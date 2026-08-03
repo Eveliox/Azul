@@ -8,6 +8,7 @@ import MagneticButton from './components/MagneticButton'
 import LanguageToggle from './components/LanguageToggle'
 import { useLanguage } from './contexts/LanguageContext'
 import { portfolioProjects } from './data/portfolioProjects'
+import { stripeLinks, isStripeLinkReady } from './data/stripeLinks'
 
 function App() {
   const { c, lang } = useLanguage()
@@ -575,23 +576,29 @@ function App() {
           ]
           return (
             <Reveal stagger={0.08} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 max-w-7xl mx-auto mb-12 sm:mb-16">
-              {c.pricing.tiers.map((tier, i) => (
-                <RevealItem key={i}>
-                  <PricingCard
-                    icon={pricingIcons[i]}
-                    title={tier.title}
-                    price={tier.price}
-                    priceSuffix={lang === 'es' ? '/mes' : '/mo'}
-                    priceNote={tier.priceNote}
-                    badge={tier.badge}
-                    badgeTone={tier.comingSoon ? 'gray' : 'green'}
-                    features={tier.features}
-                    ctaLabel={tier.ctaLabel}
-                    ctaHref="https://calendly.com/purplexmythzz/30min"
-                    comingSoon={tier.comingSoon}
-                  />
-                </RevealItem>
-              ))}
+              {c.pricing.tiers.map((tier, i) => {
+                const stripeUrl = tier.stripeLinkKey ? stripeLinks[tier.stripeLinkKey] : null
+                const showBuyNow = stripeUrl && isStripeLinkReady(stripeUrl)
+                return (
+                  <RevealItem key={i}>
+                    <PricingCard
+                      icon={pricingIcons[i]}
+                      title={tier.title}
+                      price={tier.price}
+                      priceSuffix={lang === 'es' ? '/mes' : '/mo'}
+                      priceNote={tier.priceNote}
+                      badge={tier.badge}
+                      badgeTone={tier.comingSoon ? 'gray' : 'green'}
+                      features={tier.features}
+                      ctaLabel={tier.ctaLabel}
+                      ctaHref="https://calendly.com/purplexmythzz/30min"
+                      buyNowHref={showBuyNow ? stripeUrl : undefined}
+                      buyNowLabel={lang === 'es' ? 'O pagar setup ahora →' : 'Or pay setup now →'}
+                      comingSoon={tier.comingSoon}
+                    />
+                  </RevealItem>
+                )
+              })}
             </Reveal>
           )
         })()}
@@ -651,6 +658,16 @@ function App() {
                   {c.pricing.bundle.ctaLabel}
                   <span className="transform group-hover:translate-x-1 transition-transform">→</span>
                 </a>
+                {isStripeLinkReady(stripeLinks.foundingClient) && (
+                  <a
+                    href={stripeLinks.foundingClient}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-center text-xs text-gray-400 hover:text-white mt-3 transition-colors underline underline-offset-4"
+                  >
+                    {lang === 'es' ? 'O empiece ahora — pagar en línea →' : 'Or start now — pay online →'}
+                  </a>
+                )}
                 <div className="text-center text-xs text-gray-500 mt-4">{c.pricing.bundle.microcopy}</div>
               </div>
             </div>
