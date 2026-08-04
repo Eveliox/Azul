@@ -233,7 +233,7 @@ export const content = {
             'Missed-call text-back',
             'After-hours coverage',
           ],
-          ctaLabel: 'Book Demo',
+          ctaLabel: 'Start 7-Day Trial',
         },
         {
           title: 'AI Facebook Ads',
@@ -638,7 +638,7 @@ export const content = {
             'SMS automático de llamadas perdidas',
             'Cobertura fuera de horario',
           ],
-          ctaLabel: 'Reservar Demo',
+          ctaLabel: 'Empezar Prueba 7 Días',
         },
         {
           title: 'Anuncios AI en Facebook',

@@ -736,7 +736,11 @@ function App() {
             <Reveal stagger={0.08} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 max-w-7xl mx-auto mb-12 sm:mb-16">
               {c.pricing.tiers.map((tier, i) => {
                 const stripeUrl = tier.stripeLinkKey ? stripeLinks[tier.stripeLinkKey] : null
-                const showBuyNow = stripeUrl && isStripeLinkReady(stripeUrl)
+                const isReady = stripeUrl && isStripeLinkReady(stripeUrl)
+                // Website Build stays demo-first (needs conversation for the recurring hosting).
+                // All other tiers with a Stripe link: primary CTA = direct-buy Stripe checkout.
+                const isWebsiteBuild = tier.stripeLinkKey === 'websiteSetup'
+                const useDirectBuy = isReady && !isWebsiteBuild
                 return (
                   <RevealItem key={i}>
                     <PricingCard
@@ -749,12 +753,16 @@ function App() {
                       badgeTone={tier.comingSoon ? 'gray' : 'green'}
                       features={tier.features}
                       ctaLabel={tier.ctaLabel}
-                      ctaHref="https://calendly.com/purplexmythzz/30min"
-                      buyNowHref={showBuyNow ? stripeUrl : undefined}
+                      ctaHref={useDirectBuy ? stripeUrl : 'https://calendly.com/purplexmythzz/30min'}
+                      buyNowHref={
+                        useDirectBuy
+                          ? 'https://calendly.com/purplexmythzz/30min'
+                          : (isReady && isWebsiteBuild ? stripeUrl : undefined)
+                      }
                       buyNowLabel={
-                        tier.stripeLinkKey === 'websiteSetup'
-                          ? (lang === 'es' ? 'O pagar setup ahora →' : 'Or pay setup now →')
-                          : (lang === 'es' ? 'O suscribirse ahora →' : 'Or subscribe now →')
+                        useDirectBuy
+                          ? (lang === 'es' ? 'O reserve una demo primero →' : 'Or book a demo first →')
+                          : (lang === 'es' ? 'O pagar setup ahora →' : 'Or pay setup now →')
                       }
                       comingSoon={tier.comingSoon}
                     />
@@ -811,23 +819,35 @@ function App() {
                   <span className="text-lg text-gray-500 font-medium">{lang === 'es' ? '/mes' : '/mo'}</span>
                 </div>
                 <div className="text-sm text-gray-500 line-through mb-8">{c.pricing.bundle.crossed}</div>
-                <a
-                  href="https://calendly.com/purplexmythzz/30min"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-white hover:bg-gray-100 text-gray-900 rounded-xl font-semibold text-base transition-colors duration-200 group"
-                >
-                  {c.pricing.bundle.ctaLabel}
-                  <span className="transform group-hover:translate-x-1 transition-transform">→</span>
-                </a>
-                {isStripeLinkReady(stripeLinks.foundingClient) && (
+                {isStripeLinkReady(stripeLinks.foundingClient) ? (
+                  <>
+                    <a
+                      href={stripeLinks.foundingClient}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-white hover:bg-gray-100 text-gray-900 rounded-xl font-semibold text-base transition-colors duration-200 group"
+                    >
+                      {lang === 'es' ? 'Empezar Ahora' : 'Start Now'}
+                      <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                    </a>
+                    <a
+                      href="https://calendly.com/purplexmythzz/30min"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-center text-xs text-gray-400 hover:text-white mt-3 transition-colors underline underline-offset-4"
+                    >
+                      {lang === 'es' ? 'O reserve una demo primero →' : 'Or book a demo first →'}
+                    </a>
+                  </>
+                ) : (
                   <a
-                    href={stripeLinks.foundingClient}
+                    href="https://calendly.com/purplexmythzz/30min"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-center text-xs text-gray-400 hover:text-white mt-3 transition-colors underline underline-offset-4"
+                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-white hover:bg-gray-100 text-gray-900 rounded-xl font-semibold text-base transition-colors duration-200 group"
                   >
-                    {lang === 'es' ? 'O empiece ahora, pagar en línea →' : 'Or start now, pay online →'}
+                    {c.pricing.bundle.ctaLabel}
+                    <span className="transform group-hover:translate-x-1 transition-transform">→</span>
                   </a>
                 )}
                 <div className="text-center text-xs text-gray-500 mt-4">{c.pricing.bundle.microcopy}</div>
