@@ -173,6 +173,7 @@ export const content = {
           title: 'Review Booster',
           price: '$79',
           badge: 'Free review audit',
+          stripeLinkKey: 'reviewBooster',
           features: [
             'Automated SMS & email review requests',
             'Private feedback shield for unhappy customers',
@@ -185,6 +186,7 @@ export const content = {
           title: 'Local Proof SEO',
           price: '$299',
           badge: 'Free local check',
+          stripeLinkKey: 'localSeo',
           features: [
             'Weekly Google Business Profile posts',
             'Service-area location content',
@@ -197,6 +199,7 @@ export const content = {
           title: 'Social Media AI',
           price: '$149',
           badge: '5 free posts',
+          stripeLinkKey: 'socialMedia',
           features: [
             'AI-written captions (EN/ES)',
             'Uses your real job photos',
@@ -223,6 +226,7 @@ export const content = {
           title: 'AI Answering',
           price: '$349',
           badge: '7-day free trial',
+          stripeLinkKey: 'aiAnswering',
           features: [
             '24/7 AI call answering (EN/ES)',
             'Customer capture & call summaries',
@@ -574,6 +578,7 @@ export const content = {
           title: 'Review Booster',
           price: '$79',
           badge: 'Auditoría gratis',
+          stripeLinkKey: 'reviewBooster',
           features: [
             'Solicitudes SMS & email automáticas',
             'Escudo privado para clientes descontentos',
@@ -586,6 +591,7 @@ export const content = {
           title: 'Local Proof SEO',
           price: '$299',
           badge: 'Chequeo local gratis',
+          stripeLinkKey: 'localSeo',
           features: [
             'Posts semanales en Google Business',
             'Contenido de área de servicio',
@@ -598,6 +604,7 @@ export const content = {
           title: 'Social Media AI',
           price: '$149',
           badge: '5 posts gratis',
+          stripeLinkKey: 'socialMedia',
           features: [
             'Captions AI (EN/ES)',
             'Usa sus fotos reales de trabajos',
@@ -624,6 +631,7 @@ export const content = {
           title: 'Contestación AI',
           price: '$349',
           badge: 'Prueba gratis 7 días',
+          stripeLinkKey: 'aiAnswering',
           features: [
             'Contestación AI 24/7 (EN/ES)',
             'Captura de cliente & resúmenes',

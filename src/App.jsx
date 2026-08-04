@@ -751,7 +751,11 @@ function App() {
                       ctaLabel={tier.ctaLabel}
                       ctaHref="https://calendly.com/purplexmythzz/30min"
                       buyNowHref={showBuyNow ? stripeUrl : undefined}
-                      buyNowLabel={lang === 'es' ? 'O pagar setup ahora →' : 'Or pay setup now →'}
+                      buyNowLabel={
+                        tier.stripeLinkKey === 'websiteSetup'
+                          ? (lang === 'es' ? 'O pagar setup ahora →' : 'Or pay setup now →')
+                          : (lang === 'es' ? 'O suscribirse ahora →' : 'Or subscribe now →')
+                      }
                       comingSoon={tier.comingSoon}
                     />
                   </RevealItem>

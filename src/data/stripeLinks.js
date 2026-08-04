@@ -14,6 +14,18 @@ export const stripeLinks = {
 
   // Website Build — one-time setup fee ($499)
   websiteSetup: 'https://buy.stripe.com/cNi6oJdu96ZC8AqaIFc7u03',
+
+  // Social Media AI ($149/mo)
+  socialMedia: 'https://buy.stripe.com/7sYbJ31Lr97KaIy5olc7u04',
+
+  // Local Proof SEO ($299/mo)
+  localSeo: 'https://buy.stripe.com/fZudRbdu9bfSbMC4khc7u05',
+
+  // AI Answering ($349/mo)
+  aiAnswering: 'https://buy.stripe.com/00waEZdu997K4kaaIFc7u06',
+
+  // Review Booster ($79/mo)
+  reviewBooster: 'https://buy.stripe.com/bJe9AVbm1fw86si4khc7u07',
 }
 
 // Helper: check if a Stripe link is configured (not still a TODO placeholder)
