@@ -62,6 +62,26 @@ export const portfolioProjects = [
     techStack: ["Azul Growth Suite", "React", "Modern Web Stack"]
   },
   {
+    id: 8,
+    industry: "personal",
+    title: "Founder's Portfolio",
+    tagline: "Design capability, on display",
+    shortDescription: "In-house build · design & motion showcase",
+    description: "Evelio's personal portfolio site, built in-house at Azul to demonstrate the level of design, motion, and interaction we ship for clients. A live sample of the modern, conversion-focused sites we build for local businesses.",
+    gradient: gradients.personal,
+    backgroundImage: "/evelio-portfolio-preview.png",
+    liveUrl: "https://web-portfolio-alpha-six.vercel.app/",
+    features: [
+      "Custom React + Tailwind build",
+      "Smooth scroll & motion design",
+      "Conversion-focused layout",
+      "Bilingual-ready structure",
+      "Deployed on Vercel",
+      "Mobile-first responsive"
+    ],
+    techStack: ["React", "Vite", "Tailwind CSS", "Vercel"]
+  },
+  {
     id: 7,
     industry: "medical",
     title: "Sanos Medical Group",

@@ -348,7 +348,7 @@ Bilingual is the moat AND doubles content workload. To manage it:
 - **Founder:** Evelio Gonzalez (Miami)
 - **Instagram:** @azuldevsmiami
 - **LinkedIn:** linkedin.com/in/evelio-gonzalez-77a3b5329
-- **WhatsApp Business:** ⚠️ Placeholder `15551234567` in code — needs real number swap in App.jsx (search for `15551234567`)
+- **WhatsApp Business:** `786-920-1239` (wired in App.jsx as `17869201239`)
 
 ---
 

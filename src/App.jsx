@@ -1175,7 +1175,7 @@ function App() {
                 {c.footer.bookDemo}
               </a>
               <a
-                href="https://wa.me/15551234567"
+                href="https://wa.me/17869201239"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-green-600 text-sm transition-colors block mb-1"
@@ -1202,11 +1202,11 @@ function App() {
 
       {/*
         WhatsApp floating widget.
-        TODO: replace 15551234567 with your real WhatsApp Business number (country code + number, no + or spaces).
+        TODO: replace 17869201239 with your real WhatsApp Business number (country code + number, no + or spaces).
         Miami leads will overwhelmingly prefer WhatsApp over SMS/email.
       */}
       <a
-        href={`https://wa.me/15551234567?text=${encodeURIComponent(c.whatsapp.message)}`}
+        href={`https://wa.me/17869201239?text=${encodeURIComponent(c.whatsapp.message)}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={c.whatsapp.ariaLabel}
