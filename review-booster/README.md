@@ -41,7 +41,7 @@ Open `http://localhost:3000/admin` → paste your `ADMIN_KEY`.
 1. Google Maps → search "Hello You Wellness Center" → Share → copy the Place ID, **or**
 2. Go to https://developers.google.com/maps/documentation/places/web-service/place-id → search the business → copy Place ID
 3. Link = `https://search.google.com/local/writereview?placeid=<PLACE_ID>`
-4. Update the seeded client in Supabase (Table Editor → `clients`) or create it from the admin UI.
+4. Update the seeded client in Supabase (Table Editor → `rb_clients`) or create it from the admin UI.
 
 ## 4. Test end-to-end (before touching a real customer)
 

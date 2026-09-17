@@ -18,7 +18,7 @@ export async function authenticate(req, res) {
   }
   if (key.length >= 32) {
     const { data } = await db()
-      .from('clients').select('id').eq('access_key', key).eq('active', true).maybeSingle()
+      .from('rb_clients').select('id').eq('access_key', key).eq('active', true).maybeSingle()
     if (data) return { role: 'client', clientId: data.id }
   }
   res.status(401).json({ error: 'Unauthorized' })

@@ -10,15 +10,15 @@ import { ownerAlert } from '../_lib/messages.js'
 export default async function handler(req, res) {
   const { token } = req.query
   const { data: r, error } = await db()
-    .from('review_requests')
-    .select('id, status, rating, language, customer_name, clicked_at, customer_phone, customer_email, clients(name, google_review_url, owner_email, owner_phone)')
+    .from('rb_review_requests')
+    .select('id, status, rating, language, customer_name, clicked_at, customer_phone, customer_email, clients:rb_clients(name, google_review_url, owner_email, owner_phone)')
     .eq('token', token)
     .single()
   if (error || !r) return res.status(404).json({ error: 'Not found' })
 
   if (req.method === 'GET') {
     if (!r.clicked_at) {
-      await db().from('review_requests')
+      await db().from('rb_review_requests')
         .update({ clicked_at: new Date().toISOString(), status: r.rating ? 'rated' : 'clicked' })
         .eq('id', r.id)
     }
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
     const update = { rating, rated_at: new Date().toISOString(), status: 'rated' }
     if (feedback) update.feedback = feedback
-    await db().from('review_requests').update(update).eq('id', r.id)
+    await db().from('rb_review_requests').update(update).eq('id', r.id)
 
     // Shield: 1-4 stars never go public. Alert the owner privately (only once feedback is submitted,
     // or immediately if the customer skipped the comment box).

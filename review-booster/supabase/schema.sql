@@ -1,10 +1,12 @@
 -- Azul Review Booster — run this in Supabase → SQL Editor
 -- ─────────────────────────────────────────────────────────────
+-- Tables are prefixed rb_ so this can live alongside other apps in a shared project.
+-- Safe to re-run.
 
 create extension if not exists "pgcrypto";
 
 -- One row per business you manage (HelloYou Wellness, Aspire Roofing, ...)
-create table if not exists clients (
+create table if not exists rb_clients (
   id                uuid primary key default gen_random_uuid(),
   name              text not null,                  -- "Hello You Wellness Center"
   slug              text not null unique,           -- "helloyou"
@@ -19,10 +21,21 @@ create table if not exists clients (
   created_at        timestamptz not null default now()
 );
 
+-- Per-business front-desk login. Each business only sees its own data.
+alter table rb_clients
+  add column if not exists access_key text not null unique default encode(gen_random_bytes(24), 'hex');
+
+-- Message tone for every SMS/email this client sends.
+alter table rb_clients
+  add column if not exists tone text not null default 'friendly'
+  check (tone in ('friendly','professional','casual','warm'));
+-- Owner's edits to the message text (null = use the preset as-is).
+alter table rb_clients add column if not exists messages jsonb;
+
 -- One row per review request sent to a customer
-create table if not exists review_requests (
+create table if not exists rb_review_requests (
   id              uuid primary key default gen_random_uuid(),
-  client_id       uuid not null references clients(id) on delete cascade,
+  client_id       uuid not null references rb_clients(id) on delete cascade,
   token           text not null unique,             -- short id used in the public link
   customer_name   text not null,
   customer_phone  text,                             -- E.164
@@ -41,17 +54,17 @@ create table if not exists review_requests (
   created_at      timestamptz not null default now()
 );
 
--- Per-business front-desk login. Each business only sees its own data.
-alter table clients
-  add column if not exists access_key text not null unique default encode(gen_random_bytes(24), 'hex');
+create index if not exists rb_review_requests_due_idx
+  on rb_review_requests (status, send_at);
+create index if not exists rb_review_requests_client_idx
+  on rb_review_requests (client_id, created_at desc);
 
-create index if not exists review_requests_due_idx
-  on review_requests (status, send_at);
-create index if not exists review_requests_client_idx
-  on review_requests (client_id, created_at desc);
-
--- Per-client stats used by the admin dashboard
-create or replace view client_stats as
+-- Per-client stats used by the admin dashboard.
+-- security_invoker makes the view obey the tables' RLS instead of bypassing it.
+-- Dropped first: Postgres can't add columns to an existing view in place.
+drop view if exists rb_client_stats;
+create view rb_client_stats
+with (security_invoker = true) as
 select
   c.id as client_id,
   c.name,
@@ -64,18 +77,21 @@ select
   count(r.id) filter (where r.rating = 5)              as five_star,
   count(r.id) filter (where r.rating between 1 and 4)  as shielded,
   round(avg(r.rating)::numeric, 2)                     as avg_rating,
+  c.tone,
   c.access_key
-from clients c
-left join review_requests r on r.client_id = c.id
+from rb_clients c
+left join rb_review_requests r on r.client_id = c.id
 group by c.id;
 
 -- Lock everything down: the browser never talks to Supabase directly.
 -- All access goes through the Vercel API using the service-role key.
-alter table clients enable row level security;
-alter table review_requests enable row level security;
+-- This matters in a shared project, whose public anon key may be shipped in another app's frontend.
+alter table rb_clients enable row level security;
+alter table rb_review_requests enable row level security;
+revoke all on rb_clients, rb_review_requests, rb_client_stats from anon, authenticated;
 
--- Seed: Hello You Wellness (edit the Google URL + owner details, then run)
-insert into clients (name, slug, google_review_url, owner_name, owner_email, default_language)
+-- Seed: Hello You Wellness (edit the Google URL + owner details later in Table Editor)
+insert into rb_clients (name, slug, google_review_url, owner_name, owner_email, default_language)
 values (
   'Hello You Wellness Center',
   'helloyou',

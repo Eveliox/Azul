@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import MessagesPanel from '../components/MessagesPanel.jsx'
 import { api, getAdminKey, setAdminKey, clearAdminKey } from '../api.js'
 
 export default function Admin() {
@@ -102,6 +103,8 @@ function Dashboard({ onLogout }) {
           />
         </div>
       </div>
+
+      {client && <MessagesPanel key={client.client_id} clientId={client.client_id} business={client.name} notify={notify} />}
 
       <div className="card overflow-x-auto">
         <div className="flex items-center justify-between mb-3">
@@ -234,7 +237,7 @@ function NewRequestForm({ clientId, onDone }) {
 }
 
 function NewClientForm({ onDone }) {
-  const [f, setF] = useState({ name: '', slug: '', google_review_url: '', owner_name: '', owner_email: '', owner_phone: '', default_language: 'en', delay_hours: 3, followup_hours: 48 })
+  const [f, setF] = useState({ name: '', slug: '', google_review_url: '', owner_name: '', owner_email: '', owner_phone: '', default_language: 'en', tone: 'friendly', delay_hours: 3, followup_hours: 48 })
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   async function submit(e) {
@@ -253,6 +256,7 @@ function NewClientForm({ onDone }) {
       <div><label className="label">Owner phone (SMS alerts)</label><input className="input" value={f.owner_phone} onChange={set('owner_phone')} /></div>
       <div><label className="label">Delay before asking (hours)</label><input className="input" type="number" min="0" value={f.delay_hours} onChange={set('delay_hours')} /></div>
       <div><label className="label">Follow-up after (hours)</label><input className="input" type="number" min="0" value={f.followup_hours} onChange={set('followup_hours')} /></div>
+      <div><label className="label">Starting message style</label><select className="input" value={f.tone} onChange={set('tone')}><option value="friendly">Friendly</option><option value="professional">Professional</option><option value="casual">Casual</option><option value="warm">Warm</option></select></div>
       {err && <p className="text-red-400 text-sm sm:col-span-3">{err}</p>}
       <button className="btn-primary sm:col-span-3">Create client</button>
     </form>

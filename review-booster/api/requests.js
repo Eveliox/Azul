@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     let q = db()
-      .from('review_requests')
+      .from('rb_review_requests')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(100)
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
 
     const { data: client, error: cErr } = await db()
-      .from('clients').select('*').eq('id', b.client_id).single()
+      .from('rb_clients').select('*').eq('id', b.client_id).single()
     if (cErr || !client) return res.status(404).json({ error: 'Client not found' })
 
     const delayMs = b.send_now ? 0 : client.delay_hours * 3600 * 1000
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       language: b.language === 'es' || b.language === 'en' ? b.language : client.default_language,
       send_at: new Date(Date.now() + delayMs).toISOString(),
     }
-    const { data, error } = await db().from('review_requests').insert(row).select().single()
+    const { data, error } = await db().from('rb_review_requests').insert(row).select().single()
     if (error) return res.status(500).json({ error: error.message })
     return res.status(201).json({ request: data, link: `${process.env.APP_URL}/r/${data.token}` })
   }

@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { db } from './_lib/db.js'
 import { authenticate, readJson } from './_lib/auth.js'
 import { toE164 } from './_lib/sms.js'
+import { TONES } from './_lib/messages.js'
 
 // GET   /api/clients           → list clients + stats (a business key sees only itself)
 // POST  /api/clients           → create client (master only)
@@ -11,7 +12,7 @@ export default async function handler(req, res) {
   if (!auth) return
 
   if (req.method === 'GET') {
-    let q = db().from('client_stats').select('*').order('name')
+    let q = db().from('rb_client_stats').select('*').order('name')
     if (auth.role === 'client') q = q.eq('client_id', auth.clientId)
     const { data, error } = await q
     if (error) return res.status(500).json({ error: error.message })
@@ -34,22 +35,29 @@ export default async function handler(req, res) {
       owner_email: b.owner_email || null,
       owner_phone: toE164(b.owner_phone),
       default_language: b.default_language === 'es' ? 'es' : 'en',
+      tone: TONES.includes(b.tone) ? b.tone : 'friendly',
       delay_hours: Number(b.delay_hours ?? 3),
       followup_hours: Number(b.followup_hours ?? 48),
     }
-    const { data, error } = await db().from('clients').insert(row).select().single()
+    const { data, error } = await db().from('rb_clients').insert(row).select().single()
     if (error) return res.status(500).json({ error: error.message })
     return res.status(201).json({ client: data })
   }
 
   if (req.method === 'PATCH') {
     const b = readJson(req)
-    if (!req.query.id || !b.rotate_key) return res.status(400).json({ error: 'id and rotate_key required' })
+    const patch = {}
+    if (b.rotate_key) patch.access_key = randomBytes(24).toString('hex')
+    if (b.tone !== undefined) {
+      if (!TONES.includes(b.tone)) return res.status(400).json({ error: 'invalid tone' })
+      patch.tone = b.tone
+    }
+    if (!req.query.id || !Object.keys(patch).length) return res.status(400).json({ error: 'id and a change required' })
     const { data, error } = await db()
-      .from('clients')
-      .update({ access_key: randomBytes(24).toString('hex') })
+      .from('rb_clients')
+      .update(patch)
       .eq('id', req.query.id)
-      .select('id, access_key')
+      .select('id, access_key, tone')
       .single()
     if (error || !data) return res.status(404).json({ error: 'Client not found' })
     return res.json({ client: data })
