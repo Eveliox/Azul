@@ -42,7 +42,6 @@ export default function MessagesPanel({ clientId, business, notify }) {
   const [tone, setTone] = useState('friendly')
   const [draft, setDraft] = useState({ en: {}, es: {} })
   const [saved, setSaved] = useState({ en: {}, es: {} })
-  const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState('')
   const [err, setErr] = useState('')
   const [focus, setFocus] = useState('sms')
@@ -92,49 +91,50 @@ export default function MessagesPanel({ clientId, business, notify }) {
   const previewField = focus.startsWith('followup') ? 'followup' : 'first'
 
   return (
-    <div className="card mb-6">
-      <button className="w-full flex items-center justify-between text-left" onClick={() => setOpen((v) => !v)}>
-        <div>
-          <h2 className="font-semibold">Messages</h2>
-          <p className="text-xs text-ink-400 mt-0.5">What your customers receive. Edit the wording, then send yourself a test.</p>
-        </div>
-        <span className="text-ink-400 text-sm">{open ? 'Hide' : 'Edit'}</span>
-      </button>
+    <div>
+      <div className="mb-5">
+        <h2 className="text-base font-semibold">Messages</h2>
+        <p className="text-xs text-ink-400 mt-1">This is exactly what your customers receive. Change the wording, then send yourself a test.</p>
+      </div>
 
-      {open && data && (
-        <div className="mt-5 grid lg:grid-cols-[1fr_320px] gap-6">
+      {!data && !err && <p className="text-sm text-ink-500">Loading…</p>}
+      {data && (
+        <div className="grid xl:grid-cols-[1fr_300px] gap-8">
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-5">
-              <span className="text-xs text-ink-400 mr-1">Start from</span>
-              {Object.entries(data.presets).map(([k, v]) => (
-                <button
-                  key={k}
-                  onClick={() => loadPreset(k)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition ${
-                    tone === k ? 'bg-azul-blue/20 border-azul-light text-white' : 'border-ink-700 text-ink-300 hover:border-ink-500'
-                  }`}
-                >{v.label}</button>
-              ))}
-              <div className="ml-auto flex rounded-lg border border-ink-700 overflow-hidden text-xs">
+            <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
+              <div>
+                <p className="eyebrow mb-2">Start from a template</p>
+                <div className="inline-flex rounded-lg bg-ink-950 border border-ink-800 p-0.5">
+                  {Object.entries(data.presets).map(([k, v]) => (
+                    <button
+                      key={k}
+                      onClick={() => loadPreset(k)}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
+                        tone === k ? 'bg-ink-700 text-white shadow-sm' : 'text-ink-400 hover:text-ink-100'
+                      }`}
+                    >{v.label}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="inline-flex rounded-lg bg-ink-950 border border-ink-800 p-0.5">
                 {['en', 'es'].map((l) => (
-                  <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 ${lang === l ? 'bg-ink-700 text-white' : 'text-ink-400 hover:text-white'}`}>
+                  <button key={l} onClick={() => setLang(l)} className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${lang === l ? 'bg-ink-700 text-white shadow-sm' : 'text-ink-400 hover:text-ink-100'}`}>
                     {l === 'en' ? 'English' : 'Español'}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5 mb-4">
-              <span className="text-[11px] text-ink-500 mr-1">Insert</span>
+            <div className="flex flex-wrap items-center gap-1.5 mb-5 text-[11px] text-ink-500">
+              <span className="mr-1">Insert into the field you're editing:</span>
               {PLACEHOLDERS.map((p) => (
-                <button key={p} onMouseDown={(e) => e.preventDefault()} onClick={() => insert(p)}
-                  className="font-mono text-[11px] px-2 py-0.5 rounded bg-ink-800 text-ink-200 hover:bg-ink-700">{p}</button>
+                <button key={p} onMouseDown={(e) => e.preventDefault()} onClick={() => insert(p)} className="kbd hover:border-ink-500 hover:text-ink-100">{p}</button>
               ))}
             </div>
 
             {SECTIONS.map((sec) => (
-              <div key={sec.title} className="mb-6">
-                <div className="flex items-baseline gap-2 mb-2">
+              <div key={sec.title} className="mb-6 pt-5 border-t border-ink-800 first:border-0 first:pt-0">
+                <div className="flex items-baseline gap-2 mb-3">
                   <h3 className="text-sm font-semibold">{sec.title}</h3>
                   <span className="text-xs text-ink-500">{sec.hint}</span>
                 </div>
@@ -168,15 +168,17 @@ export default function MessagesPanel({ clientId, business, notify }) {
               </div>
             ))}
 
-            {err && <p className="text-red-400 text-sm mb-3">{err}</p>}
-            <div className="flex flex-wrap items-center gap-2">
+            {err && <p className="text-red-400 text-xs mb-3">{err}</p>}
+            <div className="flex flex-wrap items-center gap-2 pt-5 border-t border-ink-800">
               <button className="btn-primary" disabled={!dirty || busy || missingLink.length > 0} onClick={save}>
-                {busy === 'save' ? 'Saving…' : 'Save messages'}
+                {busy === 'save' ? 'Saving…' : 'Save changes'}
               </button>
               <button className="btn-ghost" disabled={busy} onClick={sendTest}>
-                {busy === 'test' ? 'Sending…' : `Send me a test (${lang === 'en' ? 'English' : 'Español'})`}
+                {busy === 'test' ? 'Sending…' : `Email me a test · ${lang === 'en' ? 'EN' : 'ES'}`}
               </button>
-              {dirty && <button className="text-xs text-ink-400 hover:text-white ml-1" onClick={() => setDraft(saved)}>Discard changes</button>}
+              <span className="text-xs text-ink-500 ml-auto">
+                {dirty ? <button className="hover:text-ink-200" onClick={() => setDraft(saved)}>Discard changes</button> : 'All changes saved'}
+              </span>
             </div>
           </div>
 
@@ -193,31 +195,43 @@ function Preview({ m, business, which }) {
   const body = fill(which === 'followup' ? m.followupEmailBody : m.emailBody, business)
   const cta = fill(m.emailCta, business)
   const paragraphs = useMemo(() => body.split(/\n{2,}/), [body])
+  const now = new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
 
   return (
-    <div className="space-y-4 lg:sticky lg:top-6 self-start">
-      <p className="text-[11px] uppercase tracking-[0.14em] text-ink-500">Preview · {which === 'followup' ? 'reminder' : 'first message'}</p>
-
-      <div className="rounded-[26px] border border-ink-700 bg-black p-3 shadow-card">
-        <div className="mx-auto w-20 h-1.5 rounded-full bg-ink-700 mb-3" />
-        <div className="text-center mb-3">
-          <div className="w-8 h-8 rounded-full bg-ink-600 mx-auto mb-1 flex items-center justify-center text-[11px] font-semibold text-ink-200">{business.slice(0, 1)}</div>
-          <p className="text-[11px] text-ink-300 truncate px-2">{business}</p>
-        </div>
-        <div className="flex">
-          <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-[#26252A] text-[13px] leading-snug text-white px-3 py-2 whitespace-pre-wrap break-words">
-            {renderLink(sms)}
-          </div>
-        </div>
-        <p className="text-[10px] text-ink-500 mt-2 text-center">Text message</p>
+    <div className="space-y-5 xl:sticky xl:top-20 self-start">
+      <div className="flex items-center justify-between">
+        <p className="eyebrow">Preview</p>
+        <span className="text-[11px] text-ink-500">{which === 'followup' ? 'Reminder' : 'First message'}</span>
       </div>
 
-      <div className="rounded-xl border border-ink-700 bg-white text-gray-900 overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50">
-          <p className="text-[10px] text-gray-500">From <span className="text-gray-700">Azul Reviews</span></p>
-          <p className="text-sm font-semibold truncate">{subject || <span className="text-gray-300">Subject</span>}</p>
+      <div className="mx-auto w-[260px] rounded-[36px] border-[6px] border-ink-800 bg-black overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,.5)]">
+        <div className="relative pt-3 pb-2 border-b border-white/10 bg-[#1C1C1E]">
+          <div className="absolute left-1/2 -translate-x-1/2 top-2 w-20 h-5 rounded-full bg-black" />
+          <div className="flex justify-between px-5 text-[10px] text-white/90 font-medium mb-3"><span>{now}</span><span>●●●</span></div>
+          <div className="text-center px-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-b from-[#8E8E93] to-[#636366] mx-auto mb-1 flex items-center justify-center text-[13px] font-semibold text-white">{business.slice(0, 1)}</div>
+            <p className="text-[10px] text-white/80 truncate">{business}</p>
+          </div>
         </div>
-        <div className="px-4 py-4 text-[13px] leading-relaxed">
+        <div className="px-3 pt-4 pb-6 min-h-[170px]">
+          <p className="text-[9px] text-white/40 text-center mb-2">Text Message · {now}</p>
+          <div className="flex">
+            <div className="max-w-[92%] rounded-[18px] rounded-bl-[4px] bg-[#26252A] text-[12.5px] leading-[1.35] text-white px-3 py-2 whitespace-pre-wrap break-words">
+              {renderLink(sms)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-ink-800 bg-white text-gray-900 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">A</div>
+          <div className="min-w-0">
+            <p className="text-[11px] text-gray-500 leading-tight">Azul Reviews <span className="text-gray-400">· reviews@azulwebdev.com</span></p>
+            <p className="text-[13px] font-semibold truncate leading-snug mt-0.5">{subject || <span className="text-gray-300">Subject</span>}</p>
+          </div>
+        </div>
+        <div className="px-4 py-4 text-[12.5px] leading-relaxed">
           {paragraphs.map((p, i) => <p key={i} className="mb-3 whitespace-pre-wrap">{p}</p>)}
           <span className="inline-block px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold">{cta || 'Button'}</span>
           <p className="text-[10px] text-gray-400 mt-3 break-all">Or copy this link: {SAMPLE.link}</p>
