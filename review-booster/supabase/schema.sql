@@ -41,6 +41,10 @@ create table if not exists review_requests (
   created_at      timestamptz not null default now()
 );
 
+-- Per-business front-desk login. Each business only sees its own data.
+alter table clients
+  add column if not exists access_key text not null unique default encode(gen_random_bytes(24), 'hex');
+
 create index if not exists review_requests_due_idx
   on review_requests (status, send_at);
 create index if not exists review_requests_client_idx
@@ -59,7 +63,8 @@ select
   count(r.id) filter (where r.rating is not null)      as rated,
   count(r.id) filter (where r.rating = 5)              as five_star,
   count(r.id) filter (where r.rating between 1 and 4)  as shielded,
-  round(avg(r.rating)::numeric, 2)                     as avg_rating
+  round(avg(r.rating)::numeric, 2)                     as avg_rating,
+  c.access_key
 from clients c
 left join review_requests r on r.client_id = c.id
 group by c.id;

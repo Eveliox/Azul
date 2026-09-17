@@ -1,13 +1,16 @@
 import { randomBytes } from 'node:crypto'
 import { db } from './_lib/db.js'
-import { requireAdmin, readJson } from './_lib/auth.js'
+import { authenticate, readJson } from './_lib/auth.js'
 import { toE164 } from './_lib/sms.js'
 
 // GET  /api/requests?client_id=…   → recent requests for a client
 // POST /api/requests               → "job complete" trigger: schedules a review request
 //        body: { client_id, customer_name, customer_phone?, customer_email?, language?, send_now? }
 export default async function handler(req, res) {
-  if (!requireAdmin(req, res)) return
+  const auth = await authenticate(req, res)
+  if (!auth) return
+  // A business key is pinned to its own client, whatever client_id the browser sends.
+  const scopedClientId = auth.role === 'client' ? auth.clientId : null
 
   if (req.method === 'GET') {
     let q = db()
@@ -15,7 +18,8 @@ export default async function handler(req, res) {
       .select('*')
       .order('created_at', { ascending: false })
       .limit(100)
-    if (req.query.client_id) q = q.eq('client_id', req.query.client_id)
+    const clientId = scopedClientId || req.query.client_id
+    if (clientId) q = q.eq('client_id', clientId)
     const { data, error } = await q
     if (error) return res.status(500).json({ error: error.message })
     return res.json({ requests: data })
@@ -23,6 +27,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const b = readJson(req)
+    if (scopedClientId) b.client_id = scopedClientId
     if (!b.client_id || !b.customer_name) {
       return res.status(400).json({ error: 'client_id and customer_name are required' })
     }

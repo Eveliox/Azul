@@ -1,20 +1,25 @@
+import { randomBytes } from 'node:crypto'
 import { db } from './_lib/db.js'
-import { requireAdmin, readJson } from './_lib/auth.js'
+import { authenticate, readJson } from './_lib/auth.js'
 import { toE164 } from './_lib/sms.js'
 
-// GET  /api/clients          → list clients + stats
-// POST /api/clients          → create client
+// GET   /api/clients           → list clients + stats (a business key sees only itself)
+// POST  /api/clients           → create client (master only)
+// PATCH /api/clients?id=…      → { rotate_key: true } issue a new access key (master only)
 export default async function handler(req, res) {
-  if (!requireAdmin(req, res)) return
+  const auth = await authenticate(req, res)
+  if (!auth) return
 
   if (req.method === 'GET') {
-    const { data, error } = await db()
-      .from('client_stats')
-      .select('*')
-      .order('name')
+    let q = db().from('client_stats').select('*').order('name')
+    if (auth.role === 'client') q = q.eq('client_id', auth.clientId)
+    const { data, error } = await q
     if (error) return res.status(500).json({ error: error.message })
-    return res.json({ clients: data })
+    const clients = auth.role === 'master' ? data : data.map(({ access_key, ...c }) => c)
+    return res.json({ role: auth.role, clients })
   }
+
+  if (auth.role !== 'master') return res.status(403).json({ error: 'Forbidden' })
 
   if (req.method === 'POST') {
     const b = readJson(req)
@@ -35,6 +40,19 @@ export default async function handler(req, res) {
     const { data, error } = await db().from('clients').insert(row).select().single()
     if (error) return res.status(500).json({ error: error.message })
     return res.status(201).json({ client: data })
+  }
+
+  if (req.method === 'PATCH') {
+    const b = readJson(req)
+    if (!req.query.id || !b.rotate_key) return res.status(400).json({ error: 'id and rotate_key required' })
+    const { data, error } = await db()
+      .from('clients')
+      .update({ access_key: randomBytes(24).toString('hex') })
+      .eq('id', req.query.id)
+      .select('id, access_key')
+      .single()
+    if (error || !data) return res.status(404).json({ error: 'Client not found' })
+    return res.json({ client: data })
   }
 
   res.status(405).json({ error: 'Method not allowed' })

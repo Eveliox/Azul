@@ -18,8 +18,8 @@ function Login({ onOk }) {
     <div className="min-h-screen flex items-center justify-center p-6">
       <form onSubmit={submit} className="card w-full max-w-sm">
         <h1 className="text-lg font-semibold mb-1">Azul Review Booster</h1>
-        <p className="text-sm text-ink-400 mb-4">Enter your admin key.</p>
-        <input className="input mb-3" type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="ADMIN_KEY" />
+        <p className="text-sm text-ink-400 mb-4">Enter your access key.</p>
+        <input className="input mb-3" type="password" value={key} onChange={(e) => setKey(e.target.value.trim())} placeholder="Access key" />
         {err && <p className="text-red-400 text-sm mb-2">{err}</p>}
         <button className="btn-primary w-full">Enter</button>
       </form>
@@ -29,6 +29,7 @@ function Login({ onOk }) {
 
 function Dashboard({ onLogout }) {
   const [clients, setClients] = useState([])
+  const [role, setRole] = useState(null)
   const [selected, setSelected] = useState('')
   const [requests, setRequests] = useState([])
   const [showNewClient, setShowNewClient] = useState(false)
@@ -37,8 +38,9 @@ function Dashboard({ onLogout }) {
   const notify = (m) => { setToast(m); setTimeout(() => setToast(''), 4000) }
 
   async function loadClients() {
-    const { clients } = await api('/api/clients')
+    const { clients, role } = await api('/api/clients')
     setClients(clients)
+    setRole(role)
     if (!selected && clients[0]) setSelected(clients[0].client_id)
   }
   async function loadRequests(id) {
@@ -50,33 +52,43 @@ function Dashboard({ onLogout }) {
   useEffect(() => { loadRequests(selected) }, [selected])
 
   const client = clients.find((c) => c.client_id === selected)
+  const isMaster = role === 'master'
 
   return (
     <div className="min-h-screen p-4 md:p-8 max-w-6xl mx-auto">
       <header className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold">Review Booster</h1>
-          <p className="text-xs text-ink-400">Azul · admin</p>
+          <p className="text-xs text-ink-400">{isMaster ? 'Azul · admin' : client?.name || ''}</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn-ghost" onClick={() => setShowNewClient((v) => !v)}>+ Client</button>
+          {isMaster && <button className="btn-ghost" onClick={() => setShowNewClient((v) => !v)}>+ Client</button>}
           <button className="btn-ghost" onClick={onLogout}>Log out</button>
         </div>
       </header>
 
       {toast && <div className="mb-4 rounded-lg bg-azul-dark/40 border border-azul-blue/40 px-4 py-2 text-sm">{toast}</div>}
 
-      {showNewClient && (
+      {isMaster && showNewClient && (
         <NewClientForm onDone={() => { setShowNewClient(false); loadClients(); notify('Client created') }} />
       )}
 
       <div className="grid md:grid-cols-3 gap-4 mb-6">
         <div className="card md:col-span-1">
-          <label className="label">Client</label>
-          <select className="input" value={selected} onChange={(e) => setSelected(e.target.value)}>
-            {clients.map((c) => <option key={c.client_id} value={c.client_id}>{c.name}</option>)}
-          </select>
+          {isMaster ? (
+            <>
+              <label className="label">Client</label>
+              <select className="input" value={selected} onChange={(e) => setSelected(e.target.value)}>
+                {clients.map((c) => <option key={c.client_id} value={c.client_id}>{c.name}</option>)}
+              </select>
+            </>
+          ) : (
+            <h2 className="font-semibold">{client?.name}</h2>
+          )}
           {client && <Stats c={client} />}
+          {isMaster && client && (
+            <AccessKey c={client} onRotated={() => { loadClients(); notify(`New key issued for ${client.name}. The old key no longer works.`) }} />
+          )}
         </div>
 
         <div className="card md:col-span-2">
@@ -151,6 +163,29 @@ function Stats({ c }) {
         </div>
       ))}
     </dl>
+  )
+}
+
+function AccessKey({ c, onRotated }) {
+  const [copied, setCopied] = useState(false)
+  async function copy() {
+    await navigator.clipboard.writeText(c.access_key)
+    setCopied(true); setTimeout(() => setCopied(false), 2000)
+  }
+  async function rotate() {
+    if (!confirm(`Issue a new key for ${c.name}? Their front desk will need the new key to log in.`)) return
+    await api(`/api/clients?id=${c.client_id}`, { method: 'PATCH', body: { rotate_key: true } })
+    onRotated()
+  }
+  return (
+    <div className="mt-4 pt-3 border-t border-ink-800">
+      <label className="label">Front-desk access key</label>
+      <code className="block text-xs break-all bg-ink-900 rounded px-2 py-1 mb-2">{c.access_key}</code>
+      <div className="flex gap-2">
+        <button className="btn-ghost text-xs" onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>
+        <button className="btn-ghost text-xs" onClick={rotate}>Reset key</button>
+      </div>
+    </div>
   )
 }
 

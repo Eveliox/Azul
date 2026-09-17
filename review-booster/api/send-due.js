@@ -61,6 +61,9 @@ export default async function handler(req, res) {
   res.json(report)
 }
 
+const smsEnabled = () =>
+  Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER)
+
 async function deliver(r, smsKind) {
   const t = templates[r.language] || templates.en
   const vars = {
@@ -68,19 +71,22 @@ async function deliver(r, smsKind) {
     business: r.clients.name,
     link: `${process.env.APP_URL}/r/${r.token}`,
   }
+  const isFollowup = smsKind === 'followupSms'
   let delivered = false
-  if (r.customer_phone) {
+  if (r.customer_phone && smsEnabled()) {
     await sendSms(r.customer_phone, t[smsKind](vars))
     delivered = true
   }
-  // Email only on first send (no email nag)
-  if (r.customer_email && smsKind === 'sms') {
+  // Email follow-up only when SMS didn't carry it, so SMS customers aren't nagged twice
+  if (r.customer_email && (!isFollowup || !delivered)) {
     await sendEmail({
       to: r.customer_email,
-      subject: t.emailSubject(vars),
-      html: t.emailBody(vars),
+      subject: isFollowup ? t.followupEmailSubject(vars) : t.emailSubject(vars),
+      html: isFollowup ? t.followupEmailBody(vars) : t.emailBody(vars),
     })
     delivered = true
   }
-  if (!delivered) throw new Error('No phone or email on request')
+  if (!delivered) {
+    throw new Error(r.customer_email ? 'Nothing delivered' : 'Phone only, but SMS is not configured — add an email')
+  }
 }

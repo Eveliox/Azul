@@ -14,6 +14,12 @@ export const templates = {
       <p>Thank you for choosing <strong>${business}</strong>. We'd really appreciate 30 seconds of your time to tell us how it went.</p>
       <p><a href="${link}" style="display:inline-block;padding:12px 20px;background:#2563EB;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Share your experience</a></p>
       <p style="color:#6B7280;font-size:13px">Or copy this link: ${link}</p>`,
+    followupEmailSubject: ({ business }) => `Quick reminder from ${business}`,
+    followupEmailBody: ({ customer, business, link }) => `
+      <p>Hi ${first(customer)},</p>
+      <p>Just a quick reminder from <strong>${business}</strong> — we'd love to hear how your visit went. It only takes 30 seconds.</p>
+      <p><a href="${link}" style="display:inline-block;padding:12px 20px;background:#2563EB;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Share your experience</a></p>
+      <p style="color:#6B7280;font-size:13px">Or copy this link: ${link}</p>`,
   },
   es: {
     sms: ({ customer, business, link }) =>
@@ -24,6 +30,12 @@ export const templates = {
     emailBody: ({ customer, business, link }) => `
       <p>Hola ${first(customer)},</p>
       <p>Gracias por elegir <strong>${business}</strong>. Le agradeceríamos 30 segundos de su tiempo para contarnos cómo le fue.</p>
+      <p><a href="${link}" style="display:inline-block;padding:12px 20px;background:#2563EB;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Compartir mi experiencia</a></p>
+      <p style="color:#6B7280;font-size:13px">O copie este enlace: ${link}</p>`,
+    followupEmailSubject: ({ business }) => `Un recordatorio de ${business}`,
+    followupEmailBody: ({ customer, business, link }) => `
+      <p>Hola ${first(customer)},</p>
+      <p>Un breve recordatorio de <strong>${business}</strong> — nos encantaría saber cómo le fue en su visita. Solo toma 30 segundos.</p>
       <p><a href="${link}" style="display:inline-block;padding:12px 20px;background:#2563EB;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">Compartir mi experiencia</a></p>
       <p style="color:#6B7280;font-size:13px">O copie este enlace: ${link}</p>`,
   },
