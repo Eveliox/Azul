@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Icon } from './DashboardVisuals.jsx'
-import { SERVICES, SETUP, MONTHLY_SEO, activeServices, monthId, planKey, readPlan, reviewEvents } from './servicePlan.js'
+import { SERVICES, UPCOMING, SETUP, MONTHLY_SEO, activeServices, monthId, planKey, readPlan, reviewEvents } from './servicePlan.js'
 import './service-workspace.css'
 
 const ALL_SETUP = Object.values(SETUP).flat()
@@ -68,6 +68,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
         <span className="service-category">{s.category}</span><h3>{s.name}</h3><p>{s.description}</p>
         <div className="service-card-bottom"><span>{label}</span><strong>{value}</strong></div>
       </button> })}
+      {filter === 'all' && UPCOMING.map((s) => <div key={s.id} className="service-card service-upcoming" aria-label={`${s.name} — coming soon`}><div className="service-card-top"><span className={`icon-tile ${s.color}`}><Icon name={s.icon}/></span><span className="service-status upcoming">{s.status}</span></div><span className="service-category">{s.category}</span><h3>{s.name}</h3><p>{s.description}</p><div className="service-card-bottom"><span>{isMaster ? 'Not yet available to add to a plan' : 'Ask Azul to be first in line'}</span><strong>Soon</strong></div></div>)}
       {!isMaster && locked.length > 0 && filter === 'all' && <div className="service-card service-locked"><div className="service-card-top"><span className="icon-tile blue"><Icon name="plus"/></span><span className="service-status">Available</span></div><span className="service-category">Grow with Azul</span><h3>Unlock more services</h3><p>Not yet in your plan: {locked.map((s) => s.name).join(', ')}. Message Azul to add a service to this workspace.</p></div>}
       </div>
       {isMaster && locked.length > 0 && <p className="plan-storage-note"><Icon name="key" size={15}/><span>{client.name} is subscribed to {subscribed.length ? subscribed.map((id) => SERVICES.find((s) => s.id === id).name).join(', ') : 'no services yet'}. Their key only shows those. Change the plan under Workspace access.</span></p>}

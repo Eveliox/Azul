@@ -18,6 +18,11 @@
 .service-card-top > svg { color: #8392aa; }
 .service-status { margin-left: auto; font-size: 9px; color: #63758f; border: 1px solid #ffffffcc; background: #ffffff66; padding: 5px 8px; border-radius: 20px; }
 .service-status.not-included { color: #a56b5b; background: #fff3f0cc; border-color: #f7ddd6; }
+.service-upcoming { background: linear-gradient(120deg, #fff7ee, #fffcf7); border-color: #f6e8d3; cursor: default; }
+.service-upcoming:hover { transform: none; box-shadow: none; }
+.service-upcoming h3, .service-upcoming > p { opacity: .8; }
+.service-status.upcoming { color: #b6813a; background: #fff3e2cc; border-color: #f3dfc0; }
+.service-upcoming .service-card-bottom strong { font-size: 18px; color: #b6813a; }
 .service-locked { background: #fbfcff; border: 1px dashed #cfdaf0; cursor: default; }
 .service-locked:hover { transform: none; box-shadow: none; }
 .service-plan-editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 14px 0 18px; }

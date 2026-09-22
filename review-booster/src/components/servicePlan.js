@@ -19,6 +19,10 @@ export const SERVICES = [
   { id: 'reviews', name: 'Review Booster', icon: 'star', color: 'pink', category: 'Listen to your customers', description: 'Send requests, personalize messages, and collect feedback.', status: 'Workspace available', action: 'Open reviews' },
   { id: 'seo', name: 'Local Proof SEO', icon: 'pin', color: 'purple', category: 'Show up locally', description: 'Organize approved content and monthly visibility reporting.', status: 'Manual delivery', action: 'Open SEO plan' },
 ]
+// Services on the roadmap. Shown as "Coming soon" cards; cannot be added to a plan yet.
+export const UPCOMING = [
+  { id: 'social', name: 'Social media & AI ads', icon: 'megaphone', color: 'orange', category: 'Reach new customers', description: 'AI-written Facebook & Instagram ads, bilingual creative, and monthly performance reporting.', status: 'Coming soon' },
+]
 export const SEO_SETUP = [
   { id: 'seo-access', title: 'Confirm profile access & business facts', detail: 'Owner keeps ownership. Verify the actual location, services, hours, and booking link.' },
   { id: 'seo-baseline', title: 'Record a local visibility baseline', detail: 'Choose 3 real service queries; save the scan grid settings and export privately.' },
