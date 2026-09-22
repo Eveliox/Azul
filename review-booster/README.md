@@ -93,3 +93,13 @@ supabase/schema.sql   tables + stats view + HelloYou seed
 - **TCPA:** only text customers who actually did business with the client. Include the business name in every SMS (templates do).
 - **Google policy:** gating 1-4★ from Google is a gray area. The page never *blocks* anyone from reviewing — it just doesn't push them. Keep it that way.
 - **A2P 10DLC:** Twilio will silently drop US SMS until registration is approved. Do this on day 1.
+
+## Vapi lead alerts (`POST /api/vapi-webhook`)
+
+Emails the business owner after every real AI-answered call. Vapi sends its end-of-call report here; we format the summary, caller number and captured fields and send via Resend. Nothing is stored.
+
+**Vercel env:** `VAPI_WEBHOOK_SECRET`, `VAPI_LEAD_TO` (see `.env.example` for optional per-assistant routing).
+
+**Vapi setup:** Assistant → Advanced → Server URL: `https://app.azulwebdev.com/api/vapi-webhook`, Server URL Secret: same value as `VAPI_WEBHOOK_SECRET`, Server Messages: `end-of-call-report`.
+
+Calls under 8s with no transcript (hang-ups) are ignored. If Resend fails, the endpoint still returns 200 (Vapi won't retry) and the error is in the Vercel function logs. Transcripts can contain personal details — set `VAPI_LEAD_TRANSCRIPT=false` for clients who only want the summary.
