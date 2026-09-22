@@ -1,12 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { MONTHLY_SEO, SERVICES, SETUP, monthId, planKey, readPlan, reviewEvents } from '../src/components/servicePlan.js'
+import { MONTHLY, MONTHLY_SEO, DELIVERY, SERVICES, SERVICE_IDS, SETUP, UPCOMING, monthId, planKey, readPlan, reviewEvents } from '../src/components/servicePlan.js'
 
-test('each service has a distinct destination; SEO has exactly eight post tasks', () => {
-  assert.equal(new Set(SERVICES.map((s) => s.id)).size, 4)
-  assert.equal(MONTHLY_SEO.filter((t) => t.id.startsWith('seo-post-')).length, 8)
-  const tasks = [...Object.values(SETUP).flat(), ...MONTHLY_SEO]
-  assert.equal(new Set(tasks.map((t) => t.id)).size, tasks.length)
+test('services match the API list; every service has setup + delivery copy; SEO and Social have eight posts each', () => {
+  assert.deepEqual(SERVICES.map((s) => s.id), SERVICE_IDS)
+  for (const id of SERVICE_IDS) if (id !== 'reviews') { assert.ok(SETUP[id]?.length, `${id} setup`); assert.ok(DELIVERY[id], `${id} delivery copy`) }
+  assert.equal(MONTHLY.seo.filter((t) => t.id.startsWith('seo-post-')).length, 8)
+  assert.equal(MONTHLY.social.filter((t) => t.id.startsWith('social-post-')).length, 8)
+  const tasks = [...Object.values(SETUP).flat(), ...Object.values(MONTHLY).flat()]
+  assert.equal(new Set(tasks.map((t) => t.id)).size, tasks.length, 'task ids must be unique across all checklists')
+  assert.ok(!SERVICE_IDS.includes(UPCOMING[0].id), 'coming-soon services are not subscribable')
 })
 test('plans isolate business, demo/live, month, and setup', () => {
   assert.equal(monthId(new Date(2026, 0, 15)), '2026-01')

@@ -4,7 +4,8 @@ import { SERVICE_IDS, normalizeServices } from '../api/_lib/services.js'
 import { activeServices, inviteMessage } from '../src/components/servicePlan.js'
 
 test('normalizeServices drops unknown ids, dedupes, and keeps canonical order', () => {
-  assert.deepEqual(normalizeServices(['seo', 'reviews', 'seo', 'billing', 42]), ['reviews', 'seo'])
+  assert.deepEqual(normalizeServices(['seo', 'reviews', 'seo', 'billing', 'ads', 42]), ['reviews', 'seo'])
+  assert.deepEqual(normalizeServices(['social', 'website']), ['website', 'social'])
   assert.deepEqual(normalizeServices('reviews'), [])
   assert.deepEqual(normalizeServices(undefined), [])
 })

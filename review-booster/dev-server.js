@@ -11,7 +11,7 @@ import { normalizeServices } from './api/_lib/services.js'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), 'dist')
 const port = Number(process.env.PORT || 3000)
 const adminKey = 'dev-master-key-123'
-const clients = [{ client_id: 'demo-helloyou', name: 'Hello You Wellness Center', slug: 'helloyou', delay_hours: 3, followup_hours: 48, default_language: 'en', tone: 'warm', access_key: 'demo-business-key-helloyou-12345678', services: ['reviews', 'seo'], google_review_url: 'https://example.com/review' }]
+const clients = [{ client_id: 'demo-helloyou', name: 'Hello You Wellness Center', slug: 'helloyou', delay_hours: 3, followup_hours: 48, default_language: 'en', tone: 'warm', access_key: 'demo-business-key-helloyou-12345678', services: ['reviews', 'seo', 'social'], google_review_url: 'https://example.com/review' }]
 const names = ['Maria Lopez', 'Daniel Rivera', 'Sofia Martinez', 'James Wilson', 'Isabella Torres', 'Lucas Perez', 'Emma Davis', 'Mateo Garcia']
 const requests = Array.from({ length: 32 }, (_, i) => {
   const date = new Date(); date.setDate(date.getDate() - Math.floor(i / 2.6)); date.setHours(9 + i % 8, 15, 0, 0)

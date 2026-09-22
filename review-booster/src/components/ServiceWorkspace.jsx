@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Icon } from './DashboardVisuals.jsx'
-import { SERVICES, UPCOMING, SETUP, MONTHLY_SEO, activeServices, monthId, planKey, readPlan, reviewEvents } from './servicePlan.js'
+import { SERVICES, UPCOMING, SETUP, MONTHLY, DELIVERY, activeServices, monthId, planKey, readPlan, reviewEvents } from './servicePlan.js'
 import './service-workspace.css'
 
 const ALL_SETUP = Object.values(SETUP).flat()
+const ALL_MONTHLY = Object.entries(MONTHLY).flatMap(([service, tasks]) => tasks.map((t) => ({ ...t, service })))
 const months = Array.from({ length: 12 }, (_, i) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); return monthId(d) })
 
 function useChecklist(key, tasks) {
@@ -28,7 +29,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
   const [filter, setFilter] = useState('all')
   const [activityFilter, setActivityFilter] = useState('all')
   const setup = useChecklist(planKey(client.client_id, demo, 'setup'), ALL_SETUP)
-  const monthly = useChecklist(planKey(client.client_id, demo, month), MONTHLY_SEO)
+  const monthly = useChecklist(planKey(client.client_id, demo, month), ALL_MONTHLY)
   const isOverview = view === 'overview'
   const service = SERVICES.find((s) => s.id === view)
   const included = activeServices(client, isMaster)
@@ -37,23 +38,23 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
   const locked = SERVICES.filter((s) => !subscribed.includes(s.id))
   const selectedServices = filter === 'all' ? visible : visible.filter((s) => s.id === filter)
   const count = (tasks, done) => tasks.filter((t) => done[t.id]).length
-  const seoPosts = MONTHLY_SEO.filter((t) => t.id.startsWith('seo-post-'))
+  const posts = (id) => MONTHLY[id].filter((t) => t.id.startsWith(`${id}-post-`))
   const taskEvents = [
     ...ALL_SETUP.filter((t) => setup.done[t.id]).map((t) => ({ ...t, date: setup.done[t.id], service: Object.keys(SETUP).find((s) => SETUP[s].some((x) => x.id === t.id)) })),
-    ...MONTHLY_SEO.filter((t) => monthly.done[t.id]).map((t) => ({ ...t, date: monthly.done[t.id], service: 'seo' })),
+    ...ALL_MONTHLY.filter((t) => monthly.done[t.id]).map((t) => ({ ...t, date: monthly.done[t.id] })),
   ].map((t) => ({ ...t, state: 'completed', detail: 'Manually checked in this browser · not provider-verified' }))
   const events = [...reviewEvents(requests), ...taskEvents]
     .filter((e) => (filter === 'all' || e.service === filter) && (activityFilter === 'all' || e.state === activityFilter))
     .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8)
   const nextTasks = visible.filter((s) => s.id !== 'reviews' && (filter === 'all' || s.id === filter)).flatMap((s) => {
-    const tasks = s.id === 'seo' ? [...SETUP.seo, ...MONTHLY_SEO] : SETUP[s.id]
-    const task = tasks.find((t) => !(s.id === 'seo' && MONTHLY_SEO.includes(t) ? monthly.done[t.id] : setup.done[t.id]))
+    const tasks = [...SETUP[s.id], ...(MONTHLY[s.id] || [])]
+    const task = tasks.find((t) => !(MONTHLY[s.id]?.includes(t) ? monthly.done[t.id] : setup.done[t.id]))
     return task ? [{ ...task, service: s }] : []
   })
 
   function metric(s) {
     if (s.id === 'reviews') return [client.rated ?? 0, 'feedback responses · all time']
-    if (s.id === 'seo') return [`${count(seoPosts, monthly.done)} / 8`, `posts checked off · ${month}`]
+    if (MONTHLY[s.id]) return [`${count(posts(s.id), monthly.done)} / ${posts(s.id).length}`, `posts checked off · ${month}`]
     return [`${count(SETUP[s.id], setup.done)} / ${SETUP[s.id].length}`, 'setup steps checked off']
   }
   const storageNote = <p className="plan-storage-note"><Icon name="shield" size={15}/><span>Planning only: checkmarks are saved in this browser for this business, not synced to your team or verified by providers. No credentials or patient details belong here.</span></p>
@@ -85,19 +86,19 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
           {!nextTasks.length && filter !== 'all' && filter !== 'reviews' && <p className="muted">All planning steps for this service are checked off in this browser.</p>}
         </aside>
       </div>
-    </> : service && <>
-      <section className={`service-intro service-${service.color}`}><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{view === 'seo' ? 'Your manual workflow: collect → draft → approve → publish → measure.' : view === 'calls' ? 'Use this plan alongside Vapi. Checking a task does not configure a phone number or deploy an agent.' : 'Track the delivery work here. Hosting, deployment, and analytics stay in your existing tools.'}</p></div></section>
+    </> : service && (() => { const d = DELIVERY[view]; return <>
+      <section className={`service-intro service-${service.color}`}><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{d.intro}</p></div></section>
       {storageNote}
       <div className="delivery-grid"><div className="delivery-main">
-        <TaskList title={view === 'seo' ? 'One-time onboarding' : 'Setup & launch checklist'} tasks={SETUP[view]} state={setup}/>
-        {view === 'seo' && <section className="panel"><div className="panel-heading"><div><h2>Monthly delivery</h2><p>8 posts total · 1 website update · 1 visibility report</p></div><select className="input month-select" aria-label="SEO planning month" value={month} onChange={(e) => setMonth(e.target.value)}>{months.map((m) => <option key={m} value={m}>{new Date(`${m}-01T12:00:00`).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</option>)}</select></div><TaskList tasks={MONTHLY_SEO} state={monthly} embedded/></section>}
-      </div><aside className="delivery-side panel"><span className={`icon-tile ${service.color}`}><Icon name="message"/></span><h2>{view === 'seo' ? 'What the client sends you' : view === 'calls' ? 'Before the first real call' : 'Keep delivery focused'}</h2>
-        <p>{view === 'seo' ? 'Approved non-patient photos, a factual description, and approval of the final copy. Start with verified business information—not assumed services or locations.' : view === 'calls' ? 'Verify call routing, callbacks, human fallback, and privacy requirements. A good test call is not proof that every real call will work.' : 'Agree on scope, collect approved content, test on mobile, and make sure enquiries reach the right person.'}</p>
-        <div className="integration-note"><Icon name="shield" size={17}/><strong>{view === 'seo' ? 'GBP & ranking tools not connected' : view === 'calls' ? 'Vapi not connected to this dashboard' : 'Website monitoring not connected'}</strong><p>{view === 'seo' ? 'Publish in Google’s interface and run your ranking scans externally. This checklist does not auto-post, run AI, or track rankings.' : view === 'calls' ? 'Call volume, captured leads, and recordings will appear only after a real integration is built.' : 'This is a launch checklist, not an uptime monitor or a website builder.'}</p></div>
-        <a className="btn-ghost" href={view === 'seo' ? 'https://business.google.com/' : view === 'calls' ? 'https://dashboard.vapi.ai/' : 'https://vercel.com/dashboard'} target="_blank" rel="noreferrer">{view === 'seo' ? 'Open Google Business Profile' : view === 'calls' ? 'Open Vapi' : 'Open Vercel'}<Icon name="chevron" size={14}/></a>
+        <TaskList title={d.setupTitle} tasks={SETUP[view]} state={setup}/>
+        {MONTHLY[view] && <section className="panel"><div className="panel-heading"><div><h2>{d.monthlyTitle}</h2><p>{d.monthlySub}</p></div><select className="input month-select" aria-label={`${service.name} planning month`} value={month} onChange={(e) => setMonth(e.target.value)}>{months.map((m) => <option key={m} value={m}>{new Date(`${m}-01T12:00:00`).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</option>)}</select></div><TaskList tasks={MONTHLY[view]} state={monthly} embedded/></section>}
+      </div><aside className="delivery-side panel"><span className={`icon-tile ${service.color}`}><Icon name="message"/></span><h2>{d.sideTitle}</h2>
+        <p>{d.side}</p>
+        <div className="integration-note"><Icon name="shield" size={17}/><strong>{d.noteTitle}</strong><p>{d.note}</p></div>
+        <a className="btn-ghost" href={d.link} target="_blank" rel="noreferrer">{d.linkLabel}<Icon name="chevron" size={14}/></a>
         <p className="chart-footnote">Opens a separate tool. Access and subscriptions are managed there.</p>
       </aside></div>
-    </>}
+    </> })()}
   </div>
 }
 
