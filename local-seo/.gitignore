@@ -1,0 +1,5 @@
+# Private client working copies, images, approvals, and reports.
+clients/
+.env
+.env.*
+!.env.example

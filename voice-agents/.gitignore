@@ -1,0 +1,5 @@
+# Private client data, call logs, recordings
+clients/
+.env
+.env.*
+!.env.example

@@ -1,0 +1,10 @@
+post_id,week,planned_date,language,topic,verified_facts_reference,image_file,usage_permission_record,draft_file,approval_record,status,published_at,live_url,notes
+GBP-01,1,,en,Business introduction,,,,,,planned,,,Confirm actual location and positioning
+GBP-02,1,,es,How to book a visit,,,,,,planned,,,Use verified booking link only
+GBP-03,2,,en,Approved space or staff introduction,,,,,,planned,,,No patients or unverified credentials
+GBP-04,2,,es,Confirmed general service overview,,,,,,planned,,,Client review and platform-policy check required
+GBP-05,3,,en,Common non-clinical customer question,,,,,,planned,,,Use an owner-approved answer
+GBP-06,3,,es,Hours or visiting information,,,,,,planned,,,Verify current hours and address
+GBP-07,4,,en,Approved facility feature,,,,,,planned,,,Support claims with verified facts and image
+GBP-08,4,,es,Booking process reminder,,,,,,planned,,,No invented offers or patient stories
+WEB-01,monthly,,en/es,Useful update to an existing relevant website page,,,,,,planned,,,Separate deliverable from GBP posts; substantive local content only
