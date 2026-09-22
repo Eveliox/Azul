@@ -91,16 +91,17 @@ export default function MessagesPanel({ clientId, business, notify }) {
   const previewField = focus.startsWith('followup') ? 'followup' : 'first'
 
   return (
-    <div>
+    <div className="messages-panel">
       <div className="mb-5">
         <h2 className="text-base font-semibold">Messages</h2>
         <p className="text-xs text-ink-400 mt-1">This is exactly what your customers receive. Change the wording, then send yourself a test.</p>
       </div>
 
-      {!data && !err && <p className="text-sm text-ink-500">Loading…</p>}
+      {!data && !err && <p className="text-sm text-ink-500" role="status">Loading…</p>}
+      {!data && err && <p className="error-banner" role="alert">{err}</p>}
       {data && (
-        <div className="grid xl:grid-cols-[1fr_300px] gap-8">
-          <div>
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-8">
+          <div className="min-w-0">
             <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
               <div>
                 <p className="eyebrow mb-2">Start from a template</p>
@@ -147,7 +148,7 @@ export default function MessagesPanel({ clientId, business, notify }) {
                     return (
                       <div key={f.key}>
                         <div className="flex justify-between items-baseline mb-1">
-                          <label className="label mb-0">{f.label}</label>
+                          <label className="label mb-0" htmlFor={`message-${f.key}`}>{f.label}</label>
                           {seg && (
                             <span className={`text-[11px] ${bad ? 'text-red-400' : seg.segments > 1 ? 'text-amber-400' : 'text-ink-500'}`}>
                               {bad ? 'Missing {link}' : `${seg.chars} chars · ${seg.segments} ${seg.segments === 1 ? 'text' : 'texts'}${seg.unicode ? ' · accents count double' : ''}`}
@@ -155,6 +156,7 @@ export default function MessagesPanel({ clientId, business, notify }) {
                           )}
                         </div>
                         <Tag
+                          id={`message-${f.key}`}
                           ref={(el) => (refs.current[f.key] = el)}
                           className={`input ${Tag === 'textarea' ? (f.kind === 'text' ? 'min-h-[110px]' : 'min-h-[72px]') + ' resize-y' : ''} ${bad ? 'border-red-500/60' : ''}`}
                           value={v}
@@ -198,13 +200,13 @@ function Preview({ m, business, which }) {
   const now = new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
 
   return (
-    <div className="space-y-5 xl:sticky xl:top-20 self-start">
+    <div className="space-y-5 xl:sticky xl:top-20 self-start min-w-0">
       <div className="flex items-center justify-between">
         <p className="eyebrow">Preview</p>
         <span className="text-[11px] text-ink-500">{which === 'followup' ? 'Reminder' : 'First message'}</span>
       </div>
 
-      <div className="mx-auto w-[260px] rounded-[36px] border-[6px] border-ink-800 bg-black overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,.5)]">
+      <div className="mx-auto w-[260px] max-w-full rounded-[36px] border-[6px] border-ink-800 bg-black overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,.12)]">
         <div className="relative pt-3 pb-2 border-b border-white/10 bg-[#1C1C1E]">
           <div className="absolute left-1/2 -translate-x-1/2 top-2 w-20 h-5 rounded-full bg-black" />
           <div className="flex justify-between px-5 text-[10px] text-white/90 font-medium mb-3"><span>{now}</span><span>●●●</span></div>

@@ -1,46 +1,51 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MessagesPanel from '../components/MessagesPanel.jsx'
+import { ActivityChart, Icon, ResponseCard, StatCards } from '../components/DashboardVisuals.jsx'
 import { api, getAdminKey, setAdminKey, clearAdminKey } from '../api.js'
+import './admin.css'
 
 export default function Admin() {
   const [authed, setAuthed] = useState(!!getAdminKey())
-  return authed ? <Dashboard onLogout={() => { clearAdminKey(); setAuthed(false) }} /> : <Login onOk={() => setAuthed(true)} />
+  return <div className="admin-app">{authed ? <Dashboard onLogout={() => { clearAdminKey(); setAuthed(false) }} /> : <Login onOk={() => setAuthed(true)} />}</div>
 }
 
 function Wordmark() {
-  return (
-    <span className="inline-flex items-baseline gap-1 text-lg font-bold tracking-tight text-white">
-      Azul<span className="w-1.5 h-1.5 rounded-full bg-azul-light self-end mb-1" />
-    </span>
-  )
+  return <span className="wordmark">Azul<span>.</span><small>REVIEW BOOSTER</small></span>
 }
 
 function Login({ onOk }) {
   const [key, setKey] = useState('')
+  const [show, setShow] = useState(false)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   async function submit(e) {
-    e.preventDefault(); setBusy(true); setErr('')
-    setAdminKey(key)
-    try { await api('/api/clients'); onOk() } catch { clearAdminKey(); setErr('That key didn\'t work. Check for extra spaces.') } finally { setBusy(false) }
+    e.preventDefault(); setBusy(true); setErr(''); setAdminKey(key.trim())
+    try { await api('/api/clients'); onOk() } catch (e) {
+      clearAdminKey(); setErr(e.message === 'Unauthorized' ? 'That access key was not recognized. Please try again.' : 'Unable to connect. Check that the API server is running and try again.')
+    } finally { setBusy(false) }
   }
-  return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <form onSubmit={submit} className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <Wordmark />
-          <h1 className="text-xl font-semibold tracking-tight mt-4">Review Booster</h1>
-          <p className="text-sm text-ink-400 mt-1">Sign in with the access key you were given.</p>
-        </div>
-        <div className="card">
-          <label className="label">Access key</label>
-          <input className="input mb-3" type="password" autoFocus value={key} onChange={(e) => setKey(e.target.value.trim())} placeholder="••••••••••••" />
-          {err && <p className="text-red-400 text-xs mb-3">{err}</p>}
-          <button className="btn-primary w-full" disabled={busy || !key}>{busy ? 'Checking…' : 'Continue'}</button>
-        </div>
-      </form>
-    </div>
-  )
+  return <div className="login-scene">
+    <div className="login-shape one"/><div className="login-shape two"/>
+    <form onSubmit={submit} className="login-card">
+      <Wordmark/><span className="login-icon"><Icon name="shield" size={28}/></span>
+      <h1>Welcome back</h1><p>Your customers have a story to tell.<br/>Let's help you listen.</p>
+      <label className="label" htmlFor="access-key">Workspace access key</label>
+      <div className="password-field"><input id="access-key" className="input" required autoFocus type={show ? 'text' : 'password'} autoComplete="current-password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Enter your access key"/><button type="button" aria-label={show ? 'Hide access key' : 'Show access key'} aria-pressed={show} onClick={() => setShow(!show)}><Icon name="eye" size={18}/></button></div>
+      <p className="login-help">Use the key provided by your workspace administrator.</p>
+      {err && <div className="error-banner" role="alert">{err}</div>}
+      <button className="btn-primary login-submit" disabled={busy || !key.trim()}>{busy ? 'Signing in…' : 'Sign in to your workspace'}<Icon name="chevron" size={16}/></button>
+      <div className="login-footer"><Icon name="key" size={14}/> Private access. Your business, your feedback.</div>
+    </form>
+    <p className="login-caption">Better conversations. Stronger customer relationships.</p>
+  </div>
+}
+
+const NAV = [['overview', 'Overview', 'grid'], ['requests', 'Review requests', 'send'], ['messages', 'Messages', 'message'], ['access', 'Workspace access', 'key']]
+const TITLES = {
+  overview: ['Workspace overview', 'A little feedback goes a long way. Here’s the latest.'],
+  requests: ['Review requests', 'Keep every customer conversation in view.'],
+  messages: ['Make it sound like you', 'Personalized messages. Meaningful connections.'],
+  access: ['Workspace access', 'A dedicated sign-in key for your client’s team.'],
 }
 
 function Dashboard({ onLogout }) {
@@ -48,365 +53,186 @@ function Dashboard({ onLogout }) {
   const [role, setRole] = useState(null)
   const [selected, setSelected] = useState('')
   const [requests, setRequests] = useState([])
-  const [showNewClient, setShowNewClient] = useState(false)
+  const [demo, setDemo] = useState(false)
+  const [modal, setModal] = useState(null)
   const [toast, setToast] = useState('')
-  const [tab, setTab] = useState('activity')
+  const timer = useRef()
+  const [tab, setTab] = useState('overview')
+  const [query, setQuery] = useState('')
+  const [days, setDays] = useState(14)
+  const [loading, setLoading] = useState(true)
+  const [requestLoading, setRequestLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [requestError, setRequestError] = useState('')
+  const [refresh, setRefresh] = useState(0)
+  const reload = () => setRefresh((v) => v + 1)
+  const notify = (message) => { clearTimeout(timer.current); setToast(message); timer.current = setTimeout(() => setToast(''), 5000) }
+  useEffect(() => () => clearTimeout(timer.current), [])
 
-  const notify = (m) => { setToast(m); setTimeout(() => setToast(''), 4000) }
+  useEffect(() => {
+    let current = true
+    setLoading(true); setError('')
+    api('/api/clients').then((d) => {
+      if (!current) return
+      setClients(d.clients); setRole(d.role); setDemo(d.demo === true)
+      setSelected((id) => d.clients.some((c) => c.client_id === id) ? id : d.clients[0]?.client_id || '')
+    }).catch((e) => { if (current) setError(e.message) }).finally(() => { if (current) setLoading(false) })
+    return () => { current = false }
+  }, [refresh])
 
-  async function loadClients() {
-    const { clients, role } = await api('/api/clients')
-    setClients(clients)
-    setRole(role)
-    if (!selected && clients[0]) setSelected(clients[0].client_id)
-  }
-  async function loadRequests(id) {
-    if (!id) return
-    const { requests } = await api(`/api/requests?client_id=${id}`)
-    setRequests(requests)
-  }
-  useEffect(() => { loadClients() }, [])
-  useEffect(() => { loadRequests(selected) }, [selected])
+  useEffect(() => {
+    let current = true
+    setRequests([]); setRequestError('')
+    if (!selected) return
+    setRequestLoading(true)
+    api(`/api/requests?client_id=${encodeURIComponent(selected)}`).then((d) => {
+      if (current) setRequests(d.requests)
+    }).catch((e) => { if (current) setRequestError(e.message) }).finally(() => { if (current) setRequestLoading(false) })
+    return () => { current = false }
+  }, [selected, refresh])
 
   const client = clients.find((c) => c.client_id === selected)
   const isMaster = role === 'master'
+  const activeTab = tab === 'access' && !isMaster ? 'overview' : tab
+  const nav = NAV.filter(([id]) => id !== 'access' || isMaster)
+  const done = (message) => { setModal(null); reload(); notify(message) }
 
-  return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-20 bg-ink-950/80 backdrop-blur border-b border-ink-800">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
-            <Wordmark />
-            <span className="text-ink-700">/</span>
-            {isMaster ? (
-              <select className="input py-1.5 w-auto max-w-[240px] text-sm" value={selected} onChange={(e) => setSelected(e.target.value)}>
-                {clients.map((c) => <option key={c.client_id} value={c.client_id}>{c.name}</option>)}
-              </select>
-            ) : (
-              <span className="text-sm font-medium truncate">{client?.name}</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {isMaster && <button className="btn-ghost btn-sm" onClick={() => setShowNewClient((v) => !v)}>{showNewClient ? 'Cancel' : 'New client'}</button>}
-            <button className="btn-ghost btn-sm" onClick={onLogout}>Sign out</button>
-          </div>
-        </div>
+  return <div className="dashboard-shell">
+    <aside className="dashboard-sidebar">
+      <div className="sidebar-brand"><Wordmark/></div>
+      <div className="sidebar-label">WORKSPACE</div>
+      <nav aria-label="Workspace navigation">{nav.map(([id, label, icon]) => <button key={id} onClick={() => setTab(id)} aria-current={activeTab === id ? 'page' : undefined} className={`nav-item ${activeTab === id ? 'active' : ''}`}><Icon name={icon}/><span>{label}</span>{id === 'requests' && Number(client?.pending) > 0 && <b>{client.pending}</b>}</button>)}</nav>
+      <div className="sidebar-bottom">
+        <div className="sidebar-note"><span className="icon-tile blue"><Icon name="message"/></span><strong>Small asks. Big insights.</strong><p>Make feedback part of every customer visit.</p><button onClick={() => setTab('messages')}>Personalize messages <Icon name="chevron" size={14}/></button></div>
+        <button className="nav-item" onClick={onLogout}><Icon name="logout"/><span>Sign out</span></button>
+        <p className="sidebar-version">AZUL WORKSPACE <span>v0.1</span></p>
+      </div>
+    </aside>
+
+    <div className="dashboard-body">
+      <header className="dashboard-topbar">
+        <form className="global-search" onSubmit={(e) => { e.preventDefault(); setTab('requests') }} role="search"><Icon name="search" size={18}/><input aria-label="Search customers" placeholder="Search customers…" value={query} onChange={(e) => { setQuery(e.target.value); if (e.target.value) setTab('requests') }}/>{query && <button type="button" aria-label="Clear search" onClick={() => setQuery('')}><Icon name="close" size={15}/></button>}</form>
+        <div className="topbar-account"><span className="avatar">{isMaster ? 'AZ' : client?.name?.slice(0, 2).toUpperCase() || 'RB'}</span><div><strong>{isMaster ? 'Azul workspace' : 'Business workspace'}</strong><span>{isMaster ? 'Administrator' : 'Team access'}</span></div></div>
       </header>
-
-      <main className="max-w-6xl mx-auto px-4 md:px-8 py-8">
-        {toast && (
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 rounded-lg bg-ink-800 border border-ink-700 px-4 py-2.5 text-sm shadow-lg">{toast}</div>
-        )}
-
-        {isMaster && showNewClient && (
-          <NewClientForm onDone={() => { setShowNewClient(false); loadClients(); notify('Client created') }} />
-        )}
-
-        {client && (
-          <>
-            <StatStrip c={client} />
-
-            <div className="grid lg:grid-cols-[1fr_360px] gap-6 mt-6">
-              <div className="space-y-6">
-                <section className="card">
-                  <div className="mb-4">
-                    <p className="eyebrow mb-1">After each visit</p>
-                    <h2 className="text-base font-semibold">Send a review request</h2>
-                    <p className="text-xs text-ink-400 mt-1">
-                      Goes out {client.delay_hours ?? 3}h after you submit. One reminder if they don't tap the link.
-                    </p>
-                  </div>
-                  <NewRequestForm
-                    clientId={selected}
-                    onDone={() => { loadRequests(selected); loadClients(); notify('Scheduled. They\'ll hear from you soon.') }}
-                  />
-                </section>
-
-                <section className="card p-0 overflow-hidden">
-                  <div className="flex items-center gap-1 px-2 pt-2 border-b border-ink-800">
-                    {[['activity', 'Activity'], ['messages', 'Messages'], ...(isMaster ? [['access', 'Access']] : [])].map(([k, l]) => (
-                      <button
-                        key={k}
-                        onClick={() => setTab(k)}
-                        className={`px-3 py-2 text-sm rounded-t-md border-b-2 -mb-px transition ${
-                          tab === k ? 'border-azul-light text-white' : 'border-transparent text-ink-400 hover:text-ink-200'
-                        }`}
-                      >{l}</button>
-                    ))}
-                    {tab === 'activity' && (
-                      <button className="ml-auto mr-2 text-xs text-ink-500 hover:text-ink-200" onClick={() => loadRequests(selected)}>Refresh</button>
-                    )}
-                  </div>
-                  {tab === 'activity' && <RequestsTable requests={requests} />}
-                  {tab === 'messages' && (
-                    <div className="p-5">
-                      <MessagesPanel key={client.client_id} clientId={client.client_id} business={client.name} notify={notify} />
-                    </div>
-                  )}
-                  {tab === 'access' && isMaster && (
-                    <div className="p-5">
-                      <AccessKey c={client} onRotated={() => { loadClients(); notify(`New key issued for ${client.name}. The old key no longer works.`) }} />
-                    </div>
-                  )}
-                </section>
-              </div>
-
-              <aside className="space-y-6">
-                <FunnelCard c={client} />
-                <HowItWorks />
-              </aside>
-            </div>
-          </>
-        )}
+      <nav className="mobile-nav" aria-label="Mobile workspace navigation">{nav.map(([id, label, icon]) => <button key={id} onClick={() => setTab(id)} aria-current={activeTab === id ? 'page' : undefined} className={activeTab === id ? 'active' : ''}><Icon name={icon} size={17}/>{label}</button>)}<button onClick={onLogout}><Icon name="logout" size={17}/>Sign out</button></nav>
+      <main className="dashboard-main">
+        {demo && <div className="demo-banner"><span className="demo-dot"/>Demo workspace <span>Sample data only. No messages are sent; changes reset when the preview server restarts.</span></div>}
+        <div className="workspace-toolbar"><div className="workspace-picker"><Icon name="building" size={17}/>{isMaster ? <select aria-label="Select business" value={selected} onChange={(e) => { setSelected(e.target.value); setQuery(''); setModal(null) }}><option value="" disabled>Select a business</option>{clients.map((c) => <option key={c.client_id} value={c.client_id}>{c.name}</option>)}</select> : <span>{client?.name || 'Your business'}</span>}</div><div className="toolbar-actions">{isMaster && <button className="text-button" onClick={() => setModal('client')}><Icon name="plus" size={15}/>Add business</button>}<button className="text-button" onClick={reload} disabled={loading || requestLoading} aria-label="Refresh workspace"><Icon name="refresh" size={16}/><span>Refresh</span></button></div></div>
+        <div className="page-heading"><div><p className="eyebrow">YOUR REPUTATION, AT A GLANCE</p><h1>{TITLES[activeTab][0]}</h1><p>{TITLES[activeTab][1]}</p></div><button className="btn-primary" onClick={() => setModal('request')} disabled={!client}><Icon name="plus" size={18}/>New request</button></div>
+        {error && <div className="error-banner" role="alert">Could not load the workspace: {error}. <button onClick={reload}>Try again</button></div>}
+        {loading && !client && <div className="panel empty-state" role="status">Loading your workspace…</div>}
+        {!loading && !error && !client && <div className="panel empty-state"><span className="icon-tile blue"><Icon name="building"/></span><h2>Your workspace starts here</h2><p>{isMaster ? 'Add your first business to start collecting customer feedback.' : 'No business is available for this key.'}</p>{isMaster && <button className="btn-primary" onClick={() => setModal('client')}>Add your first business</button>}</div>}
+        {client && <>
+          {activeTab === 'overview' && <>
+            <StatCards client={client}/>
+            {requestError ? <div className="error-banner" role="alert">Could not load activity: {requestError}. <button onClick={reload}>Retry</button></div> : requestLoading ? <div className="panel empty-state" role="status">Loading request activity…</div> : <div className="analytics-grid"><ActivityChart requests={requests} days={days} onDaysChange={setDays}/><ResponseCard client={client}/></div>}
+            <section className="panel table-panel"><div className="panel-heading"><div><h2>Recent requests</h2><p>Your latest customer touchpoints</p></div><button className="text-button blue-text" onClick={() => setTab('requests')}>View all requests<Icon name="chevron" size={15}/></button></div><RequestsTable requests={requests.slice(0, 5)} loading={requestLoading} onCreate={() => setModal('request')}/></section>
+            <div className="workflow-note"><Icon name="clock" size={18}/><p><strong>A thoughtful follow-up, automatically.</strong> Requests are scheduled after {client.delay_hours ?? 3} hours, with one reminder after {client.followup_hours ?? 48} hours if the link is not visited.</p></div>
+          </>}
+          {activeTab === 'requests' && <section className="panel table-panel">{requestError && <div className="error-banner" role="alert">{requestError}</div>}<RequestBrowser key={selected} requests={requests} query={query} setQuery={setQuery} loading={requestLoading} onCreate={() => setModal('request')}/></section>}
+          {activeTab === 'messages' && <section className="panel"><MessagesPanel key={selected} clientId={selected} business={client.name} notify={notify}/></section>}
+          {activeTab === 'access' && isMaster && <section className="panel"><AccessKey key={selected} c={client} onRotated={() => { reload(); notify('New key issued. Share it securely with the team.') }}/></section>}
+        </>}
+        <footer className="dashboard-footer"><span>Azul Review Booster</span><span>Built for better customer relationships.</span></footer>
       </main>
     </div>
-  )
+    {toast && <div className="toast" role="status"><Icon name="check" size={18}/>{toast}<button aria-label="Dismiss notification" onClick={() => setToast('')}><Icon name="close" size={16}/></button></div>}
+    {modal && <Modal title={modal === 'client' ? 'Add a business' : 'Send a review request'} onClose={() => setModal(null)}>
+      {modal === 'client' ? <NewClientForm onDone={() => done('Business created. Your new workspace is ready.')}/> : <><p className="modal-description">For {client?.name}. Add a customer after their visit to schedule a follow-up.</p><NewRequestForm key={selected} clientId={selected} onDone={() => done(demo ? 'Demo request added. No message will be sent.' : 'Review request scheduled.')}/></>}
+    </Modal>}
+  </div>
 }
 
-const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0)
-
-function StatStrip({ c }) {
-  const tiles = [
-    { label: 'Requests sent', value: c.sent, sub: c.pending ? `${c.pending} scheduled` : null },
-    { label: 'Tapped the link', value: `${pct(c.clicked, c.sent)}%`, sub: `${c.clicked} of ${c.sent}` },
-    { label: 'Sent to Google', value: c.five_star, sub: '5-star ratings' },
-    { label: 'Caught privately', value: c.shielded, sub: '1–4 stars, never public', tone: c.shielded ? 'warn' : null },
-  ]
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)] gap-3">
-      <div className="card col-span-2 lg:col-span-1 flex flex-col justify-between bg-gradient-to-br from-ink-900 to-ink-800/60">
-        <p className="eyebrow">Average rating</p>
-        <div className="flex items-end gap-2 mt-3">
-          <span className="text-4xl font-semibold tracking-tight leading-none">{c.avg_rating ?? '–'}</span>
-          <span className="text-ink-400 text-sm mb-0.5">/ 5</span>
-        </div>
-        <Stars value={Number(c.avg_rating) || 0} />
-      </div>
-      {tiles.map((t) => (
-        <div key={t.label} className="card">
-          <p className="text-xs text-ink-400">{t.label}</p>
-          <p className={`text-2xl font-semibold tracking-tight mt-2 ${t.tone === 'warn' ? 'text-amber-300' : ''}`}>{t.value ?? 0}</p>
-          {t.sub && <p className="text-[11px] text-ink-500 mt-1">{t.sub}</p>}
-        </div>
-      ))}
-    </div>
-  )
+function Modal({ title, onClose, children }) {
+  const ref = useRef(null)
+  const heading = 'workspace-dialog-title'
+  useEffect(() => { const dialog = ref.current; dialog.showModal(); return () => dialog.close() }, [])
+  return <dialog ref={ref} className="workspace-dialog admin-app" aria-labelledby={heading} onCancel={onClose} onClick={(e) => { if (e.target === e.currentTarget) onClose() }}><div className="dialog-content"><div className="dialog-heading"><h2 id={heading}>{title}</h2><button className="text-button" aria-label="Close dialog" onClick={onClose}><Icon name="close"/></button></div>{children}</div></dialog>
 }
 
-function Stars({ value }) {
-  return (
-    <div className="flex gap-0.5 mt-3" aria-label={`${value} out of 5`}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <svg key={n} viewBox="0 0 24 24" className={`w-4 h-4 ${n <= Math.round(value) ? 'fill-amber-400' : 'fill-ink-700'}`}>
-          <path d="M12 2.5l2.95 6.27 6.85.83-5.05 4.73 1.32 6.8L12 17.77l-6.07 3.36 1.32-6.8L2.2 9.6l6.85-.83L12 2.5z" />
-        </svg>
-      ))}
-    </div>
-  )
+function RequestBrowser({ requests, query, setQuery, loading, onCreate }) {
+  const [status, setStatus] = useState('all')
+  const [page, setPage] = useState(0)
+  const filtered = requests.filter((r) => (status === 'all' || r.status === status) && [r.customer_name, r.customer_phone, r.customer_email].some((v) => String(v || '').toLowerCase().includes(query.toLowerCase().trim())))
+  const pages = Math.max(1, Math.ceil(filtered.length / 10))
+  const current = Math.min(page, pages - 1)
+  useEffect(() => setPage(0), [query, status])
+  return <><div className="panel-heading"><div><h2>Customer activity</h2><p>Search and filter the latest 100 requests</p></div><span className="count-badge">{filtered.length} requests</span></div>
+    <div className="table-filters"><div className="filter-search"><Icon name="search" size={17}/><input aria-label="Filter requests by customer" placeholder="Search by name, email or phone" value={query} onChange={(e) => setQuery(e.target.value)}/></div><select className="input status-select" aria-label="Filter requests by status" value={status} onChange={(e) => setStatus(e.target.value)}><option value="all">All statuses</option>{Object.entries(STATUS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
+    <RequestsTable requests={filtered.slice(current * 10, current * 10 + 10)} loading={loading} filtered={!!query || status !== 'all'} onCreate={onCreate}/>
+    <div className="table-pagination"><span>{filtered.length ? `${current * 10 + 1}–${Math.min((current + 1) * 10, filtered.length)} of ${filtered.length}` : '0 results'}</span><div><button className="btn-ghost btn-sm" disabled={current === 0} onClick={() => setPage(current - 1)}>Previous</button><span>{current + 1} / {pages}</span><button className="btn-ghost btn-sm" disabled={current + 1 >= pages} onClick={() => setPage(current + 1)}>Next</button></div></div>
+  </>
 }
 
-function FunnelCard({ c }) {
-  const steps = [
-    ['Sent', c.sent],
-    ['Tapped', c.clicked],
-    ['Rated', c.rated],
-    ['On Google', c.five_star],
-  ]
-  const max = Math.max(1, ...steps.map((s) => s[1] || 0))
-  return (
-    <div className="card">
-      <p className="eyebrow mb-4">Funnel</p>
-      <div className="space-y-3">
-        {steps.map(([label, n], i) => (
-          <div key={label}>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-ink-300">{label}</span>
-              <span className="text-ink-100 font-medium">{n ?? 0}{i > 0 && c.sent ? <span className="text-ink-500 font-normal"> · {pct(n, c.sent)}%</span> : null}</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-ink-800 overflow-hidden">
-              <div className="h-full rounded-full bg-azul-light transition-all" style={{ width: `${((n || 0) / max) * 100}%`, opacity: 1 - i * 0.18 }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function HowItWorks() {
-  const rows = [
-    ['1', 'Front desk enters the customer after the visit.'],
-    ['2', 'A text and email go out a few hours later.'],
-    ['3', '5 stars go to Google. 1–4 stars come to you privately.'],
-  ]
-  return (
-    <div className="card">
-      <p className="eyebrow mb-4">How it works</p>
-      <ol className="space-y-3">
-        {rows.map(([n, t]) => (
-          <li key={n} className="flex gap-3 text-sm text-ink-300">
-            <span className="w-5 h-5 rounded-full bg-ink-800 text-ink-300 text-[11px] font-semibold flex items-center justify-center shrink-0 mt-0.5">{n}</span>
-            <span>{t}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
-  )
-}
-
-function RequestsTable({ requests }) {
-  if (!requests.length) {
-    return (
-      <div className="py-14 text-center">
-        <p className="text-sm text-ink-300">No requests yet</p>
-        <p className="text-xs text-ink-500 mt-1">Use the form above after your next customer visit.</p>
-      </div>
-    )
-  }
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-[11px] uppercase tracking-wider text-ink-500 border-b border-ink-800">
-            <th className="py-2.5 px-5 font-medium">Customer</th>
-            <th className="py-2.5 px-3 font-medium">Status</th>
-            <th className="py-2.5 px-3 font-medium">Rating</th>
-            <th className="py-2.5 px-3 font-medium">Sends</th>
-            <th className="py-2.5 px-5 font-medium text-right">Link</th>
-          </tr>
-        </thead>
-        <tbody>
-          {requests.map((r) => (
-            <tr key={r.id} className="border-b border-ink-800/70 last:border-0 hover:bg-ink-800/40 transition-colors">
-              <td className="py-3 px-5">
-                <p className="font-medium text-ink-100">{r.customer_name}</p>
-                <p className="text-xs text-ink-500">{r.customer_phone || r.customer_email} · {r.language.toUpperCase()}</p>
-              </td>
-              <td className="py-3 px-3"><StatusPill s={r.status} error={r.error} /></td>
-              <td className="py-3 px-3">
-                {r.rating ? (
-                  <div>
-                    <span className={r.rating === 5 ? 'text-amber-400' : 'text-orange-400'}>{'★'.repeat(r.rating)}<span className="text-ink-700">{'★'.repeat(5 - r.rating)}</span></span>
-                    {r.feedback && <p className="text-xs text-ink-400 max-w-[220px] truncate" title={r.feedback}>“{r.feedback}”</p>}
-                  </div>
-                ) : <span className="text-ink-600">–</span>}
-              </td>
-              <td className="py-3 px-3 text-xs text-ink-400 whitespace-nowrap">
-                {new Date(r.send_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                {r.followup_sent_at && <span className="block text-ink-500">+ reminder</span>}
-              </td>
-              <td className="py-3 px-5 text-right">
-                <a className="text-xs text-ink-400 hover:text-azul-light font-mono" href={`/r/${r.token}`} target="_blank" rel="noreferrer">/r/{r.token}</a>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function StatusPill({ s, error }) {
-  const map = {
-    pending: ['bg-ink-500', 'Scheduled'], sent: ['bg-azul-light', 'Sent'],
-    clicked: ['bg-violet-400', 'Opened'], rated: ['bg-emerald-400', 'Rated'],
-    failed: ['bg-red-400', 'Failed'], cancelled: ['bg-ink-600', 'Cancelled'],
-  }
-  const [dot, label] = map[s] || ['bg-ink-600', s]
-  return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-ink-200" title={error || ''}>
-      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />{label}
-    </span>
-  )
+const STATUS = { pending: 'Scheduled', sent: 'Sent', clicked: 'Link visited', rated: 'Responded', failed: 'Failed', cancelled: 'Cancelled' }
+function RequestsTable({ requests, loading, filtered, onCreate }) {
+  if (loading) return <div className="empty-state" role="status">Loading requests…</div>
+  if (!requests.length) return <div className="empty-state"><span className="icon-tile blue"><Icon name={filtered ? 'search' : 'send'}/></span><h3>{filtered ? 'No matching requests' : 'Your next conversation starts here'}</h3><p>{filtered ? 'Try another customer name or status.' : 'Send a review request after a customer visit.'}</p>{!filtered && <button className="btn-ghost" onClick={onCreate}>Create a request</button>}</div>
+  return <div className="table-scroll"><table className="requests-table"><thead><tr><th>Customer</th><th>Status</th><th>Feedback rating</th><th>Scheduled for</th><th><span className="sr-only">Review link</span></th></tr></thead><tbody>{requests.map((r, index) => <tr key={r.id}>
+    <td><div className="customer-cell"><span className={`customer-avatar avatar-${index % 4}`}>{(r.customer_name || '?').split(' ').filter(Boolean).slice(0, 2).map((v) => v[0]).join('')}</span><div><strong>{r.customer_name}</strong><small>{r.customer_phone || r.customer_email || 'No contact'} <span>· {(r.language || 'en').toUpperCase()}</span></small></div></div></td>
+    <td><span className={`status-pill status-${r.status}`} title={r.error || undefined}><i/>{STATUS[r.status] || r.status}</span>{r.error && <details className="feedback-detail"><summary>View error</summary><p>{r.error}</p></details>}</td>
+    <td>{r.rating ? <><span className="rating-stars" aria-label={`${r.rating} out of 5`}>{'★'.repeat(r.rating)}<span>{'★'.repeat(5 - r.rating)}</span></span>{r.feedback && <details className="feedback-detail"><summary>Read feedback</summary><p>{r.feedback}</p></details>}</> : <span className="muted">Not rated</span>}</td>
+    <td className="date-cell">{new Date(r.send_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}<small>{new Date(r.send_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}{r.followup_sent_at ? ' · Reminder sent' : ''}</small></td>
+    <td><a className="table-link" href={`/r/${r.token}`} target="_blank" rel="noreferrer" aria-label={`Open review link for ${r.customer_name}`} title="Opening this link may record a visit"><Icon name="chevron" size={16}/></a></td>
+  </tr>)}</tbody></table></div>
 }
 
 function AccessKey({ c, onRotated }) {
   const [copied, setCopied] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   async function copy() {
-    await navigator.clipboard.writeText(c.access_key)
-    setCopied(true); setTimeout(() => setCopied(false), 2000)
+    try { await navigator.clipboard.writeText(c.access_key); setCopied(true) } catch { setError('Could not copy. Reveal the key and copy it manually.') }
   }
   async function rotate() {
-    if (!confirm(`Issue a new key for ${c.name}? Their front desk will need the new key to sign in.`)) return
-    await api(`/api/clients?id=${c.client_id}`, { method: 'PATCH', body: { rotate_key: true } })
-    onRotated()
+    if (!confirm(`Issue a new key for ${c.name}? The old key will stop working.`)) return
+    setBusy(true); setError('')
+    try { await api(`/api/clients?id=${c.client_id}`, { method: 'PATCH', body: { rotate_key: true } }); setCopied(false); onRotated() } catch (e) { setError(e.message) } finally { setBusy(false) }
   }
-  return (
-    <div className="max-w-xl">
-      <h3 className="text-sm font-semibold">Front-desk access key</h3>
-      <p className="text-xs text-ink-400 mt-1 mb-4">Share this with {c.name}. It signs them in to their own view only: no other clients, no settings.</p>
-      <div className="flex items-center gap-2">
-        <code className="flex-1 text-xs break-all bg-ink-950 border border-ink-800 rounded-lg px-3 py-2 text-ink-300">{c.access_key}</code>
-        <button className="btn-ghost btn-sm" onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>
-      </div>
-      <button className="text-xs text-ink-500 hover:text-red-400 mt-3" onClick={rotate}>Reset key (the old one stops working)</button>
-    </div>
-  )
+  return <div className="access-panel"><span className="icon-tile blue"><Icon name="shield" size={24}/></span><h2>Give your team their own space</h2><p className="muted">This key only grants access to {c.name}. Share it securely with authorized staff—not in public links or screenshots.</p><label className="label" htmlFor="business-key">Business access key</label><div className="key-row"><input id="business-key" className="input" readOnly type={visible ? 'text' : 'password'} value={c.access_key || ''}/><button className="btn-ghost" onClick={() => setVisible(!visible)}>{visible ? 'Hide' : 'Reveal'}</button><button className="btn-primary" disabled={!c.access_key} onClick={copy}>{copied ? 'Copied' : 'Copy key'}</button></div><div className="access-warning"><Icon name="key" size={19}/><div><strong>Need to revoke access?</strong><p>Resetting the key signs out anyone using the old one on their next API request.</p><button className="text-button danger" onClick={rotate} disabled={busy}>{busy ? 'Resetting…' : 'Reset access key'}</button></div></div>{error && <div className="error-banner" role="alert">{error}</div>}</div>
 }
 
 function NewRequestForm({ clientId, onDone }) {
-  const empty = { customer_name: '', customer_phone: '', customer_email: '', language: '', send_now: false }
-  const [f, setF] = useState(empty)
+  const [f, setF] = useState({ customer_name: '', customer_phone: '', customer_email: '', language: '', send_now: false })
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
-
   async function submit(e) {
-    e.preventDefault(); setBusy(true); setErr('')
-    try {
-      const d = await api('/api/requests', { method: 'POST', body: { ...f, client_id: clientId, language: f.language || undefined } })
-      setF(empty); onDone(d)
-    } catch (e) { setErr(e.message) } finally { setBusy(false) }
+    e.preventDefault(); setErr('')
+    if (!f.customer_phone.trim() && !f.customer_email.trim()) { setErr('Add a mobile number or email address.'); return }
+    setBusy(true)
+    try { const d = await api('/api/requests', { method: 'POST', body: { ...f, client_id: clientId, language: f.language || undefined } }); onDone(d) } catch (e) { setErr(e.message) } finally { setBusy(false) }
   }
+  return <form onSubmit={submit} className="grid sm:grid-cols-2 gap-4">
+    <Field label="Customer name" id="customer-name" className="sm:col-span-2"><input id="customer-name" className="input" required autoComplete="off" placeholder="Maria Lopez" value={f.customer_name} onChange={set('customer_name')}/></Field>
+    <Field label="Mobile number" id="customer-phone"><input id="customer-phone" className="input" type="tel" placeholder="(305) 555-0100" value={f.customer_phone} onChange={set('customer_phone')}/></Field>
+    <Field label="Email address" id="customer-email"><input id="customer-email" className="input" type="email" placeholder="maria@example.com" value={f.customer_email} onChange={set('customer_email')}/></Field>
+    <Field label="Message language" id="request-language" className="sm:col-span-2"><select id="request-language" className="input" value={f.language} onChange={set('language')}><option value="">Business default</option><option value="en">English</option><option value="es">Español</option></select></Field>
+    <label className="checkbox-row sm:col-span-2"><input type="checkbox" checked={f.send_now} onChange={set('send_now')}/>Skip delay (send on the next sender run)</label>
+    <p className="form-note sm:col-span-2">Only contact customers with the appropriate messaging consent. Do not include medical or treatment details.</p>
+    {err && <p className="error-banner sm:col-span-2" role="alert">{err}</p>}
+    <button className="btn-primary sm:col-span-2" disabled={busy || !clientId}><Icon name="send" size={16}/>{busy ? 'Scheduling…' : 'Schedule request'}</button>
+  </form>
+}
 
-  return (
-    <form onSubmit={submit} className="grid sm:grid-cols-2 gap-3">
-      <div className="sm:col-span-2"><label className="label">Customer name</label><input className="input" required autoComplete="off" placeholder="Maria Lopez" value={f.customer_name} onChange={set('customer_name')} /></div>
-      <div><label className="label">Mobile number</label><input className="input" inputMode="tel" placeholder="(305) 555-0100" value={f.customer_phone} onChange={set('customer_phone')} /></div>
-      <div><label className="label">Email</label><input className="input" type="email" placeholder="maria@example.com" value={f.customer_email} onChange={set('customer_email')} /></div>
-      <div>
-        <label className="label">Language</label>
-        <select className="input" value={f.language} onChange={set('language')}>
-          <option value="">Business default</option><option value="en">English</option><option value="es">Español</option>
-        </select>
-      </div>
-      <label className="flex items-center gap-2 text-xs text-ink-400 self-end pb-2.5 cursor-pointer">
-        <input type="checkbox" className="accent-azul-blue" checked={f.send_now} onChange={set('send_now')} /> Send right now instead of waiting
-      </label>
-      {err && <p className="text-red-400 text-xs sm:col-span-2">{err}</p>}
-      <div className="sm:col-span-2 flex justify-end">
-        <button className="btn-primary" disabled={busy || !clientId}>{busy ? 'Scheduling…' : 'Schedule request'}</button>
-      </div>
-    </form>
-  )
+function Field({ label, id, children, className = '' }) {
+  return <div className={className}><label className="label" htmlFor={id}>{label}</label>{children}</div>
 }
 
 function NewClientForm({ onDone }) {
   const [f, setF] = useState({ name: '', slug: '', google_review_url: '', owner_name: '', owner_email: '', owner_phone: '', default_language: 'en', tone: 'friendly', delay_hours: 3, followup_hours: 48 })
   const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   async function submit(e) {
-    e.preventDefault(); setErr('')
-    try { await api('/api/clients', { method: 'POST', body: f }); onDone() } catch (e) { setErr(e.message) }
+    e.preventDefault(); setErr(''); setBusy(true)
+    try { await api('/api/clients', { method: 'POST', body: f }); onDone() } catch (e) { setErr(e.message) } finally { setBusy(false) }
   }
-  return (
-    <form onSubmit={submit} className="card mb-6">
-      <p className="eyebrow mb-1">Onboarding</p>
-      <h2 className="text-base font-semibold mb-5">New client</h2>
-      <div className="grid sm:grid-cols-3 gap-3">
-        <div><label className="label">Business name</label><input className="input" required placeholder="Hello You Wellness Center" value={f.name} onChange={set('name')} /></div>
-        <div><label className="label">Short ID</label><input className="input" required placeholder="helloyou" value={f.slug} onChange={set('slug')} /></div>
-        <div><label className="label">Default language</label><select className="input" value={f.default_language} onChange={set('default_language')}><option value="en">English</option><option value="es">Español</option></select></div>
-        <div className="sm:col-span-3"><label className="label">Google review link</label><input className="input" required placeholder="https://search.google.com/local/writereview?placeid=…" value={f.google_review_url} onChange={set('google_review_url')} /></div>
-        <div><label className="label">Owner name</label><input className="input" value={f.owner_name} onChange={set('owner_name')} /></div>
-        <div><label className="label">Owner email <span className="text-ink-500">· gets private feedback</span></label><input className="input" type="email" value={f.owner_email} onChange={set('owner_email')} /></div>
-        <div><label className="label">Owner mobile <span className="text-ink-500">· optional</span></label><input className="input" value={f.owner_phone} onChange={set('owner_phone')} /></div>
-        <div><label className="label">Ask after (hours)</label><input className="input" type="number" min="0" value={f.delay_hours} onChange={set('delay_hours')} /></div>
-        <div><label className="label">Remind after (hours)</label><input className="input" type="number" min="0" value={f.followup_hours} onChange={set('followup_hours')} /></div>
-        <div><label className="label">Message style</label><select className="input" value={f.tone} onChange={set('tone')}><option value="friendly">Friendly</option><option value="professional">Professional</option><option value="casual">Casual</option><option value="warm">Warm</option></select></div>
-      </div>
-      {err && <p className="text-red-400 text-xs mt-3">{err}</p>}
-      <div className="flex justify-end mt-5"><button className="btn-primary">Create client</button></div>
-    </form>
-  )
+  const fields = [['name', 'Business name', 'text', true], ['slug', 'Short ID (e.g. helloyou)', 'text', true], ['google_review_url', 'Google review link', 'url', true], ['owner_name', 'Owner name', 'text'], ['owner_email', 'Owner email', 'email'], ['owner_phone', 'Owner mobile (optional)', 'tel'], ['delay_hours', 'Ask after (hours)', 'number'], ['followup_hours', 'Remind after (hours)', 'number']]
+  return <form onSubmit={submit} className="grid sm:grid-cols-2 gap-4"><p className="modal-description sm:col-span-2">Create a separate workspace with its own messages and team access.</p>{fields.map(([key, label, type, required]) => <Field key={key} id={`client-${key}`} label={label} className={key === 'google_review_url' ? 'sm:col-span-2' : ''}><input className="input" id={`client-${key}`} required={required} type={type} min={type === 'number' ? 0 : undefined} value={f[key]} onChange={set(key)}/></Field>)}
+    <Field label="Default language" id="client-language"><select className="input" id="client-language" value={f.default_language} onChange={set('default_language')}><option value="en">English</option><option value="es">Español</option></select></Field>
+    <Field label="Message style" id="client-tone"><select className="input" id="client-tone" value={f.tone} onChange={set('tone')}>{['friendly', 'professional', 'casual', 'warm'].map((t) => <option key={t} value={t}>{t[0].toUpperCase() + t.slice(1)}</option>)}</select></Field>
+    {err && <p className="error-banner sm:col-span-2" role="alert">{err}</p>}<button className="btn-primary sm:col-span-2" disabled={busy}>{busy ? 'Creating…' : 'Create business workspace'}</button>
+  </form>
 }
