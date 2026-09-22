@@ -9,6 +9,7 @@
     "dev:local": "vercel dev --listen 3000",
     "dev:ui": "vite",
     "build": "vite build",
+    "test": "node --test tests/*.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

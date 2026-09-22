@@ -6,11 +6,12 @@ import { randomUUID, randomBytes } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, sep, extname } from 'node:path'
 import { PRESETS, FIELDS, resolveMessages, normalizeMessages, validateMessages } from './api/_lib/messages.js'
+import { normalizeServices } from './api/_lib/services.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), 'dist')
 const port = Number(process.env.PORT || 3000)
 const adminKey = 'dev-master-key-123'
-const clients = [{ client_id: 'demo-helloyou', name: 'Hello You Wellness Center', slug: 'helloyou', delay_hours: 3, followup_hours: 48, default_language: 'en', tone: 'warm', access_key: 'demo-business-key-helloyou-12345678' }]
+const clients = [{ client_id: 'demo-helloyou', name: 'Hello You Wellness Center', slug: 'helloyou', delay_hours: 3, followup_hours: 48, default_language: 'en', tone: 'warm', access_key: 'demo-business-key-helloyou-12345678', services: ['reviews', 'seo'], google_review_url: 'https://example.com/review' }]
 const names = ['Maria Lopez', 'Daniel Rivera', 'Sofia Martinez', 'James Wilson', 'Isabella Torres', 'Lucas Perez', 'Emma Davis', 'Mateo Garcia']
 const requests = Array.from({ length: 32 }, (_, i) => {
   const date = new Date(); date.setDate(date.getDate() - Math.floor(i / 2.6)); date.setHours(9 + i % 8, 15, 0, 0)
@@ -47,14 +48,18 @@ createServer(async (req, res) => {
         if (req.method === 'GET') return json(200, { demo: true, role: master ? 'master' : 'client', clients: (master ? clients : [own]).map((c) => { const row = stats(c); if (!master) delete row.access_key; return row }) })
         if (!master) return json(403, { error: 'Forbidden' })
         if (req.method === 'POST') {
-          if (!body.name?.trim() || !body.slug?.trim() || !body.google_review_url?.trim()) return json(400, { error: 'Business name, short ID and Google review link are required' })
-          const c = { ...body, client_id: randomUUID(), access_key: randomBytes(24).toString('hex'), messages: null }; clients.push(c)
+          const services = normalizeServices(body.services)
+          if (!body.name?.trim() || !body.slug?.trim()) return json(400, { error: 'Business name and short ID are required' })
+          if (!services.length) return json(400, { error: 'Select at least one service' })
+          if (services.includes('reviews') && !body.google_review_url?.trim()) return json(400, { error: 'A Google review link is required for Review Booster' })
+          const c = { ...body, services, google_review_url: body.google_review_url?.trim() || null, client_id: randomUUID(), access_key: randomBytes(24).toString('hex'), messages: null }; clients.push(c)
           return json(201, { client: c })
         }
         if (req.method === 'PATCH') {
           const c = clients.find((c) => c.client_id === url.searchParams.get('id'))
           if (!c) return json(404, { error: 'Business not found' })
           if (body.rotate_key) c.access_key = randomBytes(24).toString('hex')
+          if (body.services !== undefined) { const services = normalizeServices(body.services); if (!services.length) return json(400, { error: 'Select at least one service' }); c.services = services }
           return json(200, { client: c })
         }
       }
@@ -64,6 +69,7 @@ createServer(async (req, res) => {
       if (url.pathname === '/api/requests') {
         if (req.method === 'GET') return json(200, { requests: requests.filter((r) => r.client_id === c.client_id).slice(0, 100) })
         if (req.method === 'POST') {
+          if (!c.services.includes('reviews')) return json(403, { error: 'Review Booster is not enabled for this business' })
           if (!body.customer_name?.trim() || !(body.customer_phone?.trim() || body.customer_email?.trim())) return json(400, { error: 'Customer name and contact required' })
           const now = new Date().toISOString()
           const r = { ...body, id: randomUUID(), token: randomBytes(12).toString('hex'), client_id: c.client_id, language: body.language || c.default_language || 'en', created_at: now, send_at: new Date(Date.now() + (body.send_now ? 0 : Number(c.delay_hours ?? 3) * 3600000)).toISOString(), status: 'pending', rating: null, sent_at: null, clicked_at: null, rated_at: null }

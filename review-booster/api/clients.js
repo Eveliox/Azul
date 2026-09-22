@@ -3,10 +3,11 @@ import { db } from './_lib/db.js'
 import { authenticate, readJson } from './_lib/auth.js'
 import { toE164 } from './_lib/sms.js'
 import { TONES } from './_lib/messages.js'
+import { normalizeServices } from './_lib/services.js'
 
 // GET   /api/clients           → list clients + stats (a business key sees only itself)
-// POST  /api/clients           → create client (master only)
-// PATCH /api/clients?id=…      → { rotate_key: true } issue a new access key (master only)
+// POST  /api/clients           → create client with its services; returns the new access key (master only)
+// PATCH /api/clients?id=…      → { rotate_key: true } | { services: [...] } | { tone } (master only)
 export default async function handler(req, res) {
   const auth = await authenticate(req, res)
   if (!auth) return
@@ -24,13 +25,18 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const b = readJson(req)
-    if (!b.name || !b.slug || !b.google_review_url) {
-      return res.status(400).json({ error: 'name, slug, google_review_url are required' })
+    const services = normalizeServices(b.services)
+    if (!b.name || !b.slug) return res.status(400).json({ error: 'name and slug are required' })
+    if (!services.length) return res.status(400).json({ error: 'Select at least one service' })
+    const reviewUrl = (b.google_review_url || '').trim() || null
+    if (services.includes('reviews') && !reviewUrl) {
+      return res.status(400).json({ error: 'A Google review link is required for Review Booster' })
     }
     const row = {
       name: b.name.trim(),
       slug: b.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-'),
-      google_review_url: b.google_review_url.trim(),
+      google_review_url: reviewUrl,
+      services,
       owner_name: b.owner_name || null,
       owner_email: b.owner_email || null,
       owner_phone: toE164(b.owner_phone),
@@ -48,6 +54,11 @@ export default async function handler(req, res) {
     const b = readJson(req)
     const patch = {}
     if (b.rotate_key) patch.access_key = randomBytes(24).toString('hex')
+    if (b.services !== undefined) {
+      const services = normalizeServices(b.services)
+      if (!services.length) return res.status(400).json({ error: 'Select at least one service' })
+      patch.services = services
+    }
     if (b.tone !== undefined) {
       if (!TONES.includes(b.tone)) return res.status(400).json({ error: 'invalid tone' })
       patch.tone = b.tone
@@ -57,9 +68,12 @@ export default async function handler(req, res) {
       .from('rb_clients')
       .update(patch)
       .eq('id', req.query.id)
-      .select('id, access_key, tone')
+      .select('id, access_key, tone, services, google_review_url')
       .single()
     if (error || !data) return res.status(404).json({ error: 'Client not found' })
+    if (data.services.includes('reviews') && !data.google_review_url) {
+      return res.json({ client: data, warning: 'Review Booster is enabled but this business has no Google review link yet. Add one in Supabase before sending requests.' })
+    }
     return res.json({ client: data })
   }
 
