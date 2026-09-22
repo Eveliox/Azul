@@ -42,7 +42,7 @@ function Login({ onOk }) {
   </div>
 }
 
-const NAV = [['overview', 'Dashboard', 'grid'], ['website', 'Website', 'globe'], ['calls', 'AI Answering', 'phone'], ['reviews', 'Reviews', 'star'], ['seo', 'Local SEO', 'pin'], ['social', 'Social Media', 'share'], ['access', 'Workspace access', 'key']]
+const NAV = [['overview', 'Dashboard', 'grid'], ['website', 'Website', 'globe'], ['calls', 'AI Answering', 'phone'], ['reviews', 'Reviews', 'star'], ['seo', 'Local SEO', 'pin'], ['access', 'Workspace access', 'key']]
 const REVIEW_TABS = [['reviews', 'Overview'], ['requests', 'Requests'], ['messages', 'Messages']]
 const TITLES = {
   overview: ['Your business, connected.', 'Pick a service, see what’s happening, and take the next step.'],
@@ -137,7 +137,7 @@ function Dashboard({ onLogout }) {
         {!loading && !error && !client && <div className="panel empty-state"><span className="icon-tile blue"><Icon name="building"/></span><h2>Your workspace starts here</h2><p>{isMaster ? 'Add your first business to start collecting customer feedback.' : 'No business is available for this key.'}</p>{isMaster && <button className="btn-primary" onClick={() => setModal('client')}>Add your first business</button>}</div>}
         {client && <>
           {inReviews && <nav className="review-subnav" aria-label="Review Booster sections">{REVIEW_TABS.map(([id, label]) => <button key={id} aria-current={activeTab === id ? 'page' : undefined} className={activeTab === id ? 'active' : ''} onClick={() => setTab(id)}>{label}</button>)}</nav>}
-          {['overview', 'website', 'calls', 'seo', 'social'].includes(activeTab) && <ServiceWorkspace key={`${demo}:${selected}`} client={client} demo={demo} isMaster={isMaster} view={activeTab} navigate={setTab} requests={requests} loading={requestLoading} error={requestError}/>}
+          {['overview', 'website', 'calls', 'seo'].includes(activeTab) && <ServiceWorkspace key={`${demo}:${selected}`} client={client} demo={demo} isMaster={isMaster} view={activeTab} navigate={setTab} requests={requests} loading={requestLoading} error={requestError}/>}
           {activeTab === 'reviews' && !hasReviews && <div className="panel empty-state"><span className="icon-tile pink"><Icon name="star"/></span><h2>Review Booster is not in this plan</h2><p>{client.name} is not subscribed to Review Booster. Enable it under Workspace access to start sending requests.</p><button className="btn-ghost" onClick={() => setTab('access')}>Manage plan</button></div>}
           {activeTab === 'reviews' && hasReviews && <>
             <StatCards client={client}/>
@@ -149,7 +149,7 @@ function Dashboard({ onLogout }) {
           {activeTab === 'messages' && <section className="panel"><MessagesPanel key={selected} clientId={selected} business={client.name} notify={notify}/></section>}
           {activeTab === 'access' && isMaster && <section className="panel"><AccessKey key={selected} c={client} onRotated={() => { reload(); notify('New key issued. Share it securely with the team.') }} onPlanSaved={() => { reload(); notify('Plan updated. Their workspace now shows the new services.') }}/></section>}
         </>}
-        <footer className="dashboard-footer"><span>Azul Business Workspace</span><span>Website · AI Answering · Reviews · Local SEO · Social Media</span></footer>
+        <footer className="dashboard-footer"><span>Azul Business Workspace</span><span>Website · AI Answering · Reviews · Local SEO</span></footer>
       </main>
     </div>
     {toast && <div className="toast" role="status"><Icon name="check" size={18}/>{toast}<button aria-label="Dismiss notification" onClick={() => setToast('')}><Icon name="close" size={16}/></button></div>}

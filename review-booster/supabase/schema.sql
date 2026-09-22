@@ -39,7 +39,7 @@ alter table rb_clients
 alter table rb_clients drop constraint if exists rb_clients_services_check;
 alter table rb_clients
   add constraint rb_clients_services_check
-  check (services <@ array['website','calls','reviews','seo','social']::text[]);
+  check (services <@ array['website','calls','reviews','seo']::text[]);
 -- Website/voice/SEO-only clients have no review link. Review requests are refused for them.
 alter table rb_clients alter column google_review_url drop not null;
 

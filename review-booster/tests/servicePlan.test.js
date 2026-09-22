@@ -6,10 +6,10 @@ test('services match the API list; every service has setup + delivery copy; SEO 
   assert.deepEqual(SERVICES.map((s) => s.id), SERVICE_IDS)
   for (const id of SERVICE_IDS) if (id !== 'reviews') { assert.ok(SETUP[id]?.length, `${id} setup`); assert.ok(DELIVERY[id], `${id} delivery copy`) }
   assert.equal(MONTHLY.seo.filter((t) => t.id.startsWith('seo-post-')).length, 8)
-  assert.equal(MONTHLY.social.filter((t) => t.id.startsWith('social-post-')).length, 8)
   const tasks = [...Object.values(SETUP).flat(), ...Object.values(MONTHLY).flat()]
   assert.equal(new Set(tasks.map((t) => t.id)).size, tasks.length, 'task ids must be unique across all checklists')
-  assert.ok(!SERVICE_IDS.includes(UPCOMING[0].id), 'coming-soon services are not subscribable')
+  for (const u of UPCOMING) assert.ok(!SERVICE_IDS.includes(u.id), `${u.id} is coming soon and must not be subscribable`)
+  assert.deepEqual(UPCOMING.map((u) => u.id), ['social', 'ads'])
 })
 test('plans isolate business, demo/live, month, and setup', () => {
   assert.equal(monthId(new Date(2026, 0, 15)), '2026-01')

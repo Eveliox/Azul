@@ -19,10 +19,12 @@ export const SERVICES = [
   { id: 'calls', name: 'AI Answering Service', icon: 'phone', color: 'green', category: 'Never miss the conversation', description: 'Plan your bilingual receptionist and its call handoff.', status: 'Vapi not connected', action: 'Open answering service plan' },
   { id: 'reviews', name: 'Review Booster', icon: 'star', color: 'pink', category: 'Listen to your customers', description: 'Send requests, personalize messages, and collect feedback.', status: 'Workspace available', action: 'Open reviews' },
   { id: 'seo', name: 'Local Proof SEO', icon: 'pin', color: 'purple', category: 'Show up locally', description: 'Organize approved content and monthly visibility reporting.', status: 'Manual delivery', action: 'Open SEO plan' },
-  { id: 'social', name: 'Social Media AI', icon: 'share', color: 'orange', category: 'Show your real work', description: 'Turn job and team photos into bilingual Facebook & Instagram posts.', status: 'Manual delivery', action: 'Open social media plan' },
 ]
 // Services on the roadmap. Shown as "Coming soon" cards; cannot be added to a plan yet.
+// Social already has SETUP/MONTHLY_SOCIAL/DELIVERY config below; enabling it = move this entry to SERVICES,
+// add 'social' to SERVICE_IDS (api/_lib/services.js) + schema.sql, and add MONTHLY_SOCIAL to MONTHLY.
 export const UPCOMING = [
+  { id: 'social', name: 'Social Media AI', icon: 'share', color: 'orange', category: 'Show your real work', description: 'Turn job and team photos into bilingual Facebook & Instagram posts.', status: 'Coming soon', action: 'Open social media plan' },
   { id: 'ads', name: 'AI Facebook Ads', icon: 'megaphone', color: 'orange', category: 'Reach new customers', description: 'AI-built Facebook & Instagram ad campaigns with local targeting, creative, and budget optimization.', status: 'Coming soon' },
 ]
 // Per-service copy for the delivery view. Keeps ServiceWorkspace data-driven.
@@ -70,7 +72,7 @@ export const MONTHLY_SEO = [
   { id: 'seo-page', title: 'Improve one existing website page', detail: 'Add useful, verified local information. Avoid near-duplicate city pages and unsupported medical claims.' },
   { id: 'seo-report', title: 'Deliver the monthly visibility report', detail: 'Repeat the same grid and keywords. Report actual results; do not promise ranking gains.' },
 ]
-export const MONTHLY = { seo: MONTHLY_SEO, social: MONTHLY_SOCIAL }
+export const MONTHLY = { seo: MONTHLY_SEO }
 export const monthId = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 export function planKey(clientId, demo, period) { return `azul:delivery:v1:${demo ? 'demo' : 'live'}:${clientId}:${period}` }
 export function readPlan(storage, key, allowed) {
