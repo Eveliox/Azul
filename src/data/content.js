@@ -117,12 +117,13 @@ export const content = {
           bullets: ['Weekly Google Business posts', 'Service-area location content', 'AI-written local updates (EN/ES)'],
         },
         {
-          price: '$149/mo',
+          price: 'Coming Soon',
           title: 'Social Media AI',
-          badge: 'Get 5 posts free',
+          badge: 'Join the waitlist',
           description:
             'Send us job photos, before-and-afters, or team photos. We turn them into bilingual social media posts for Facebook and Instagram, daily or weekly, using your real work.',
           bullets: ['AI-written captions (EN/ES)', 'Uses your real photos', 'Facebook & Instagram content'],
+          comingSoon: true,
         },
         {
           price: '$349/mo',
@@ -197,16 +198,15 @@ export const content = {
         },
         {
           title: 'Social Media AI',
-          price: '$149',
-          badge: '5 free posts',
-          stripeLinkKey: 'socialMedia',
+          badge: 'Join Waitlist',
           features: [
             'AI-written captions (EN/ES)',
             'Uses your real job photos',
             'Facebook & Instagram posting',
             'Weekly content calendar',
           ],
-          ctaLabel: 'Start Posting',
+          ctaLabel: 'Join Waitlist',
+          comingSoon: true,
         },
         {
           title: 'Website Build',
@@ -522,12 +522,13 @@ export const content = {
           bullets: ['Posts semanales de Google Business', 'Contenido de área de servicio', 'Actualizaciones AI (EN/ES)'],
         },
         {
-          price: '$149/mes',
+          price: 'Próximamente',
           title: 'Social Media AI',
-          badge: '5 posts gratis',
+          badge: 'Únase a la lista',
           description:
             'Envíenos fotos de trabajos, antes-y-después, o fotos del equipo. Las convertimos en posts bilingües para Facebook e Instagram, diario o semanal, usando su trabajo real.',
           bullets: ['Captions AI (EN/ES)', 'Usa sus fotos reales', 'Contenido para Facebook e Instagram'],
+          comingSoon: true,
         },
         {
           price: '$349/mes',
@@ -602,16 +603,15 @@ export const content = {
         },
         {
           title: 'Social Media AI',
-          price: '$149',
-          badge: '5 posts gratis',
-          stripeLinkKey: 'socialMedia',
+          badge: 'Únase a la Lista',
           features: [
             'Captions AI (EN/ES)',
             'Usa sus fotos reales de trabajos',
             'Publicación en Facebook & Instagram',
             'Calendario semanal de contenido',
           ],
-          ctaLabel: 'Empezar A Postear',
+          ctaLabel: 'Únase a la Lista',
+          comingSoon: true,
         },
         {
           title: 'Sitio Web',
