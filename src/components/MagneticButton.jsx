@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion'
 
 export default function MagneticButton({
   as: Tag = 'a',
@@ -9,6 +9,7 @@ export default function MagneticButton({
   ...rest
 }) {
   const ref = useRef(null)
+  const reduced = useReducedMotion()
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const sx = useSpring(x, { stiffness: 220, damping: 18, mass: 0.4 })
@@ -33,6 +34,7 @@ export default function MagneticButton({
   }
 
   const MotionTag = motion[Tag] || motion.a
+  if (reduced) return <Tag className={className} {...rest}>{children}</Tag>
 
   return (
     <MotionTag
