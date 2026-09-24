@@ -134,7 +134,7 @@ export const content = {
           bullets: ['24/7 bilingual AI call answering', 'Customer capture & call summaries', 'After-hours coverage'],
         },
         {
-          price: '$199/mo + $499 setup',
+          price: '$50/mo + $499 setup',
           title: 'Website Build',
           badge: 'Free website mockup',
           description:
@@ -210,7 +210,7 @@ export const content = {
         },
         {
           title: 'Website Build',
-          price: '$199',
+          price: '$50',
           priceNote: '+ $499 setup',
           badge: 'Free mockup',
           stripeLinkKey: 'websiteSetup',
@@ -539,7 +539,7 @@ export const content = {
           bullets: ['Contestación bilingüe AI 24/7', 'Captura de cliente & resúmenes', 'Cobertura fuera de horario'],
         },
         {
-          price: '$199/mes + $499 setup',
+          price: '$50/mes + $499 setup',
           title: 'Sitio Web',
           badge: 'Mockup gratis',
           description:
@@ -615,7 +615,7 @@ export const content = {
         },
         {
           title: 'Sitio Web',
-          price: '$199',
+          price: '$50',
           priceNote: '+ $499 setup',
           badge: 'Mockup gratis',
           stripeLinkKey: 'websiteSetup',
