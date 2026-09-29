@@ -93,7 +93,8 @@ What the client actually experiences:
 
 ### LANE 4 (bottom) — TOOLS / INFRASTRUCTURE (color: gray-100 bg, gray-700 text)
 The delivery stack (support layer that powers Lane 2):
-1. **GoHighLevel Agency** ($297/mo — the hub) — connects to Website, Reviews, SEO, Social, Dashboard
+1. **Review Booster** (own build: Vercel + Supabase + Twilio + Resend — the hub) — connects to Reviews, Missed-call text-back, AI Answering lead alerts, Dashboard
+1b. **Meta Business Suite** — connects to Social Media AI (FB + IG scheduling)
 2. **Vapi.ai** — connects to AI Answering
 3. **Twilio** — connects to SMS + missed-call text-back
 4. **Claude API** — connects to SEO content + Social captions

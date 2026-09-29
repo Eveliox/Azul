@@ -1,71 +1,50 @@
 # AZUL DELIVERY PLAYBOOK
 
-Complete operational how-to for delivering every service. This is the sit-down-and-follow-these-steps version. Reference it during GHL setup and client onboarding.
+Complete operational how-to for delivering every service. This is the sit-down-and-follow-these-steps version. Reference it during setup and client onboarding.
 
 **Prerequisites:**
-- GoHighLevel Agency Starter plan ($297/mo)
+- Review Booster deployed (`review-booster/`: Vercel + Supabase + Twilio + Resend). It handles review requests, SMS, email and Vapi lead alerts
 - Vapi.ai account (for AI Answering)
 - LocalFalcon subscription ($40/mo)
 - Claude API key or ChatGPT Plus
 - WhatsApp Business number
+- Meta Business Suite access (free) for Facebook + Instagram scheduling
 - Stripe account (already set up)
 
 ---
 
 ## Section 1 — Foundation Setup (do once, use forever)
 
-### 1.1 GoHighLevel Agency Account
+### 1.1 Review Booster
 
-1. Go to gohighlevel.com → sign up for Agency Starter ($297/mo, 14-day trial)
-2. Complete business profile: Company name = Azul, Industry = Marketing Agency
-3. Add payment method (they'll charge after trial)
-4. Get your Agency dashboard access
+Follow `review-booster/README.md` sections 1–5: Supabase project, Twilio number with A2P 10DLC registration (start this on day 1, approval takes days), Resend with your domain verified, deploy to Vercel. Add the Vapi lead alerts at the end of that README.
 
-### 1.2 Build Your Sandbox Sub-Account
+Vercel's free Hobby plan is for non-commercial use. Once Review Booster serves paying clients, move the project to Vercel Pro.
 
-In GHL Agency dashboard:
-1. Click **+ Add Sub-Account**
-2. Name it: `Azul — Test Sandbox`
-3. Address: your Miami address
-4. Choose Snapshot: **Start Fresh** (you're building the template)
-5. Timezone: America/New_York
+### 1.2 Add Azul as a test client
 
-### 1.3 Configure the Sandbox
+In Review Booster's `/admin`, create a client for Azul itself with your own email, phone and a Google review link. Run the end-to-end test from the README (section 4) against yourself before touching a real customer.
 
-Inside the sandbox, set up these building blocks:
+### 1.3 Client tracker
 
-**Custom Fields** (Contacts → Custom Fields):
-- `preferred_language` (dropdown: English, Spanish)
-- `service_type` (dropdown: roofing, HVAC, plumbing, pool, landscaping, general_contractor, medspa, other)
-- `last_job_date` (date)
-- `job_value` (number)
+One Google Sheet, one row per client:
+- Business name, owner, phone, email
+- Preferred language (English / Spanish)
+- Trade (roofing, HVAC, plumbing, pool, landscaping, other)
+- Services they pay for
+- Google Business Profile access (yes / pending)
+- Facebook Page + Instagram access (yes / pending)
+- Twilio / Vapi numbers assigned
+- Where their jobs live (Jobber, Housecall Pro, ServiceTitan, paper)
 
-**Pipeline** (Opportunities → Pipelines):
-Create pipeline "Sales Pipeline" with stages:
-1. New Lead
-2. Contacted
-3. Quoted
-4. Booked
-5. Job Complete
-6. Review Requested
-7. Reviewed
-8. Lost
+### 1.4 Reusable templates
 
-**Tags to create:**
-- `founding-client` (for your $399/mo customers)
-- `growth-suite` (for $549/mo customers)
-- `english`
-- `spanish`
-- `job-complete` (triggers review requests)
-- `unhappy-customer` (routes to private feedback)
-
-### 1.4 Save As Snapshot
-
-Agency Settings → Snapshots → Create Snapshot from Sub-Account
-- Name: `Azul Growth Suite — Master`
-- Include: everything
-
-Now you can clone this in 1 click for every new client.
+Your "clone in one click" kit is a set of files, not a platform:
+- Review Booster: add a new client in `/admin` (2 minutes)
+- Vapi: duplicate your best assistant and change the business facts
+- Website: the vertical templates (Section 5.4)
+- Content: the bilingual prompt library (Section 3.5)
+- Make.com: export working scenarios as blueprints and import them for the next client
 
 ---
 
@@ -73,7 +52,9 @@ Now you can clone this in 1 click for every new client.
 
 ### 2.1 What it does (the outcome)
 
-Happy customers get automatically prompted for a Google review. Unhappy ones get routed to a private feedback form so they don't leave a 1-star publicly.
+Every customer gets a review request after the job, by SMS and email, in their language. Review Booster does this.
+
+> **Policy note:** Review Booster's review page currently sends 5★ ratings to Google and 1–4★ ratings to a private feedback form. Google's review policy prohibits selectively asking for positive reviews, so this "gate" puts the client's Google profile at risk. Decide how to change it before signing new clients (see `ai-agents/README.md` section 4.4).
 
 ### 2.2 One-time setup per client (30 min)
 
@@ -82,28 +63,25 @@ Happy customers get automatically prompted for a Google review. Unhappy ones get
      > "Hi [Name], to set up your review automation I need to be added as a Manager on your Google Business Profile. Here's how: [link to how-to]. My email: azuldevsmiami@gmail.com. Takes 2 minutes."
    - How-to link: https://support.google.com/business/answer/3403100
 
-2. **Configure the automation in GHL** (using your Snapshot, most is pre-built):
-   - Trigger: Contact tagged `job-complete`
-   - Wait 2 hours
-   - Send SMS: *"Hi [First Name], thanks for choosing [Business]! Would you take 30 seconds to leave us a review? [review-link]"*
-   - If preferred_language = spanish, send Spanish version
-   - If clicked but no submit in 48h → send follow-up SMS
+2. **Add the client in Review Booster** (`/admin`): business name, owner email and phone, default language, services.
 
-3. **Build the review gate landing page** in GHL:
-   - Path: `/review/[client-slug]`
-   - Simple design: business logo, "How was your experience with [Business]?", 5-star selector
-   - If 5 stars → redirect to Google review link
-   - If 1-4 stars → show private feedback form (emails client directly)
+3. **Add their Google review link** (see `review-booster/README.md` section 3 for getting the Place ID).
 
-4. **Connect Google review link** (get it from GBP settings)
+4. **Decide how finished jobs get in:**
+   - Front desk adds each finished job in `/admin` from their phone (10 seconds), or
+   - You add them weekly from the client's job list.
+   - Later: a webhook from Jobber / Housecall Pro on "job completed" (planned in the Review Booster README).
+   - Review Booster then waits, sends the SMS + email in the customer's language, and sends one follow-up if there's no click in 48 hours.
+
+5. **Test it against yourself** before any real customer (README section 4).
 
 ### 2.3 Weekly workflow per client (10 min)
 
-- **Monday:** Open client's dashboard, check requests-sent count from last week
+- **Monday:** Open Review Booster `/admin`, check last week's requests sent for this client
 - Any 1-4 star private feedback? Forward to client via WhatsApp for personal follow-up
 - Any reviews collected? Screenshot the best one and text client: *"[Name] just left you a 5-star. Nice work."*
 
-### 2.4 SMS/Email templates (paste into GHL)
+### 2.4 SMS/Email templates (reference; the live ones are in `review-booster/api/_lib/`)
 
 **English SMS:**
 ```
@@ -126,9 +104,9 @@ Responda STOP para no recibir más mensajes.
 
 ### 2.5 What to watch for
 
-- **Delivery failure:** if SMS bounces (bad number), tag contact `bad-number` and manually email
-- **Zero reviews after 2 weeks:** check that job-complete tag is actually being applied. Client may not be marking jobs done in their system.
-- **Negative review posted publicly:** if review gate failed, respond within 24h with a professional public reply
+- **Delivery failure:** if SMS bounces (bad number), check the Twilio logs and email the customer manually
+- **Zero reviews after 2 weeks:** check that finished jobs are actually being added in Review Booster. The client may have stopped entering them.
+- **Negative review posted publicly:** help the client respond within 24h with a calm, professional public reply
 
 ---
 
@@ -155,7 +133,7 @@ Keeps client's Google Business Profile active with weekly posts that show Google
 4. **Set up LocalFalcon scan:**
    - Add their business + 3-5 target keywords
    - Baseline scan → save the PDF
-5. **Set up GHL Social Planner → Google Business Profile connection**
+5. **Set up posting:** post directly in Google Business Profile Manager, or connect their profile to a scheduler that supports Google Business Profile (Publer or Localo)
 
 ### 3.3 Weekly workflow (2 hours per client)
 
@@ -182,7 +160,7 @@ Add 3 relevant hashtags to each version.
 
 - Review the AI output (5 min) — check for hallucinations, verify neighborhood name is real
 - Add the client's photo
-- Schedule via GHL Social Planner for Tuesday 9 AM
+- Schedule for Tuesday 9 AM (Publer / Localo), or post directly in Google Business Profile Manager
 - Do a second post on Thursday if you have another photo
 
 **Friday:**
@@ -232,7 +210,7 @@ Consistent bilingual Facebook + Instagram presence using client's real job photo
    - How-to: Facebook Business Suite → Settings → People → Add
    - They need your Facebook account email
 2. **Instagram: they need to convert their IG to a Business account and connect to their Facebook Page**
-3. **In GHL Social Planner:** connect their Facebook Page + Instagram (should auto-pull posts)
+3. **In Meta Business Suite:** confirm you can see and schedule for both their Facebook Page and Instagram
 4. **Ask them for:**
    - Their brand colors (or grab from their website)
    - Any hashtags they already use
@@ -259,7 +237,7 @@ Output English and Spanish versions.
 
 **Facebook adaptation:** IG captions work on FB with 2-3 fewer hashtags and slightly more description.
 
-Schedule 3-4 posts per week per platform via GHL Social Planner.
+Schedule 3-4 posts per week per platform in Meta Business Suite (free), or in Publer if you're already using it for Google posts.
 
 ### 4.4 Content calendar rhythm
 
@@ -300,7 +278,7 @@ Modern conversion-focused website that funnels visitors into calls, quote reques
 - **Day 8-11:** Build the site (React + Vite + Tailwind OR Framer)
 - **Day 12:** Client review, revisions
 - **Day 13:** Launch on their custom domain
-- **Day 14:** Connect to GHL forms, Crisp chat widget, GA4
+- **Day 14:** Connect the contact form (Section 5.3), Crisp chat widget, GA4
 
 ### 5.3 Every website MUST include
 
@@ -310,7 +288,7 @@ Modern conversion-focused website that funnels visitors into calls, quote reques
 - Service area map (embed Google Map showing coverage area)
 - "Why choose us" (3 pillars — years in business, reviews count, response time)
 - Testimonials section pulling their real Google reviews
-- Contact form (name, phone, service, message) → connects to GHL pipeline
+- Contact form (name, phone, service, message) → a Vercel function emails the lead to the client through Resend (same setup as Review Booster)
 - Chat widget (Crisp free tier) with pre-filled greeting in EN + ES
 - Footer with NAP (Name, Address, Phone), business hours, social icons
 - Mobile-optimized (test on 375px width before launch)
@@ -358,7 +336,7 @@ This is your thinnest-margin service AND the highest technical complexity. Only 
    - EN branch: name → callback number → service needed → address → best time to call back
    - ES branch: same but in Spanish
    - Confirm and end: *"Someone from [Business] will call you within 30 minutes."*
-4. **Configure webhook:** on call end → send summary to client via SMS (Twilio) + email (GHL)
+4. **Configure webhook:** on call end → Review Booster's `/api/vapi-webhook` emails the summary to the client through Resend (already built; see `review-booster/README.md`). Add an SMS summary through Twilio if the client prefers texts
 5. **Missed-call text-back:** if any call goes fully unanswered (even by Vapi), send auto-SMS from Twilio
 
 ### 6.4 Vapi script template (starter)
@@ -441,38 +419,37 @@ I'll have your Growth Suite fully live in 5 business days.
 
 ### Day 1 (30 min)
 
-- In GHL Agency → Clone Snapshot → Create sub-account named "Client — [Business Name]"
-- Upload their logo, set brand colors
-- Import any existing customer list they have (CSV)
-- Tag all contacts with `english` or `spanish` based on names
+- Add them to your client tracker (Section 1.3)
+- Add them as a client in Review Booster `/admin` with their default language
+- Save their logo and brand colors in their client folder
+- Ask which language each customer prefers when jobs are entered; don't guess from names
 
 ### Day 2-3 (4 hours)
 
-- Client accepts your GBP manager invite → connect GBP to sub-account
+- Client accepts your GBP manager invite → connect GBP to your scheduler (if you use one)
 - Buy Twilio number for missed-call text-back
-- Turn on Review Booster automation (Snapshot has it pre-built, just enable)
-- Turn on missed-call text-back automation
-- Configure their review gate landing page with their Google review link
+- Add their Google review link in Review Booster
+- Set up missed-call text-back on their Twilio number
 - Test both by sending yourself a fake request
 
 ### Day 3-4 (4 hours)
 
 - Build their website (use vertical template, customize with their logo/colors/services/photos)
 - Deploy to Vercel on their custom domain
-- Connect contact form → GHL pipeline
+- Connect contact form → lead emails to the client (Resend)
 - Install Crisp chat widget with pre-filled bilingual greeting
 
 ### Day 4-5 (3 hours)
 
-- Connect Facebook + Instagram to GHL Social Planner
+- Confirm Facebook + Instagram access in Meta Business Suite
 - Generate first week of content from their 5 photos (5 GBP posts + 5 IG + 5 FB = 15 pieces of content)
 - Schedule everything for the next 7 days
 
 ### Day 5 (30 min kickoff call)
 
-Screen-share their new GHL dashboard:
-- Show them: reviews inbox, contacts pipeline, upcoming scheduled posts
-- Give them their login (they can peek anytime)
+Screen-share what's live:
+- Show them: their website, Review Booster stats, upcoming scheduled posts in Meta Business Suite
+- Don't give them the Review Booster admin key: it currently opens every client's data. Send them a monthly stats screenshot instead
 - Confirm: they send you photos via WhatsApp every Monday
 - Confirm: their AI Answering (if applicable) is forwarding correctly
 
@@ -481,7 +458,7 @@ Screen-share their new GHL dashboard:
 - Fix anything that broke
 - Send a "you're all set" confirmation email
 
-**Onboarding time: ~14 hours for client #1, drops to ~6 hours by client #5 as you refine the Snapshot.**
+**Onboarding time: ~14 hours for client #1, drops to ~6 hours by client #5 as you refine your templates.**
 
 ---
 
@@ -492,12 +469,12 @@ Per active paying client, ~2 hours/week total.
 ### Monday morning (per client, 20 min)
 
 - WhatsApp them: *"Hey [Name], send me job photos from the past week"*
-- When photos come in, generate content in Claude → schedule in GHL
+- When photos come in, generate content in Claude → schedule in Meta Business Suite / your scheduler
 
 ### Wednesday afternoon (per client, 15 min)
 
-- Open GHL sub-account
-- Check: any missed calls this week? Any reviews sent but not clicked? Any pipeline stuck?
+- Open Review Booster `/admin`, Vapi call logs and Twilio logs
+- Check: any missed calls this week? Any reviews sent but not clicked? Any lead the client never called back?
 - Fix or nudge
 
 ### Friday afternoon (per client, 15 min)
@@ -508,7 +485,7 @@ Per active paying client, ~2 hours/week total.
   
   ✅ Reviews collected this week: [X]
   ✅ Missed calls captured: [X] (with SMS follow-ups sent)
-  ✅ New leads in pipeline: [X]
+  ✅ New leads captured: [X]
   ✅ Posts published: [X] (GBP + FB + IG)
   ✅ Google Business impressions: [X]
   
@@ -539,7 +516,7 @@ Per active paying client, ~2 hours/week total.
 
 - Review Stripe MRR — anyone canceled? Any failed charges?
 - Review your own numbers: how many demos booked this month, closing rate, new MRR
-- Refine the Snapshot based on what you added/changed for clients this month
+- Refine your templates based on what you added/changed for clients this month
 
 ---
 
@@ -551,9 +528,9 @@ Per active paying client, ~2 hours/week total.
 - If still nothing, they're not a good fit for Social Media AI — refund that portion and downgrade
 
 ### "Reviews aren't landing"
-- Check job-complete tag is actually being applied to contacts (most common cause)
+- Check finished jobs are actually being added in Review Booster (most common cause)
 - Check SMS delivery rate in Twilio dashboard (bad numbers get filtered)
-- Check the review gate landing page isn't broken
+- Check the review page isn't broken
 
 ### "AI Answering messed up a call"
 - Listen to the recording immediately
@@ -568,10 +545,10 @@ Per active paying client, ~2 hours/week total.
 - If they don't like the service → let them go cleanly, transfer their GBP access back
 - Never argue with a churn — just learn from it
 
-### "GHL is glitching"
-- 90% of the time restarting your browser fixes it
-- 9% of the time it's a real GHL bug — check their status page (status.gohighlevel.com)
-- 1% of the time you have to open a support ticket. Expect 24-48 hr response.
+### "Texts aren't sending"
+- Check A2P 10DLC registration status in Twilio (unregistered texts are silently dropped)
+- Check Twilio's message logs for errors on those numbers
+- Check the Vercel function logs and that the Review Booster cron (`/api/send-due`) is running
 
 ---
 
@@ -592,42 +569,43 @@ Hire the setter ($800-1500/mo LatAm) BEFORE the closer. They're cheaper, easier 
 ## Section 12 — Tools You'll Actually Log Into Daily
 
 **Web browser bookmarks bar (in this order):**
-1. GHL Agency Dashboard — `app.gohighlevel.com`
+1. Review Booster admin — `/admin` on your Review Booster domain
 2. Stripe Dashboard — `dashboard.stripe.com`
 3. Calendly — `calendly.com/purplexmythzz`
 4. WhatsApp Web — `web.whatsapp.com`
 5. Meta Business Suite — `business.facebook.com`
 6. Vapi — `dashboard.vapi.ai`
-7. LocalFalcon — `localfalcon.com`
-8. Claude — `claude.ai`
-9. Google Business Profile Manager — `business.google.com`
+7. Twilio Console — `console.twilio.com`
+8. LocalFalcon — `localfalcon.com`
+9. Claude — `claude.ai`
+10. Google Business Profile Manager — `business.google.com`
+11. Vercel + Supabase dashboards (when something breaks)
 
 **Mobile app on your phone:**
 - WhatsApp Business (for client photos + intake)
-- GHL mobile app (for on-the-go dashboard checks)
+- Review Booster `/admin` saved to your home screen (for on-the-go checks)
 - Stripe (get notified of new payments in real time)
 
 ---
 
 ## Section 13 — Your Next 7 Days (Copy-Paste Checklist)
 
-- [ ] Sign up for GoHighLevel Agency Starter today
+- [ ] Deploy Review Booster (`review-booster/README.md`) and start A2P 10DLC registration today
 - [ ] Sign up for Vapi (free tier)
 - [ ] Sign up for LocalFalcon ($40/mo)
 - [ ] Get Claude API key ($20 credit)
 - [ ] Get WhatsApp Business number
-- [ ] Watch 3 GHL YouTube tutorials (Extendly channel)
-- [ ] Build your Sandbox sub-account in GHL
-- [ ] Configure Review Booster automation end-to-end
-- [ ] Configure missed-call text-back automation
-- [ ] Save as Snapshot
+- [ ] Add Azul as a test client in Review Booster
+- [ ] Test Review Booster end-to-end against yourself
+- [ ] Configure missed-call text-back on your Twilio number
+- [ ] Set up your client tracker sheet
 - [ ] Write bilingual prompt library (5 prompts min)
 - [ ] Create WhatsApp intake form
 - [ ] Reach out to Aspire Roofing offering free 60-day Growth Suite
 - [ ] Build prospect list of 25 Miami roofers
 - [ ] Send 10 Looms this week
 
-If you do all 15 of these, by Sunday night you'll have infrastructure ready + first outbound going + likely 1 free-trial case study client onboarded.
+If you do all 14 of these, by Sunday night you'll have infrastructure ready + first outbound going + likely 1 free-trial case study client onboarded.
 
 Everything after this is repetition and refinement.
 

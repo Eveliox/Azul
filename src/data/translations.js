@@ -11,10 +11,10 @@ const agentStartingPrice = '$497/mo + $997 setup'
 const agentStats = [{ to: 168 }, { text: '< 1 min' }, { to: 2 }]
 // Example integrations for each example agent, in the same order as agents.detail.agents.
 const agentTools = [
-  ['GoHighLevel', 'Google Calendar', 'Twilio'],
+  ['Google Calendar', 'Jobber', 'Twilio'],
   ['Housecall Pro', 'Jobber', 'Google Calendar', 'Twilio'],
-  ['GoHighLevel', 'QuickBooks', 'Gmail', 'Twilio'],
-  ['Google Business Profile', 'GoHighLevel', 'Twilio'],
+  ['QuickBooks', 'Jobber', 'Gmail', 'Twilio'],
+  ['Google Business Profile', 'Housecall Pro', 'Twilio'],
   ['Google Drive', 'Google Calendar', 'Gmail', 'QuickBooks'],
   ['Instagram', 'Facebook', 'Google Business Profile', 'Google Drive'],
 ]
@@ -93,7 +93,7 @@ export const translations = {
           { name: 'Bilingual Receptionist', short: 'Answers calls and texts, books jobs, and never misses a lead at 2am.', does: 'Picks up every call and text in English or Spanish, asks the questions you would, books the visit on your calendar, and sends you a quick summary.' },
           { name: 'Dispatcher', short: 'Schedules crews, sends “on my way” texts, and reshuffles when jobs run long.', does: 'Builds the day’s schedule, texts customers when the crew is on the way, and moves the next appointments when a job runs over.' },
           { name: 'Estimate Follow-Up', short: 'Chases every open quote until it’s a yes or a no.', does: 'Checks in on every estimate you send, answers simple questions, and lets you know the moment a customer is ready to book.' },
-          { name: 'Review Requester', short: 'Asks happy customers for a Google review after each job.', does: 'Texts each customer after the job is done, asks how it went, and sends the happy ones straight to your Google review page.' },
+          { name: 'Review Requester', short: 'Asks every customer for a Google review after each job.', does: 'Texts every customer after the job is done with a thank-you and a direct link to your Google review page, and flags any problem they mention so you can make it right.' },
           { name: 'Permit & Paperwork Assistant', short: 'Tracks permits, inspections, and warranty registrations.', does: 'Keeps a running list of permits and inspection dates, reminds you before deadlines, and files warranty registrations after installs.' },
           { name: 'Social Media Coordinator', short: 'Turns job photos into posts in both languages.', does: 'Takes the photos your crew sends from the job, writes a post in English and Spanish, and schedules it for you to approve.' },
         ],
@@ -111,7 +111,7 @@ export const translations = {
         faqEyebrow: 'Questions', faqTitle: 'Straight answers.',
         faq: [
           { question: 'Does it replace my staff?', answer: 'No. It takes the work that slips through the cracks: the 2am calls, the follow-ups nobody has time for, the paperwork. Your team keeps doing the jobs. Most owners use an agent to cover nights and weekends and to take pressure off the person at the front desk.' },
-          { question: 'What tools does it work with?', answer: 'Most of what home service businesses already use, like GoHighLevel, Google Calendar, Google Business Profile, Twilio, QuickBooks, Jobber and Housecall Pro. Using something else? Mention it when you send the job posting and we’ll tell you straight if we can connect it.' },
+          { question: 'What tools does it work with?', answer: 'Most of what home service businesses already use, like Google Calendar, Google Business Profile, Twilio, QuickBooks, Jobber and Housecall Pro. Using something else? Mention it when you send the job posting and we’ll tell you straight if we can connect it.' },
           { question: 'What if it doesn’t know an answer?', answer: 'It says so, takes a message, and gets it to you or whoever you choose by text or email. We set clear rules together for what it can promise, like prices and timing, and what always goes to a person.' },
           { question: 'How long does it take to build?', answer: 'Most agents are live in about two to three weeks, depending on the role and how many tools it connects to. We’ll give you a timeline after we look at your job posting.' },
           { question: 'Does it work in Spanish?', answer: 'Yes. Every agent works in English and Spanish from day one and answers in whichever language the customer uses. We write and test the Spanish ourselves, here in Miami, so it sounds like someone from here.' },
@@ -223,7 +223,7 @@ export const translations = {
           { name: 'Recepcionista bilingüe', short: 'Contesta llamadas y mensajes, agenda trabajos y no pierde un cliente ni a las 2am.', does: 'Atiende cada llamada y mensaje en inglés o en español, hace las preguntas que tú harías, agenda la visita en tu calendario y te manda un resumen.' },
           { name: 'Despachador', short: 'Organiza las cuadrillas, avisa “vamos en camino” y reorganiza cuando un trabajo se alarga.', does: 'Arma el horario del día, le avisa al cliente cuando la cuadrilla va en camino y mueve las próximas citas cuando un trabajo se demora.' },
           { name: 'Seguimiento de estimados', short: 'Le da seguimiento a cada estimado hasta que sea un sí o un no.', does: 'Se comunica con cada cliente que recibió un estimado, contesta preguntas sencillas y te avisa en cuanto alguien está listo para agendar.' },
-          { name: 'Solicitud de reseñas', short: 'Les pide una reseña en Google a los clientes contentos después de cada trabajo.', does: 'Le escribe a cada cliente al terminar el trabajo, le pregunta cómo le fue y manda a los clientes contentos directo a tu página de reseñas en Google.' },
+          { name: 'Solicitud de reseñas', short: 'Le pide una reseña en Google a cada cliente después de cada trabajo.', does: 'Le escribe a cada cliente al terminar el trabajo con un agradecimiento y el enlace directo a tu página de reseñas en Google, y te avisa si menciona algún problema para que lo resuelvas.' },
           { name: 'Asistente de permisos y papeleo', short: 'Lleva el control de permisos, inspecciones y registros de garantía.', does: 'Mantiene una lista al día de permisos y fechas de inspección, te recuerda antes de cada fecha límite y registra las garantías después de cada instalación.' },
           { name: 'Coordinador de redes sociales', short: 'Convierte las fotos de tus trabajos en publicaciones en los dos idiomas.', does: 'Toma las fotos que manda tu cuadrilla, escribe una publicación en inglés y en español, y la programa para que tú la apruebes.' },
         ],
@@ -241,7 +241,7 @@ export const translations = {
         faqEyebrow: 'Preguntas', faqTitle: 'Respuestas claras.',
         faq: [
           { question: '¿Reemplaza a mis empleados?', answer: 'No. Se encarga de lo que se queda sin hacer: las llamadas de las 2am, el seguimiento que nadie tiene tiempo de dar, el papeleo. Tu equipo sigue haciendo los trabajos. La mayoría de los dueños usan un agente para cubrir noches y fines de semana, y para quitarle presión a la persona de la oficina.' },
-          { question: '¿Con qué herramientas funciona?', answer: 'Con casi todo lo que ya usan los negocios de servicios para el hogar, como GoHighLevel, Google Calendar, Google Business Profile, Twilio, QuickBooks, Jobber y Housecall Pro. ¿Usas otra cosa? Menciónala cuando nos mandes la oferta de empleo y te decimos con honestidad si la podemos conectar.' },
+          { question: '¿Con qué herramientas funciona?', answer: 'Con casi todo lo que ya usan los negocios de servicios para el hogar, como Google Calendar, Google Business Profile, Twilio, QuickBooks, Jobber y Housecall Pro. ¿Usas otra cosa? Menciónala cuando nos mandes la oferta de empleo y te decimos con honestidad si la podemos conectar.' },
           { question: '¿Qué pasa si no sabe una respuesta?', answer: 'Lo dice, toma el mensaje y te lo hace llegar a ti o a quien tú decidas, por mensaje de texto o correo. Juntos definimos qué puede prometer, como precios y tiempos, y qué siempre pasa a una persona.' },
           { question: '¿Cuánto tiempo toma crearlo?', answer: 'La mayoría de los agentes están listos en unas dos o tres semanas, según el puesto y cuántas herramientas hay que conectar. Te damos un tiempo estimado después de revisar tu oferta de empleo.' },
           { question: '¿Funciona en español?', answer: 'Sí. Todos los agentes funcionan en inglés y en español desde el primer día, y contestan en el idioma que use el cliente. Escribimos y probamos el español nosotros mismos, aquí en Miami, para que suene como alguien de aquí.' },

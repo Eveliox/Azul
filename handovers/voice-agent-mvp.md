@@ -479,7 +479,7 @@ Come back after Phase 8 (first pilot live with Kevin). We'll cover:
 - Vapi vs Bland vs building custom (do you need to migrate?)
 - Handling voicemails vs live calls
 - Multi-assistant per client (different agent for after-hours vs business hours)
-- Integrating with GHL when you're ready to add that
+- Sending call summaries through Review Booster's Vapi webhook (`review-booster/api/vapi-webhook`, already built)
 - Charging setup fees ($499 setup + $349/mo)
 - Handling clients who want their AI voice to sound EXACTLY like them (voice cloning — advanced)
 

@@ -1,0 +1,5 @@
+# Private client data: specs, prompts with business details, transcripts, credentials
+clients/
+.env
+.env.*
+!.env.example

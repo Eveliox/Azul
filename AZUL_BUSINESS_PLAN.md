@@ -60,18 +60,19 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 **Purpose:** Automate collecting 5-star Google reviews from happy customers while shielding the business from public negative feedback.
 
 **Tool stack:**
-- Primary: GoHighLevel (built-in review automation)
-- SMS: Twilio (via GHL)
-- Email: SendGrid or Mailgun (via GHL)
+- Primary: Review Booster, Azul's own build (`review-booster/`: Vercel + Supabase)
+- SMS: Twilio
+- Email: Resend
 - Alternative standalone: NiceJob, Birdeye, or Podium
 
 **Workflow:**
-1. Client marks a job "complete" in their existing CRM (Jobber, Housecall Pro, ServiceTitan) → webhook fires to GHL. If no CRM: manual add via a simple form.
-2. GHL waits 2-4 hours after job completion.
+1. Front desk adds the finished job in Review Booster's admin page (10 seconds from a phone). Planned: a webhook from their job software (Jobber, Housecall Pro, ServiceTitan) on "job completed".
+2. Review Booster waits a few hours after job completion.
 3. Sends bilingual SMS + email: *"Hi [Name], thanks for choosing [Business]! Would you leave us a quick review?"*
 4. **Review gate:** link opens landing page asking "How was your experience?"
    - 5 stars → redirect to Google/Facebook review link
    - 1-4 stars → private feedback form emailed only to the client (the "shield")
+   - **Policy note:** Google's review policy prohibits selectively asking for positive reviews, so this gate puts clients' Google profiles at risk. See `ai-agents/README.md` section 4.4 before selling it to new clients.
 5. If no response in 48 hours, one follow-up SMS.
 6. Dashboard tracks: sent / opened / clicked / posted.
 
@@ -86,7 +87,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 
 **Tool stack:**
 - Google Business Profile Manager (free)
-- GHL Social Planner (pushes to GMB API) OR Localo / Publer
+- Localo or Publer (schedule to Google Business Profile), or post directly in GBP Manager
 - Claude API or ChatGPT Plus (content generation)
 - LocalFalcon ($40/mo) for local ranking reports
 
@@ -96,7 +97,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 3. Feed to Claude/GPT with a prompt template:
    > "Write a 100-word Google Business post in [English/Spanish] for a [industry] business in [Miami neighborhood] about [job description]. Include the neighborhood name naturally. End with a soft CTA."
 4. Human review the AI output (5 min).
-5. Schedule via GHL Social Planner or post manually — 1-2 posts/week.
+5. Schedule via Localo / Publer or post manually — 1-2 posts/week.
 6. Monthly: run LocalFalcon rank scan → export PDF → email to client with 2-sentence commentary.
 
 **Effort per client:** ~2-3 hours/month total.
@@ -109,8 +110,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 **Purpose:** Consistent bilingual social presence on Facebook + Instagram using the client's real work photos.
 
 **Tool stack:**
-- GHL Social Planner OR Buffer / Later / Publer
-- Meta Business Suite (for FB + IG)
+- Meta Business Suite (free, schedules FB + IG) OR Publer / Buffer / Later
 - Claude/GPT for captions
 
 **Workflow:**
@@ -131,7 +131,6 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 **Tool stack:**
 - Vapi.ai (~$0.05/min) — most flexible, dev-first
 - OR Bland.ai (~$0.09/min) — no-code, easier for agency setup
-- OR GHL Voice AI add-on (if you already run GHL)
 - Twilio for phone numbers ($1-3/mo)
 
 **Workflow:**
@@ -159,7 +158,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 - React + Vite + Tailwind (what Azul's own site is built with)
 - OR Framer ($15/mo) for faster template-based iteration
 - Deploy: Vercel or Cloudflare Pages (free tier or $20/mo)
-- Chat widget: Crisp (free tier) or GHL's built-in
+- Chat widget: Crisp (free tier)
 
 **Workflow:**
 1. **Week 1-2 (setup):** discovery call → wireframe → design → build → launch. Use vertical templates (one for roofing, one for HVAC, one for pool services) to avoid designing from scratch.
@@ -184,7 +183,9 @@ Waitlist only for now. Do NOT build this before you have 10+ paying clients on o
 
 | Purpose | Tool | Monthly Cost |
 |---|---|---|
-| Core CRM, automation, reviews, SMS, social scheduling, websites | **GoHighLevel Agency Plan** | $297-$497 |
+| Reviews, SMS, email, Vapi lead alerts | **Review Booster** (own build: Vercel Pro + Supabase + Twilio + Resend) | ~$20-45 + ~$0.01/SMS |
+| Social + GBP scheduling | Meta Business Suite (free) or Publer / Localo | Free-low |
+| Glue between client tools | Make.com | Free-low |
 | AI phone answering | Vapi.ai or Bland.ai | ~$50/client (usage) |
 | Content generation | Claude API + ChatGPT Plus | $20-100 |
 | Local rank tracking | LocalFalcon | $40 |
@@ -193,7 +194,7 @@ Waitlist only for now. Do NOT build this before you have 10+ paying clients on o
 | Design templates | Figma / Framer | $15 |
 | Agency WhatsApp Business number | Meta (free) or Twilio | Free-$5 |
 
-**Total fixed monthly cost:** ~$500-700
+**Total fixed monthly cost:** ~$150-300
 **Per-client variable cost:** $50-100 (mostly SMS + AI voice minutes)
 
 ---
@@ -210,7 +211,7 @@ Waitlist only for now. Do NOT build this before you have 10+ paying clients on o
 
 | Clients | MRR | Gross Profit/mo | Notes |
 |---|---|---|---|
-| 2 | $1,098 | $940 | Break-even on fixed tool costs |
+| 2 | $1,098 | $940 | Well past fixed tool costs |
 | 10 | $5,490 | $4,700 | Founder still solo, working 40 hrs/wk |
 | 20 | $10,980 | $9,400 | Hire first VA (~$2,000/mo Philippines or LatAm) |
 | 30+ | $16,470+ | $14,100+ | Systemize SOPs, hire second VA or account manager |
@@ -226,14 +227,14 @@ Waitlist only for now. Do NOT build this before you have 10+ paying clients on o
 ## 6. 30-Day Launch Plan
 
 ### Week 1 — Infrastructure
-- Sign up for GoHighLevel Agency plan ($297 starter tier)
+- Deploy Review Booster (`review-booster/README.md`) and start A2P 10DLC registration
 - Pick 1 vertical to specialize in first (recommend roofing)
-- Create Azul's own GHL sub-account as the test/demo environment
+- Add Azul itself as a test client in Review Booster
 - Set up Twilio account, buy 1 phone number for AI Answering testing
 - Sign up for Claude API + LocalFalcon
 
 ### Week 2 — Automations
-- Build Review Booster automation in GHL (SMS + email + review gate)
+- Test Review Booster end to end against yourself (SMS + email + review page)
 - Build missed-call text-back automation
 - Configure one test AI Answering agent in Vapi (bilingual, roofing-flavored)
 - Write bilingual prompt library for content generation (SEO posts, social captions, review requests)
@@ -241,7 +242,7 @@ Waitlist only for now. Do NOT build this before you have 10+ paying clients on o
 
 ### Week 3 — First client
 - Land 1 Founding Client — offer free 30 days of full Growth Suite in exchange for case study rights
-- Onboard them into GHL, tune all automations against their real data
+- Onboard them into Review Booster and your client tracker, tune everything against their real data
 - Start generating content, answering their calls, running review requests
 - Document every setup step as an SOP
 
@@ -313,7 +314,7 @@ Bilingual is the moat AND doubles content workload. To manage it:
 
 - **Prompt library must produce both languages from one input.** Same job description in → EN and ES outputs generated in one API call.
 - **Miami/Latin American Spanish, not Spain Spanish.** Use "usted" for professional register with business owners. Vertical-specific terminology (Techos, HVAC stays as HVAC, Plomería, Servicios de Piscinas, etc.).
-- **Client language preference stored per account** in GHL so all their content defaults to the right language.
+- **Language preference stored per client and per customer** in Review Booster (Supabase) and in your client tracker, so all their content defaults to the right language.
 - **Meta / GBP posts can be language-tagged** — post EN version to English-facing audience, ES to Spanish-facing.
 - **AI Answering script must handle language switch mid-call.** Customers in Miami switch mid-sentence.
 
