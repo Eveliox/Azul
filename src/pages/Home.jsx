@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 import { gsap, groupLines, useGSAP } from '../lib/gsap'
@@ -74,34 +74,19 @@ function Hero() {
 
 function Purpose() {
   const { c } = useLanguage()
-  const section = useRef(null)
-  const video = useRef(null)
-  const reduced = useReducedMotion()
-  const [playing, setPlaying] = useState(false)
-  const src = import.meta.env.VITE_PURPOSE_VIDEO || '/images/purpose-roofers.webm'
-  useEffect(() => { if (reduced) video.current?.pause(); else video.current?.play().catch(() => {}) }, [reduced])
-  function toggle() { if (playing) video.current.pause(); else video.current.play().catch(() => {}) }
-
-  // Pin the section while the statement lights up word by word with scroll.
-  // Unrevealed words stay at 25% opacity, so the text is never invisible.
-  useGSAP(() => {
-    if (reduced) return
-    const words = section.current.querySelectorAll('.purpose-title .split-word')
-    gsap.timeline({ scrollTrigger: { trigger: section.current, start: 'top top', end: '+=110%', pin: true, scrub: 0.6, anticipatePin: 1 } })
-      .fromTo(words, { opacity: 0.25 }, { opacity: 1, ease: 'none', stagger: 0.12 })
-      .fromTo(video.current, { scale: 1.08 }, { scale: 1, ease: 'none', duration: words.length * 0.12 }, 0)
-  }, { scope: section, dependencies: [reduced, c.purpose.title], revertOnUpdate: true })
-
   return (
-    <section className="purpose" ref={section}>
-      <video ref={video} src={src} poster="/images/purpose-roofers.jpg" muted loop playsInline preload="metadata" autoPlay={!reduced} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} aria-label={c.purpose.fallback} />
-      <div className="purpose-shade" />
-      <div className="purpose-content">
-        <SectionEyebrow>{c.purpose.eyebrow}</SectionEyebrow>
-        <span className="purpose-year">{c.purpose.year}</span>
+    <section className="purpose purpose-editorial">
+      <div className="purpose-statement">
+        <div className="purpose-heading"><SectionEyebrow>{c.purpose.eyebrow}</SectionEyebrow><span>{c.purpose.year}</span></div>
         <SplitText className="purpose-title" reveal={false}>{c.purpose.title}</SplitText>
-        <div className="purpose-bottom"><span>{c.purpose.caption}</span><button onClick={toggle} aria-label={playing ? c.purpose.pause : c.purpose.play}><span aria-hidden="true">{playing ? 'Ⅱ' : '▷'}</span>{playing ? c.purpose.pause : c.purpose.play}</button></div>
+        <p className="purpose-support">{c.purpose.support}</p>
+        <Link className="text-link" to="/work">{c.purpose.cta}<Arrow /></Link>
+        <p className="purpose-signoff">{c.purpose.caption}</p>
       </div>
+      <figure className="purpose-photo">
+        <ImageReveal src="/aspire-roofing-preview.png" alt={c.purpose.imageAlt} parallax={false} />
+        <figcaption><span>{c.purpose.imageCaption}</span><span aria-hidden="true">↗</span></figcaption>
+      </figure>
     </section>
   )
 }

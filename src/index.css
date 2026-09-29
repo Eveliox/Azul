@@ -114,18 +114,23 @@ html.lenis,html.lenis body{height:auto}
 .section-intro h2{font-size:clamp(36px,4vw,63px)}
 .section-intro p{font-size:15px;color:var(--muted);max-width:350px}
 
-/* Purpose: pinned while the statement lights up word by word. */
-.purpose{height:100svh;min-height:560px;position:relative;overflow:hidden;background:#09236d}
-.purpose video,.purpose-shade{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.purpose video{filter:saturate(.25)}
-.purpose-shade{background:linear-gradient(0deg,#021546d9,#0825798c);mix-blend-mode:multiply}
-.purpose-content{position:relative;height:100%;z-index:1;padding:calc(var(--nav-h) + 40px) var(--section-x) var(--float-safe);display:flex;flex-direction:column}
+/* Purpose: readable statement and project photography in the normal page flow. */
+.purpose-editorial{display:grid;grid-template-columns:1.1fr 1fr;gap:7vw;align-items:center;background:#102da0;padding:85px var(--section-x);position:relative;overflow:hidden}
+.purpose-statement{min-width:0}
+.purpose-heading{display:flex;align-items:start;justify-content:space-between;gap:24px;margin-bottom:65px}
+.purpose-heading .eyebrow{margin:0}
+.purpose-heading>span{font-size:10px;letter-spacing:.12em;color:#c1ccf6}
 .purpose .eyebrow-square,.audit .eyebrow-square{background:white}
-.purpose-year{font-size:10px;letter-spacing:.1em;margin-top:auto;margin-bottom:22px}
-.purpose-title{font-size:clamp(46px,7vw,110px)}
-.purpose-bottom{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-top:auto;padding-top:32px;font-size:9px;letter-spacing:.1em}
-.purpose-bottom button{display:flex;align-items:center;gap:12px;border:0;background:none;font-size:11px}
-.purpose-bottom button>span{display:grid;place-items:center;border:1px solid #ffffff60;border-radius:50%;width:42px;height:42px}
+.purpose-title{font-size:clamp(40px,5.1vw,78px);line-height:1.04;letter-spacing:-.055em;color:#fff}
+.purpose-support{max-width:350px;margin-top:30px;font-size:14px;line-height:1.75;color:#d2daf8}
+.purpose-statement>.text-link{margin-top:20px;color:#fff}
+.purpose-signoff{margin-top:60px;font-size:8px;letter-spacing:.12em;color:#bdc9f2;max-width:350px}
+.purpose-photo{margin:0;min-width:0;align-self:center}
+.purpose-photo .image-reveal{height:clamp(390px,39vw,590px);background:#183772}
+.purpose-photo .image-reveal-inner{inset:0}
+.purpose-photo img{filter:saturate(.75);object-position:48% 55%}
+.purpose-photo figcaption{display:flex;justify-content:space-between;align-items:center;padding:17px 0;border-bottom:1px solid #ffffff35;gap:20px;font-size:8px;letter-spacing:.1em;color:#dce4ff}
+.purpose-photo figcaption>span:last-child{font-size:24px}
 
 /* Client logos: full-bleed marquee that pauses on hover. Captions only on
    hover or keyboard focus (:focus-visible, so a mouse click never sticks). */
@@ -299,11 +304,6 @@ input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px;flex-shrink
 .service-name{font-size:27px;max-width:calc(100% - 30px)}
 .service-arrow{font-size:25px}
 .waitlist{margin-left:22px;font-size:8px}
-.purpose-content{padding-top:calc(var(--nav-h) + 32px)}
-.purpose-title{font-size:clamp(38px,11vw,49px)}
-.purpose-bottom{gap:20px;font-size:8px}
-.purpose-bottom>span{max-width:190px}
-.purpose-bottom button{font-size:0}
 .client-logo{padding:38px 28px}
 .client-logo strong{font-size:26px}
 .marquee--static{grid-template-columns:repeat(2,1fr)}
@@ -449,3 +449,6 @@ input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px;flex-shrink
 .work-image .work-browser-bar{position:absolute;top:30px;left:25px;right:25px}
 .work-image img{position:absolute;top:50px;left:25px;width:calc(100% - 50px);height:calc(100% - 50px)}
 @media(max-width:700px){.work-image .work-browser-bar{top:22px;left:18px;right:18px}.work-image img{top:42px;left:18px;width:calc(100% - 36px);height:calc(100% - 42px)}}
+
+@media(max-width:900px){.purpose-editorial{gap:35px;padding-block:65px}.purpose-title{font-size:clamp(38px,5vw,58px)}.purpose-heading{margin-bottom:42px}.purpose-signoff{margin-top:40px}}
+@media(max-width:700px){.purpose-editorial{grid-template-columns:1fr;padding:55px var(--section-x);gap:35px}.purpose-heading{margin-bottom:38px}.purpose-title{font-size:clamp(38px,10.5vw,56px)}.purpose-support{font-size:14px;margin-top:24px}.purpose-signoff{margin-top:35px}.purpose-photo .image-reveal{height:auto;aspect-ratio:5/4}.purpose-photo figcaption{font-size:7px;padding:12px 0}}
