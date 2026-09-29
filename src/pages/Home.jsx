@@ -12,6 +12,10 @@ import { MagneticButton } from '../components/motion/MagneticButton'
 import { Marquee } from '../components/motion/Marquee'
 import { SplitText } from '../components/motion/SplitText'
 import { Wordmark } from '../components/motion/Wordmark'
+import { HeroFilm } from '../components/site/HeroFilm'
+import { AgentOrbit } from '../components/agents/AgentOrbit'
+import { HoursComparison } from '../components/agents/HoursComparison'
+import { JobPostingButton } from '../components/agents/JobPostingDrawer'
 import { ServiceList } from '../components/site/ServiceList'
 import { Arrow, DownloadModal } from '../components/site/UI'
 import { bookingUrl } from '../components/site/Layout'
@@ -57,12 +61,7 @@ function Hero() {
 
   return (
     <section className="hero" ref={ref}>
-      <div className="hero-bg" aria-hidden="true">
-        <img className="hero-image" src="/images/waterfront.jpg" alt="" fetchPriority="high" />
-        <div className="hero-shade" />
-        <div className="hero-darken" />
-        <div className="hero-curtain" />
-      </div>
+      <HeroFilm />
       <DotGrid avoid=".hero-meta > *, .hero-copy h1, .hero-copy p, .hero-bottom > *, [data-dot-avoid]" rows={7} />
       <div className="hero-meta"><span>{c.hero.location}</span><span>{c.hero.index}</span></div>
       <div className="hero-copy"><SplitText as="h1" reveal={false}>{c.hero.title}</SplitText><p>{c.hero.sub}</p></div>
@@ -142,6 +141,29 @@ export function Guides() {
   return <section className="section guides" id="guides"><SectionEyebrow>{c.guides.eyebrow}</SectionEyebrow><div className="guides-grid"><div><SplitText>{c.guides.title}</SplitText><div className="guide-list">{c.guides.titles.map((title, i) => <button key={i} onMouseEnter={() => setActive(i)} onFocus={() => setActive(i)} onClick={() => setSelected(i)}><span className="guide-number">0{i + 1}</span><span>{title}<small>{c.guides.free}</small></span><Arrow /></button>)}</div></div><div className="guide-preview" aria-hidden="true"><div className={`guide-book book-${active}`}><div className="book-top"><span>{c.brand}</span><span>0{active + 1} / 03</span></div><div className="book-orbit" /><h3>{c.guides.titles[active]}</h3><span className="book-bottom">{c.guides.format} ↗</span></div></div></div>{selected !== null && <DownloadModal guide={{ id: `guide-${selected + 1}`, title: c.guides.titles[selected], description: c.guides.descriptions[selected] }} onClose={() => setSelected(null)} />}</section>
 }
 
+// New service: headline, 40 vs 168 hours, and the 24 · 7 · 365 ring.
+function AgentsFeature() {
+  const { c } = useLanguage()
+  const a = c.agents
+  return (
+    <section className="section agents-feature" id="ai-agents">
+      <SectionEyebrow>{a.home.eyebrow}</SectionEyebrow>
+      <SplitText className="agents-feature-title">{a.home.title}</SplitText>
+      <div className="agents-feature-grid">
+        <div>
+          <p className="agents-feature-body">{a.home.body}</p>
+          <HoursComparison />
+          <div className="agent-ctas">
+            <JobPostingButton />
+            <MagneticButton as={Link} className="text-link" to="/services/custom-ai-agents#examples">{a.examplesCta}<Arrow /></MagneticButton>
+          </div>
+        </div>
+        <AgentOrbit className="is-large" />
+      </div>
+    </section>
+  )
+}
+
 function Dashboard() {
   const { c } = useLanguage()
   return <div className="dashboard-scene"><div className="dashboard"><div className="dashboard-bar"><b>{c.brand}</b><span>{c.audit.mockStatus}</span><i /></div><p className="dashboard-label">{c.audit.mockLabel}</p><h3>{c.audit.mockTitle}</h3><div className="chart" aria-hidden="true">{[24, 37, 30, 45, 39, 60, 50, 65, 71, 62, 83, 96].map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div><div className="dashboard-cards">{c.audit.mockCards.map((name, i) => <div key={name}><span aria-hidden="true">{['✳', '⌖', '↗'][i]}</span><b>{name}</b><small>{c.audit.mockNotes[i]}</small></div>)}</div><p className="dashboard-bottom">{c.audit.mockBottom}</p></div><div className="scene-square" aria-hidden="true" /></div>
@@ -169,6 +191,7 @@ export default function Home() {
       <ServiceList services={c.build.services} slugs={serviceSlugs} waitlist={c.build.waitlist} waitlistIndex={5} />
       <Link className="text-link" to="/services">{c.build.all}<Arrow /></Link>
     </section>
+    <AgentsFeature />
     <Purpose />
     <Clients />
     <section className="section audit" id="audit"><div><SectionEyebrow>{c.audit.eyebrow}</SectionEyebrow><SplitText>{c.audit.title}</SplitText><p>{c.audit.body}</p><ul>{c.audit.benefits.map(benefit => <li key={benefit}><span aria-hidden="true">+</span>{benefit}</li>)}</ul><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.audit.cta}<Arrow /></a><small>{c.audit.foot}</small></div><Dashboard /></section>
