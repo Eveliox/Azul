@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 const variants = {
   up: { hidden: { opacity: 0, y: 32 }, show: { opacity: 1, y: 0 } },
@@ -20,7 +20,9 @@ export default function Reveal({
   className = '',
   stagger = 0,
 }) {
+  const reduced = useReducedMotion()
   const MotionTag = motion[Tag] || motion.div
+  if (reduced) return <Tag className={className}>{children}</Tag>
 
   if (stagger > 0) {
     return (
@@ -54,7 +56,9 @@ export default function Reveal({
 }
 
 export function RevealItem({ children, as: Tag = 'div', direction = 'up', className = '', duration = 0.6 }) {
+  const reduced = useReducedMotion()
   const MotionTag = motion[Tag] || motion.div
+  if (reduced) return <Tag className={className}>{children}</Tag>
   return (
     <MotionTag
       className={className}

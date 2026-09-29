@@ -117,12 +117,13 @@ export const content = {
           bullets: ['Weekly Google Business posts', 'Service-area location content', 'AI-written local updates (EN/ES)'],
         },
         {
-          price: '$149/mo',
+          price: 'Coming Soon',
           title: 'Social Media AI',
-          badge: 'Get 5 posts free',
+          badge: 'Join the waitlist',
           description:
             'Send us job photos, before-and-afters, or team photos. We turn them into bilingual social media posts for Facebook and Instagram, daily or weekly, using your real work.',
           bullets: ['AI-written captions (EN/ES)', 'Uses your real photos', 'Facebook & Instagram content'],
+          comingSoon: true,
         },
         {
           price: '$349/mo',
@@ -133,7 +134,7 @@ export const content = {
           bullets: ['24/7 bilingual AI call answering', 'Customer capture & call summaries', 'After-hours coverage'],
         },
         {
-          price: '$199/mo + $499 setup',
+          price: '$50/mo + $499 setup',
           title: 'Website Build',
           badge: 'Free website mockup',
           description:
@@ -175,10 +176,10 @@ export const content = {
           badge: 'Free review audit',
           stripeLinkKey: 'reviewBooster',
           features: [
-            'Automated SMS & email review requests',
-            'Private feedback shield for unhappy customers',
-            'Review dashboard & tracking',
-            'Google, Facebook & Yelp integration',
+            'Scheduled email review requests',
+            'Customer feedback collection',
+            'Request dashboard & tracking',
+            'English & Spanish messages',
           ],
           ctaLabel: 'Get Started',
         },
@@ -197,20 +198,19 @@ export const content = {
         },
         {
           title: 'Social Media AI',
-          price: '$149',
-          badge: '5 free posts',
-          stripeLinkKey: 'socialMedia',
+          badge: 'Join Waitlist',
           features: [
             'AI-written captions (EN/ES)',
             'Uses your real job photos',
             'Facebook & Instagram posting',
             'Weekly content calendar',
           ],
-          ctaLabel: 'Start Posting',
+          ctaLabel: 'Join Waitlist',
+          comingSoon: true,
         },
         {
           title: 'Website Build',
-          price: '$199',
+          price: '$50',
           priceNote: '+ $499 setup',
           badge: 'Free mockup',
           stripeLinkKey: 'websiteSetup',
@@ -230,7 +230,7 @@ export const content = {
           features: [
             '24/7 AI call answering (EN/ES)',
             'Customer capture & call summaries',
-            'Missed-call text-back',
+            'Callback request handoff',
             'After-hours coverage',
           ],
           ctaLabel: 'Start 7-Day Trial',
@@ -257,7 +257,6 @@ export const content = {
           'Professional website + chat widget',
           '5-star review automation',
           'Local Proof SEO content',
-          'Social Media AI posting',
           'Missed-call text-back',
           'Customer pipeline & tracking',
           'Full automation setup',
@@ -265,7 +264,7 @@ export const content = {
         ],
         startingAt: 'Starting at',
         price: '$549',
-        crossed: '$1,075 à la carte',
+        crossed: null, // No comparable-scope savings claim until bundle scope is finalized.
         ctaLabel: 'Book Free Demo',
         microcopy: 'No contracts. Cancel anytime.',
       },
@@ -303,22 +302,22 @@ export const content = {
         {
           question: 'How is this different from just hiring a marketing agency?',
           answer:
-            'Traditional agencies bill you $2,000+ per month for one service (usually ads or SEO) and hand you a report at the end. Azul is a productized growth system: reviews, SEO, social, website, and AI answering all working together, at a flat monthly price, with no long-term contract. You get the outcome (more booked jobs), not just a deliverable.',
+            'Azul combines website design and practical growth services for local businesses. Start with a website, review requests, local SEO, or bilingual AI answering. We agree on scope and pricing before setup. Social Media AI and AI Facebook Ads are coming soon, not included in current plans.',
         },
         {
           question: 'Do I need to be tech-savvy to use this?',
           answer:
-            'No. We set up everything: Google Business, review requests, missed-call text-back, social posting, your dashboard. You get a simple weekly summary showing new reviews, calls captured, and leads generated. If you can read a text message, you can use Azul.',
+            'No. We guide you through access, configuration, testing, and handoff for the services you choose. We explain which tools are connected and which work is handled manually. You keep ownership of your business accounts.',
         },
         {
           question: 'Do you really answer calls in English and Spanish?',
           answer:
-            'Yes. Every part of the system (review requests, SEO content, social posts, and AI phone answering) can run in English, Spanish, or both. Miami customers switch languages mid-conversation and our AI keeps up. This is baked in, not an add-on.',
+            'Yes. We configure and test English and Spanish call handling for your business. The assistant captures callback details; it does not replace staff for complex requests or emergencies. Test calls and a human fallback are part of setup.',
         },
         {
           question: 'How fast will I actually see results?',
           answer:
-            'Missed-call text-back and AI answering start capturing leads on day 1. New Google reviews typically start landing within the first week after we turn on review requests. Local SEO ranking improvements are usually visible within 30-60 days. Every plan includes a free trial or free offer so you can prove it works before paying full price.',
+            'Launch timing depends on access, approved content, and testing. Customer response and local rankings vary; we do not guarantee review counts, rankings, leads, or revenue. We agree on delivery milestones and report actual activity.',
         },
         {
           question: 'Do you serve businesses outside of Miami?',
@@ -328,7 +327,7 @@ export const content = {
         {
           question: 'What if I want to cancel?',
           answer:
-            "No long-term contracts, no cancellation fees. Give us 30 days' notice and we shut everything off cleanly. You keep the website, the reviews, the customer list, and the Google Business content we built. Founding Client pricing is the only plan locked in: it stays at $399/mo for life, but you can still cancel anytime.",
+            'Cancellation, hosting, and handover terms are confirmed in your service agreement before you start. Contact us to plan a transition without losing access to your business accounts.',
         },
       ],
     },
@@ -349,8 +348,7 @@ export const content = {
         ],
         interestLabel: "I'm interested in",
         interestOptions: [
-          { value: 'Growth Suite Bundle', label: 'Growth Suite Bundle ($549/mo)' },
-          { value: 'Founding Client Offer', label: 'Founding Client Offer ($399/mo)' },
+          { value: 'Custom plan', label: 'A custom combination of services' },
           { value: 'Review Booster', label: 'Review Booster' },
           { value: 'Local Proof SEO', label: 'Local Proof SEO' },
           { value: 'Social Media AI', label: 'Social Media AI' },
@@ -522,12 +520,13 @@ export const content = {
           bullets: ['Posts semanales de Google Business', 'Contenido de área de servicio', 'Actualizaciones AI (EN/ES)'],
         },
         {
-          price: '$149/mes',
+          price: 'Próximamente',
           title: 'Social Media AI',
-          badge: '5 posts gratis',
+          badge: 'Únase a la lista',
           description:
             'Envíenos fotos de trabajos, antes-y-después, o fotos del equipo. Las convertimos en posts bilingües para Facebook e Instagram, diario o semanal, usando su trabajo real.',
           bullets: ['Captions AI (EN/ES)', 'Usa sus fotos reales', 'Contenido para Facebook e Instagram'],
+          comingSoon: true,
         },
         {
           price: '$349/mes',
@@ -538,7 +537,7 @@ export const content = {
           bullets: ['Contestación bilingüe AI 24/7', 'Captura de cliente & resúmenes', 'Cobertura fuera de horario'],
         },
         {
-          price: '$199/mes + $499 setup',
+          price: '$50/mes + $499 setup',
           title: 'Sitio Web',
           badge: 'Mockup gratis',
           description:
@@ -580,10 +579,10 @@ export const content = {
           badge: 'Auditoría gratis',
           stripeLinkKey: 'reviewBooster',
           features: [
-            'Solicitudes SMS & email automáticas',
-            'Escudo privado para clientes descontentos',
-            'Panel de reseñas & seguimiento',
-            'Integración con Google, Facebook y Yelp',
+            'Solicitudes de reseña por email',
+            'Recopilación de opiniones',
+            'Panel de solicitudes y seguimiento',
+            'Mensajes en inglés y español',
           ],
           ctaLabel: 'Empezar',
         },
@@ -602,20 +601,19 @@ export const content = {
         },
         {
           title: 'Social Media AI',
-          price: '$149',
-          badge: '5 posts gratis',
-          stripeLinkKey: 'socialMedia',
+          badge: 'Únase a la Lista',
           features: [
             'Captions AI (EN/ES)',
             'Usa sus fotos reales de trabajos',
             'Publicación en Facebook & Instagram',
             'Calendario semanal de contenido',
           ],
-          ctaLabel: 'Empezar A Postear',
+          ctaLabel: 'Únase a la Lista',
+          comingSoon: true,
         },
         {
           title: 'Sitio Web',
-          price: '$199',
+          price: '$50',
           priceNote: '+ $499 setup',
           badge: 'Mockup gratis',
           stripeLinkKey: 'websiteSetup',
@@ -635,7 +633,7 @@ export const content = {
           features: [
             'Contestación AI 24/7 (EN/ES)',
             'Captura de cliente & resúmenes',
-            'SMS automático de llamadas perdidas',
+            'Avisos de solicitudes de llamada',
             'Cobertura fuera de horario',
           ],
           ctaLabel: 'Empezar Prueba 7 Días',
@@ -662,7 +660,6 @@ export const content = {
           'Sitio web profesional + chat widget',
           'Automatización de reseñas 5 estrellas',
           'Contenido de Local Proof SEO',
-          'Publicación con Social Media AI',
           'SMS de llamadas perdidas',
           'Pipeline de clientes & seguimiento',
           'Configuración completa automatizada',
@@ -670,7 +667,7 @@ export const content = {
         ],
         startingAt: 'Desde',
         price: '$549',
-        crossed: '$1,075 por separado',
+        crossed: null, // Sin comparación de ahorro hasta definir el alcance.
         ctaLabel: 'Reservar Demo Gratis',
         microcopy: 'Sin contratos. Cancele cuando quiera.',
       },
@@ -708,22 +705,22 @@ export const content = {
         {
           question: '¿En qué se diferencia esto de contratar una agencia de marketing?',
           answer:
-            'Las agencias tradicionales le cobran $2,000+ al mes por un solo servicio (usualmente anuncios o SEO) y le entregan un reporte al final. Azul es un sistema de crecimiento productizado: reseñas, SEO, redes sociales, sitio web, y contestación AI trabajando juntos, a un precio mensual fijo, sin contrato largo. Usted recibe el resultado (más trabajos reservados), no solo un entregable.',
+            'Azul combina diseño web y servicios prácticos para negocios locales. Empiece con un sitio, solicitudes de reseña, SEO local o contestación bilingüe. Acordamos alcance y precio antes de configurar. Social Media AI y Anuncios AI en Facebook llegarán próximamente y no están incluidos.',
         },
         {
           question: '¿Necesito saber de tecnología para usarlo?',
           answer:
-            'No. Nosotros configuramos todo: Google Business, solicitudes de reseña, SMS de llamadas perdidas, publicación en redes, su panel. Usted recibe un resumen semanal simple mostrando reseñas nuevas, llamadas capturadas, y leads generados. Si sabe leer un mensaje de texto, sabe usar Azul.',
+            'No. Le guiamos con accesos, configuración, pruebas y entrega de los servicios elegidos. Explicamos qué herramientas están conectadas y qué trabajo se realiza manualmente. Usted conserva sus cuentas de negocio.',
         },
         {
           question: '¿Realmente contestan llamadas en inglés y español?',
           answer:
-            'Sí. Cada parte del sistema (solicitudes de reseña, contenido SEO, posts sociales, y contestación telefónica AI) puede funcionar en inglés, español, o ambos. Los clientes en Miami cambian de idioma en medio de la conversación y nuestra AI sigue el ritmo. Esto está integrado, no es un add-on.',
+            'Sí. Configuramos y probamos llamadas en inglés y español para su negocio. El asistente captura solicitudes de devolución de llamada; no reemplaza al personal en temas complejos ni emergencias. Incluimos pruebas y una alternativa de atención humana.',
         },
         {
           question: '¿Qué tan rápido veré resultados?',
           answer:
-            'El SMS de llamadas perdidas y la contestación AI empiezan a capturar leads el día 1. Las reseñas nuevas de Google típicamente empiezan a llegar la primera semana después de que activamos las solicitudes. Las mejoras en posicionamiento SEO local usualmente se ven en 30-60 días. Cada plan incluye una prueba gratis para que pueda comprobar que funciona antes de pagar el precio completo.',
+            'El lanzamiento depende de los accesos, contenido aprobado y pruebas. La respuesta de clientes y el posicionamiento varían: no garantizamos reseñas, rankings, leads ni ingresos. Acordamos hitos de entrega y reportamos actividad real.',
         },
         {
           question: '¿Atienden negocios fuera de Miami?',
@@ -733,7 +730,7 @@ export const content = {
         {
           question: '¿Qué pasa si quiero cancelar?',
           answer:
-            'Sin contratos a largo plazo, sin penalidad por cancelación. Nos avisa con 30 días de anticipación y apagamos todo limpiamente. Usted se queda con el sitio web, las reseñas, la lista de clientes, y el contenido de Google Business que construimos. El precio de Cliente Fundador es el único plan bloqueado: se queda en $399/mes de por vida, pero aún puede cancelar cuando quiera.',
+            'Las condiciones de cancelación, hosting y entrega se confirman en el acuerdo de servicio antes de comenzar. Contáctenos para planificar una transición sin perder acceso a sus cuentas de negocio.',
         },
       ],
     },
@@ -754,8 +751,7 @@ export const content = {
         ],
         interestLabel: 'Me interesa',
         interestOptions: [
-          { value: 'Growth Suite Bundle', label: 'Growth Suite Bundle ($549/mes)' },
-          { value: 'Founding Client Offer', label: 'Oferta Cliente Fundador ($399/mes)' },
+          { value: 'Custom plan', label: 'Una combinación de servicios' },
           { value: 'Review Booster', label: 'Review Booster' },
           { value: 'Local Proof SEO', label: 'Local Proof SEO' },
           { value: 'Social Media AI', label: 'Social Media AI' },

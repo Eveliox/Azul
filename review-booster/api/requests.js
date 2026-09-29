@@ -40,6 +40,12 @@ export default async function handler(req, res) {
     const { data: client, error: cErr } = await db()
       .from('rb_clients').select('*').eq('id', b.client_id).single()
     if (cErr || !client) return res.status(404).json({ error: 'Client not found' })
+    if (!(client.services || []).includes('reviews')) {
+      return res.status(403).json({ error: 'Review Booster is not enabled for this business' })
+    }
+    if (!client.google_review_url) {
+      return res.status(409).json({ error: 'This business has no Google review link yet' })
+    }
 
     const delayMs = b.send_now ? 0 : client.delay_hours * 3600 * 1000
     const row = {
