@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { content } from '../data/content'
+import { translations } from '../data/translations'
 
 const LanguageContext = createContext(null)
 
@@ -8,7 +8,8 @@ const SUPPORTED = ['en', 'es']
 
 function detectInitialLang() {
   if (typeof window === 'undefined') return 'en'
-  const stored = window.localStorage.getItem(STORAGE_KEY)
+  let stored
+  try { stored = window.localStorage.getItem(STORAGE_KEY) } catch { /* Storage can be blocked. */ }
   if (stored && SUPPORTED.includes(stored)) return stored
   const browser = (window.navigator.language || 'en').slice(0, 2).toLowerCase()
   return SUPPORTED.includes(browser) ? browser : 'en'
@@ -18,8 +19,9 @@ export function LanguageProvider({ children }) {
   const [lang, setLangState] = useState(detectInitialLang)
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, lang)
+    try { window.localStorage.setItem(STORAGE_KEY, lang) } catch { /* In-memory language remains available. */ }
     document.documentElement.lang = lang
+    document.title = translations[lang].meta
   }, [lang])
 
   const setLang = (next) => {
@@ -32,7 +34,7 @@ export function LanguageProvider({ children }) {
     lang,
     setLang,
     toggleLang,
-    c: content[lang],
+    c: translations[lang],
   }
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>

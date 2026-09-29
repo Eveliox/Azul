@@ -1,0 +1,17 @@
+import { useLanguage } from '../../contexts/LanguageContext'
+
+/** Illustrative product interfaces, kept in React so every label switches language. */
+export function ServiceVisual({ index }) {
+  const { c } = useLanguage()
+  const v = c.serviceVisuals
+  return <div className={`service-demo demo-${index}`}>
+    <div className="demo-top"><b>{c.brand}</b><span>{v.example}</span><i aria-hidden="true" /></div>
+    <div className="demo-heading"><span>0{index + 1} / 06</span><h3>{v.titles[index]}</h3></div>
+    {index === 0 && <div className="demo-phone"><div className="phone-notch"/><span className="demo-label">{v.messages}</span><div className="message-bubble">{v.reviewRequest}</div><div className="review-panel"><span className="review-stars" aria-hidden="true">★★★★★</span><b>{v.reviewTitle}</b><p>{v.reviewBody}</p><span className="demo-action">{v.leaveReview} ↗</span></div><p className="demo-footnote">{v.reviewNote}</p></div>}
+    {index === 1 && <div className="social-planner"><div className="planner-top"><span>{v.week}</span><span>← &nbsp; →</span></div><div className="planner-days">{v.days.map((d,i)=><span className={i===2?'selected':''} key={i}>{d}<b>{12+i}</b></span>)}</div><div className="social-post"><img src="/images/svc-roofing.jpg" alt=""/><div><span className="demo-label">{v.scheduled}</span><b>{v.socialTitle}</b><p>{v.socialBody}</p><span className="social-icons" aria-hidden="true">♡ &nbsp; ◯ &nbsp; ↗</span></div></div><div className="demo-chip">{v.bilingual}</div></div>}
+    {index === 2 && <div className="website-devices"><div className="browser-frame"><div className="browser-bar"><i/><i/><i/><span>{v.website}</span></div><img src="/images/work/aspire.jpg" alt=""/></div><div className="mobile-frame"><img src="/images/work/aspire-mobile.jpg" alt=""/></div><div className="demo-chip">{v.responsive}</div></div>}
+    {index === 3 && <div className="search-demo"><div className="search-field"><span aria-hidden="true">⌕</span>{v.search}</div><div className="local-map" aria-hidden="true"><i/><i/><i/><span className="map-pin pin-one">1</span><span className="map-pin pin-two">2</span><span className="map-pin pin-three">3</span></div><div className="search-result"><span className="result-icon" aria-hidden="true">⌂</span><div><b>{v.localBusiness}</b><p>{v.localDetails}</p><span>{v.serviceArea}</span></div></div><p className="demo-footnote">{v.rankingNote}</p></div>}
+    {index === 4 && <div className="call-demo"><div className="call-orb" aria-hidden="true">↗</div><span className="demo-label">{v.callStatus}</span><div className="call-wave" aria-hidden="true">{[12,24,38,19,48,60,33,48,26,42,18,10].map((h,i)=><i key={i} style={{'--bar':`${h}px`,'--delay':`${i*.08}s`}}/>)}</div><div className="call-transcript"><span>{v.assistant}</span><p>{v.assistantText}</p><span>{v.caller}</span><p>{v.callerText}</p></div><div className="demo-chip">{v.bilingual}</div></div>}
+    {index === 5 && <div className="ad-demo"><div className="ad-audience"><span className="demo-label">{v.audience}</span><strong>{v.serviceArea}</strong><div className="audience-dots" aria-hidden="true">{Array.from({length:24},(_,i)=><i key={i}/>)}</div></div><div className="ad-post"><div className="ad-account"><span className="result-icon" aria-hidden="true">⌂</span><div><b>{v.localBusiness}</b><small>{v.sponsored}</small></div></div><img src="/images/svc-roofing.jpg" alt=""/><div className="ad-caption"><b>{v.adTitle}</b><span>{v.adAction} ↗</span></div></div><div className="demo-chip">{c.build.waitlist}</div></div>}
+  </div>
+}
