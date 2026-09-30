@@ -1,3 +1,5 @@
+import { insightsCopy } from './insights.js'
+
 const shared = {
   brand: 'azul', email: 'hello@azulwebdev.com', languages: ['EN', 'ES'],
   areas: ['Miami-Dade', 'Broward', 'Palm Beach'],
@@ -21,6 +23,7 @@ const agentTools = [
 export const translations = {
   en: {
     ...shared,
+    insights: insightsCopy.en,
     about: {
       "meta": {
             "title": "About Azul — Built for Miami. Fluent in both.",
@@ -263,6 +266,7 @@ export const translations = {
   },
   es: {
     ...shared,
+    insights: insightsCopy.es,
     about: {
       "meta": {
             "title": "Sobre Azul — Hecho para Miami. En los dos idiomas.",

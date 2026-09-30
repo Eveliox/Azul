@@ -196,7 +196,7 @@ export default function Home() {
     <AgentsFeature />
     <Purpose />
     <Clients />
-    <section className="section audit" id="audit"><div><SectionEyebrow>{c.audit.eyebrow}</SectionEyebrow><SplitText>{c.audit.title}</SplitText><p>{c.audit.body}</p><ul>{c.audit.benefits.map(benefit => <li key={benefit}><span aria-hidden="true">+</span>{benefit}</li>)}</ul><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.audit.cta}<Arrow /></a><small>{c.audit.foot}</small></div><Dashboard /></section>
+    <section className="section audit" id="audit"><div><SectionEyebrow>{c.audit.eyebrow}</SectionEyebrow><SplitText>{c.audit.title}</SplitText><p>{c.audit.body}</p><ul>{c.audit.benefits.map(benefit => <li key={benefit}><span aria-hidden="true">+</span>{benefit}</li>)}</ul><Link className="button" to="/free-report">{c.audit.cta}<Arrow /></Link><small>{c.audit.foot}</small></div><Dashboard /></section>
     <Guides />
   </>
 }
