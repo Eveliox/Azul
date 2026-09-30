@@ -21,7 +21,6 @@ export function LanguageProvider({ children }) {
   useEffect(() => {
     try { window.localStorage.setItem(STORAGE_KEY, lang) } catch { /* In-memory language remains available. */ }
     document.documentElement.lang = lang
-    document.title = translations[lang].meta
   }, [lang])
 
   const setLang = (next) => {

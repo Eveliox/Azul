@@ -499,3 +499,67 @@ input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px;flex-shrink
   .service-detail-included ul { gap: 0; }
   .service-detail-next { flex-direction: column; align-items: flex-start; }
 }
+
+/* About: the shared type, color, spacing, and motion system. */
+.about-hero { position: relative; isolation: isolate; padding-top: var(--pad-top); }
+.about-hero > :not(.dot-grid) { position: relative; z-index: 1; }
+.about-hero .dot-grid { opacity: .3; }
+.about-hero h1 { max-width: 1500px; font-size: clamp(50px, 7vw, 110px); }
+.about-hero-intro { margin-top: 35px; max-width: 850px; color: var(--muted); font-size: clamp(16px, 1.25vw, 20px); }
+.about-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px 35px; margin-top: 35px; }
+.about-actions .text-link { margin-top: 0; }
+.about-section { border-top: 1px solid var(--line); }
+.about-split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 6vw; align-items: start; }
+.about-page h2 { font-size: clamp(36px, 4vw, 60px); }
+.about-prose, .about-support, .about-founder-bio { font-size: 16px; color: var(--muted); }
+.about-prose p + p { margin-top: 22px; }
+.about-differences, .about-steps, .about-regions, .about-principles { list-style: none; padding: 0; margin: 0; }
+.about-differences { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 6vw; margin-top: 55px; }
+.about-differences li { display: flex; gap: 25px; border-top: 1px solid var(--line); padding: 32px 0; }
+.about-number { flex-shrink: 0; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.about-page h3 { font-size: clamp(22px, 2vw, 30px); line-height: 1.2; font-weight: 500; letter-spacing: -.035em; }
+.about-differences p, .about-steps p { color: var(--muted); font-size: 15px; margin-top: 16px; max-width: 490px; }
+.about-support { max-width: 420px; margin-top: 25px; }
+.about-territory h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.about-regions { margin: 20px 0 38px; }
+.about-regions li { font-size: clamp(24px, 2.5vw, 36px); letter-spacing: -.035em; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.about-trades { margin-top: 20px; }
+.about-page .about-trades li { font-size: 13px; color: inherit; border-color: var(--line); background: none; }
+.about-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 55px; }
+.about-steps li { border-top: 1px solid var(--line); padding-top: 25px; }
+.about-steps h3 { margin-top: 28px; }
+.about-founder { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: 6vw; }
+.about-founder-role { color: var(--muted); margin-top: 22px; font-size: 13px; }
+.about-founder-bio { margin-top: 30px; max-width: 570px; }
+.about-founder-note { border-top: 1px solid var(--line); padding-top: 24px; margin-top: 30px; font-size: 13px; }
+.about-founder-photo { margin: 0; width: 100%; max-width: 520px; justify-self: end; }
+.about-photo-placeholder, .about-founder-photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.about-photo-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; border: 1px dashed var(--line); padding: 30px; text-align: center; }
+.about-photo-mark { font-size: 80px; font-weight: 300; line-height: 1; color: var(--blue); }
+.about-photo-placeholder > span:last-child { font-size: 12px; color: var(--muted); }
+.about-founder-photo figcaption { padding-top: 15px; font-size: 12px; color: var(--muted); }
+.about-principles li { display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid var(--line); padding: 22px 0; font-size: clamp(18px, 1.7vw, 25px); line-height: 1.4; letter-spacing: -.02em; }
+.about-principles li:first-child { padding-top: 0; }
+.about-principles li > span { color: var(--muted); }
+.about-founding { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 45px; align-items: center; }
+.about-founding h2 { font-size: clamp(28px, 3vw, 42px); }
+.about-founding p { max-width: 630px; margin-top: 20px; color: var(--muted); font-size: 15px; }
+.about-founding .about-founding-note { font-size: 12px; margin-top: 10px; }
+.about-founding-action strong { font-size: clamp(50px, 5vw, 72px); font-weight: 500; letter-spacing: -.055em; color: #f4f3ef; }
+.about-founding-action > p { margin-top: 0; }
+.about-founding-action > p > span { margin-left: 6px; }
+@media (max-width: 900px) {
+  .about-split, .about-founder { grid-template-columns: 1fr; gap: 38px; }
+  .about-steps { gap: 25px; }
+  .about-founder-photo { justify-self: start; max-width: 440px; }
+}
+@media (max-width: 600px) {
+  .about-hero h1 { font-size: clamp(40px, 10.5vw, 60px); }
+  .about-differences, .about-steps, .about-founding { grid-template-columns: 1fr; }
+  .about-differences, .about-steps { margin-top: 35px; }
+  .about-differences li { gap: 18px; }
+  .about-steps { gap: 32px; }
+  .about-steps h3 { margin-top: 18px; }
+  .about-founding { gap: 30px; }
+}
+.mobile-nav a[aria-current="page"] > span::before { content: ''; display: inline-block; width: 4px; height: 4px; margin-right: 12px; vertical-align: middle; background: currentColor; }
