@@ -20,7 +20,8 @@ import { ServiceList } from '../components/site/ServiceList'
 import { Arrow, DownloadModal } from '../components/site/UI'
 import { bookingUrl } from '../components/site/Layout'
 
-export const serviceSlugs = ['review-booster', 'social-media-ai', 'website-build', 'local-proof-seo', 'ai-answering-service', 'ai-facebook-ads']
+import { serviceSlugs } from '../data/services'
+import { ServicePrice } from '../components/site/ServicePrice'
 // The intro plays once per page load, not on every return to Home.
 let introPlayed = false
 
@@ -152,6 +153,7 @@ function AgentsFeature() {
       <div className="agents-feature-grid">
         <div>
           <p className="agents-feature-body">{a.home.body}</p>
+          <ServicePrice slug="custom-ai-agents" />
           <HoursComparison />
           <div className="agent-ctas">
             <JobPostingButton />

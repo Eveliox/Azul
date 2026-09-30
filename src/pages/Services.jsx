@@ -10,10 +10,10 @@ import { SplitText } from '../components/motion/SplitText'
 import { ServiceVisual } from '../components/site/ServiceVisual'
 import { Arrow } from '../components/site/UI'
 import { bookingUrl } from '../components/site/Layout'
-import { serviceSlugs } from './Home'
+import { serviceSlugs } from '../data/services'
+import { ServicePrice } from '../components/site/ServicePrice'
 
 const slugs = [...serviceSlugs, 'custom-ai-agents']
-const WAITLIST_INDEX = 5
 const NEW_INDEX = 6
 
 // One service per row, copy and preview swapping sides every other row.
@@ -32,7 +32,7 @@ function ServiceFeature({ index, name, description, chips }) {
         <h2>{name}{index === NEW_INDEX && <span className="new-badge">{p.newLabel}</span>}</h2>
         <p>{description}</p>
         {chips && <ul className="service-chips">{chips.map(chip => <li key={chip}>{chip}</li>)}</ul>}
-        {index === WAITLIST_INDEX && <span className="waitlist">{c.build.waitlist}</span>}
+        <ServicePrice slug={slugs[index]} />
         <MagneticButton as={Link} className="text-link" to={`/services/${slugs[index]}`}>{p.learn}<Arrow /></MagneticButton>
       </div>
       <div className="service-feature-visual" aria-hidden="true"><ServiceVisual index={index} total={slugs.length} /></div>

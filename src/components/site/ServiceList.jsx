@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ServicePrice } from './ServicePrice'
 import { ServiceVisual } from './ServiceVisual'
 import { useLanguage } from '../../contexts/LanguageContext'
 
 /** Previews have their own space so pointer and keyboard users can read every row. */
-export function ServiceList({ services, slugs, waitlist, waitlistIndex }) {
+export function ServiceList({ services, slugs }) {
   const [active, setActive] = useState(0)
   const { c } = useLanguage()
   return (
@@ -23,7 +24,7 @@ export function ServiceList({ services, slugs, waitlist, waitlistIndex }) {
             <span className="service-copy">
               <span className="service-name">{service}</span>
               <span className="service-description">{c.build.descriptions[i]}</span>
-              {i === waitlistIndex && <span className="waitlist">{waitlist}</span>}
+              <ServicePrice slug={slugs[i]} compact />
             </span>
             <span className="service-arrow" aria-hidden="true">↗</span>
           </Link>
