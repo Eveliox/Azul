@@ -134,12 +134,12 @@ export const content = {
           bullets: ['24/7 bilingual AI call answering', 'Customer capture & call summaries', 'After-hours coverage'],
         },
         {
-          price: '$50/mo + $499 setup',
+          price: '$50/mo + $1,500 one-time',
           title: 'Website Build',
           badge: 'Free website mockup',
           description:
             'Modern websites built to turn visitors into calls, quote requests, and booked appointments. Connected to your full growth system and includes a live chat widget in both languages.',
-          bullets: ['Conversion-focused design', 'Connected inquiry forms', 'Chat widget & hosting'],
+          bullets: ['8–15 page custom design', 'Bilingual, with CMS & SEO', 'Hosting & ongoing support'],
         },
         {
           price: 'Coming Soon',
@@ -211,13 +211,15 @@ export const content = {
         {
           title: 'Website Build',
           price: '$50',
-          priceNote: '+ $499 setup',
+          priceNote: '+ $1,500 one-time',
           badge: 'Free mockup',
           stripeLinkKey: 'websiteSetup',
           features: [
-            'Modern conversion-focused design',
-            'Chat widget included',
-            'Contact & quote forms',
+            'Company site, 8–15 pages',
+            'Custom design',
+            'CMS to edit your own content',
+            'SEO setup',
+            'English & Spanish',
             'Hosting & ongoing support',
           ],
           ctaLabel: 'Get Free Mockup',
@@ -263,7 +265,7 @@ export const content = {
           'Optional AI Answering add-on',
         ],
         startingAt: 'Starting at',
-        price: '$549',
+        price: '$999.99',
         crossed: null, // No comparable-scope savings claim until bundle scope is finalized.
         ctaLabel: 'Book Free Demo',
         microcopy: 'No contracts. Cancel anytime.',
@@ -537,12 +539,12 @@ export const content = {
           bullets: ['Contestación bilingüe AI 24/7', 'Captura de cliente & resúmenes', 'Cobertura fuera de horario'],
         },
         {
-          price: '$50/mes + $499 setup',
+          price: '$50/mes + $1,500 pago único',
           title: 'Sitio Web',
           badge: 'Mockup gratis',
           description:
             'Sitios web modernos hechos para convertir visitantes en llamadas, solicitudes de cotización, y citas reservadas. Conectados a su sistema completo e incluye chat widget en ambos idiomas.',
-          bullets: ['Diseño enfocado en conversión', 'Formularios conectados', 'Chat widget & hosting'],
+          bullets: ['Diseño a la medida, 8–15 páginas', 'Bilingüe, con CMS y SEO', 'Hosting & soporte continuo'],
         },
         {
           price: 'Próximamente',
@@ -614,13 +616,15 @@ export const content = {
         {
           title: 'Sitio Web',
           price: '$50',
-          priceNote: '+ $499 setup',
+          priceNote: '+ $1,500 pago único',
           badge: 'Mockup gratis',
           stripeLinkKey: 'websiteSetup',
           features: [
-            'Diseño moderno enfocado en conversión',
-            'Chat widget incluido',
-            'Formularios de contacto & cotización',
+            'Sitio de empresa, 8–15 páginas',
+            'Diseño a la medida',
+            'CMS para editar su propio contenido',
+            'SEO configurado',
+            'Inglés y español',
             'Hosting & soporte continuo',
           ],
           ctaLabel: 'Mockup Gratis',
@@ -666,7 +670,7 @@ export const content = {
           'Add-on opcional de Contestación AI',
         ],
         startingAt: 'Desde',
-        price: '$549',
+        price: '$999.99',
         crossed: null, // Sin comparación de ahorro hasta definir el alcance.
         ctaLabel: 'Reservar Demo Gratis',
         microcopy: 'Sin contratos. Cancele cuando quiera.',

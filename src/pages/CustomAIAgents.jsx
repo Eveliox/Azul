@@ -146,6 +146,36 @@ function Comparison() {
   )
 }
 
+function Pricing() {
+  const { c } = useLanguage()
+  const d = c.agents.detail
+  const ref = useRef(null)
+  useStagger(ref, '.agent-tier')
+  return (
+    <section className="section agent-pricing" id="pricing">
+      <SectionEyebrow>{d.pricingEyebrow}</SectionEyebrow>
+      <SplitText>{d.pricingTitle}</SplitText>
+      <div className="agent-tier-grid" ref={ref}>
+        {d.tiers.map((tier, i) => {
+          const [setup, monthly] = d.tierPrices[i]
+          return (
+            <article className="agent-tier" key={tier.name}>
+              <span className="service-index">{String(i + 1).padStart(2, '0')}</span>
+              <h3>{tier.name}</h3>
+              <p>{tier.body}</p>
+              <dl>
+                <div><dt>{d.setupLabel}</dt><dd>{setup}</dd></div>
+                <div><dt>{d.monthlyLabel}</dt><dd>{monthly}</dd></div>
+              </dl>
+            </article>
+          )
+        })}
+      </div>
+      <p className="sample-note">{d.pricingNote}</p>
+    </section>
+  )
+}
+
 export default function CustomAIAgents() {
   const { c } = useLanguage()
   const d = c.agents.detail
@@ -161,6 +191,7 @@ export default function CustomAIAgents() {
     </section>
     <Examples />
     <Comparison />
+    <Pricing />
     <section className="section agent-faq">
       <SectionEyebrow>{d.faqEyebrow}</SectionEyebrow>
       <div className="agent-faq-grid"><SplitText>{d.faqTitle}</SplitText><FAQAccordion items={d.faq} /></div>

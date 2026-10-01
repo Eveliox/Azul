@@ -9,7 +9,7 @@ export const stripeLinks = {
   // Growth Suite — Founding Client ($399/mo locked for life, first 10 clients)
   foundingClient: 'https://buy.stripe.com/28EcN7cq5bfS7wm9EBc7u02',
 
-  // Growth Suite — Standard ($549/mo, no contract)
+  // Growth Suite — Standard. This link still charges the old $549/mo; replace it with a $999.99/mo link.
   growthSuite: 'https://buy.stripe.com/00wfZjeyd5Vyg2S8Axc7u01',
 
   // Website Build — one-time setup fee ($499)

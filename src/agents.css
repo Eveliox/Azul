@@ -150,6 +150,17 @@
 .compare-table thead .is-agent{color:#8ca5ff}
 .compare-table tbody .is-agent{background:linear-gradient(90deg,#1745ed24,transparent)}
 
+/* Pricing tiers */
+.agent-pricing>h2{max-width:1000px;font-size:clamp(36px,4.4vw,66px)}
+.agent-tier-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;margin-top:60px}
+.agent-tier{display:flex;flex-direction:column;padding-top:24px;border-top:1px solid var(--line)}
+.agent-tier h3{margin-top:18px;font-size:clamp(22px,2vw,28px);font-weight:500;letter-spacing:-.035em;line-height:1.15}
+.agent-tier p{margin-top:14px;font-size:14px;color:var(--muted)}
+.agent-tier dl{display:grid;gap:14px;margin:auto 0 0;padding-top:28px}
+.agent-tier dl div{padding-top:14px;border-top:1px solid var(--line)}
+.agent-tier dt{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.agent-tier dd{margin:6px 0 0;font-size:24px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+
 /* FAQ and final call to action */
 .agent-faq-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:6vw;align-items:start}
 .agent-faq-grid h2{font-size:clamp(36px,4.4vw,66px)}
@@ -243,14 +254,15 @@
 
 @media(max-width:1000px){
   .agent-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .agent-problem-grid{gap:28px}
+  .agent-problem-grid,.agent-tier-grid{gap:28px}
   .timeline{--gap:20px}
 }
 @media(max-width:900px){
   .agents-feature-grid,.agent-hero-grid,.agent-faq-grid{grid-template-columns:1fr;gap:50px}
   .service-feature{grid-template-columns:1fr;gap:36px;padding:56px 0}
   .service-feature.is-flipped .service-feature-copy{order:0}
-  .agent-problem-grid{grid-template-columns:1fr;gap:0}
+  .agent-problem-grid,.agent-tier-grid{grid-template-columns:1fr;gap:0}
+  .agent-tier{padding-bottom:36px}
   .agent-problem{padding-bottom:28px}
   .agent-hero .agent-orbit-ring{width:min(280px,70vw)}
 }

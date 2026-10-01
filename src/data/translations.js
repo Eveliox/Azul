@@ -8,7 +8,13 @@ const shared = {
 // Sample proof metrics (labeled as samples in the UI). Numbers count up; text slides in.
 const sampleStats = [{ to: 4.9, decimals: 1, suffix: ' / 5' }, { to: 1200, suffix: '+' }, { to: 3400, suffix: '+' }, { text: 'EN / ES' }]
 // Custom AI Agents starting price. Renders exactly as written in both languages.
-const agentStartingPrice = '$497/mo + $997 setup'
+const agentStartingPrice = '$300/mo + $2,000 setup'
+// [one-time build, monthly] for each tier in agents.detail.tiers, in the same order.
+const agentTierPrices = [
+  ['$2,000–$4,000', '$300–$600'],
+  ['$5,000–$12,000', '$750–$1,500'],
+  ['$15,000–$35,000+', '$1,500–$4,000'],
+]
 // Sample values (labeled as samples in the UI).
 const agentStats = [{ to: 168 }, { text: '< 1 min' }, { to: 2 }]
 // Example integrations for each example agent, in the same order as agents.detail.agents.
@@ -131,7 +137,7 @@ export const translations = {
             "title": "Start with the Azul Growth Suite.",
             "price": "$399",
             "period": "/mo",
-            "body": "The first 10 Founding Clients lock in $399/month for life. Standard pricing is $549/month.",
+            "body": "The first 10 Founding Clients lock in $399/month for life. Standard pricing is $999.99/month.",
             "cta": "Explore our services",
             "note": "Ask about availability and confirm your plan’s scope before getting started."
       }
@@ -223,6 +229,14 @@ export const translations = {
           ['Speed to answer', 'When they’re free', 'Under a minute (sample)'],
         ],
         compareNote: 'An agent works next to your team. Your people still do the work that needs a person.',
+        pricingEyebrow: 'Pricing', pricingTitle: 'Three ways to start.\nPriced by how much it does.',
+        setupLabel: 'One-time build', monthlyLabel: 'Per month', tierPrices: agentTierPrices,
+        tiers: [
+          { name: 'Starter', body: 'One job: answers common questions, captures leads and books appointments. One channel, web chat or text.' },
+          { name: 'Business', body: 'Connected to your tools, like your CRM, calendar, email and Google Workspace. Handles multi-step work such as qualifying leads, follow-ups and sorting requests. Voice optional.' },
+          { name: 'Custom / multi-agent', body: 'Covers a full role, or most of one. Several agents hand work to each other, with custom dashboards, approvals and reporting.' },
+        ],
+        pricingNote: 'Prices in USD. After we review your job posting, we confirm the tier, scope and any usage costs before we start building.',
         faqEyebrow: 'Questions', faqTitle: 'Straight answers.',
         faq: [
           { question: 'Does it replace my staff?', answer: 'No. It takes the work that slips through the cracks: the 2am calls, the follow-ups nobody has time for, the paperwork. Your team keeps doing the jobs. Most owners use an agent to cover nights and weekends and to take pressure off the person at the front desk.' },
@@ -374,7 +388,7 @@ export const translations = {
             "title": "Empiece con Azul Growth Suite.",
             "price": "$399",
             "period": "/mes",
-            "body": "Los primeros 10 clientes fundadores mantienen su tarifa de $399 al mes de por vida. La tarifa regular es de $549 al mes.",
+            "body": "Los primeros 10 clientes fundadores mantienen su tarifa de $399 al mes de por vida. La tarifa regular es de $999.99 al mes.",
             "cta": "Explore nuestros servicios",
             "note": "Consulte la disponibilidad y confirme el alcance de su plan antes de comenzar."
       }
@@ -466,6 +480,14 @@ export const translations = {
           ['Rapidez para contestar', 'Cuando esté libre', 'En menos de un minuto (ejemplo)'],
         ],
         compareNote: 'Un agente trabaja al lado de tu equipo. Tu gente sigue haciendo el trabajo que necesita una persona.',
+        pricingEyebrow: 'Precios', pricingTitle: 'Tres formas de empezar.\nSegún cuánto hace.',
+        setupLabel: 'Desarrollo (pago único)', monthlyLabel: 'Al mes', tierPrices: agentTierPrices,
+        tiers: [
+          { name: 'Inicial', body: 'Una sola tarea: responde preguntas frecuentes, captura clientes potenciales y agenda citas. Un canal: chat web o mensajes de texto.' },
+          { name: 'Negocio', body: 'Conectado a tus herramientas, como tu CRM, calendario, correo y Google Workspace. Maneja trabajo de varios pasos, como calificar clientes potenciales, dar seguimiento y clasificar solicitudes. Voz opcional.' },
+          { name: 'A la medida / multiagente', body: 'Cubre un puesto completo, o casi todo. Varios agentes se pasan el trabajo entre sí, con paneles a la medida, aprobaciones y reportes.' },
+        ],
+        pricingNote: 'Precios en USD. Después de revisar tu oferta de empleo, confirmamos el nivel, el alcance y cualquier costo de uso antes de empezar a construir.',
         faqEyebrow: 'Preguntas', faqTitle: 'Respuestas claras.',
         faq: [
           { question: '¿Reemplaza a mis empleados?', answer: 'No. Se encarga de lo que se queda sin hacer: las llamadas de las 2am, el seguimiento que nadie tiene tiempo de dar, el papeleo. Tu equipo sigue haciendo los trabajos. La mayoría de los dueños usan un agente para cubrir noches y fines de semana, y para quitarle presión a la persona de la oficina.' },
