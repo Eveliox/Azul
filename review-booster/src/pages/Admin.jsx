@@ -5,6 +5,7 @@ import { ActivityChart, Icon, ResponseCard, StatCards } from '../components/Dash
 import { SERVICES, SERVICE_IDS, activeServices, inviteMessage } from '../components/servicePlan.js'
 import { api, getAdminKey, setAdminKey, clearAdminKey } from '../api.js'
 import './admin.css'
+import './workspace-brand.css'
 
 export default function Admin() {
   const [authed, setAuthed] = useState(!!getAdminKey())
@@ -27,7 +28,7 @@ function Login({ onOk }) {
     } finally { setBusy(false) }
   }
   return <div className="login-scene">
-    <div className="login-shape one"/><div className="login-shape two"/>
+    <div className="login-editorial"><span className="eyebrow">AZUL / BUSINESS WORKSPACE</span><h2>Good things.<br/>Working together.</h2><p>Your business has momentum.<br/>Let’s keep it moving.</p><span className="login-editorial-mark" aria-hidden="true">Azul.</span></div>
     <form onSubmit={submit} className="login-card">
       <Wordmark/><span className="login-icon"><Icon name="shield" size={28}/></span>
       <h1>Welcome back</h1><p>Your services. Your next steps.<br/>One place to bring it all together.</p>
@@ -131,7 +132,7 @@ function Dashboard({ onLogout }) {
       <main className="dashboard-main">
         {demo && <div className="demo-banner"><span className="demo-dot"/>Demo workspace <span>Sample service data. No real messages. Demo requests reset on server restart; checklist marks stay in this browser.</span></div>}
         <div className="workspace-toolbar"><div className="workspace-picker"><Icon name="building" size={17}/>{isMaster ? <select aria-label="Select business" value={selected} onChange={(e) => { setSelected(e.target.value); setQuery(''); setModal(null) }}><option value="" disabled>Select a business</option>{clients.map((c) => <option key={c.client_id} value={c.client_id}>{c.name}</option>)}</select> : <span>{client?.name || 'Your business'}</span>}</div><div className="toolbar-actions">{isMaster && <button className="text-button" onClick={() => setModal('client')}><Icon name="plus" size={15}/>Add business</button>}<button className="text-button" onClick={reload} disabled={loading || requestLoading} aria-label="Refresh workspace"><Icon name="refresh" size={16}/><span>Refresh</span></button></div></div>
-        <div className="page-heading"><div><p className="eyebrow">{activeTab === 'overview' ? 'YOUR AZUL WORKSPACE' : 'YOUR SERVICES / ' + (inReviews ? 'REVIEWS' : activeTab.toUpperCase())}</p><h1>{TITLES[activeTab][0]}</h1><p>{TITLES[activeTab][1]}</p></div>{(inReviews || activeTab === 'overview') && hasReviews && <button className="btn-primary" onClick={() => setModal('request')} disabled={!client}><Icon name="plus" size={18}/>{activeTab === 'overview' ? 'New review request' : 'New request'}</button>}</div>
+        <div className={`page-heading ${activeTab === 'overview' ? 'workspace-welcome' : ''}`}><div><p className="eyebrow">{activeTab === 'overview' ? 'YOUR AZUL WORKSPACE' : 'YOUR SERVICES / ' + (inReviews ? 'REVIEWS' : activeTab.toUpperCase())}</p><h1>{TITLES[activeTab][0]}</h1><p>{TITLES[activeTab][1]}</p></div>{(inReviews || activeTab === 'overview') && hasReviews && <button className="btn-primary" onClick={() => setModal('request')} disabled={!client}><Icon name="plus" size={18}/>{activeTab === 'overview' ? 'New review request' : 'New request'}</button>}{activeTab === 'overview' && <span className="welcome-signoff" aria-hidden="true">BUILT FOR WHAT’S NEXT <span>↗</span></span>}</div>
         {error && <div className="error-banner" role="alert">Could not load the workspace: {error}. <button onClick={reload}>Try again</button></div>}
         {loading && !client && <div className="panel empty-state" role="status">Loading your workspace…</div>}
         {!loading && !error && !client && <div className="panel empty-state"><span className="icon-tile blue"><Icon name="building"/></span><h2>Your workspace starts here</h2><p>{isMaster ? 'Add your first business to start collecting customer feedback.' : 'No business is available for this key.'}</p>{isMaster && <button className="btn-primary" onClick={() => setModal('client')}>Add your first business</button>}</div>}

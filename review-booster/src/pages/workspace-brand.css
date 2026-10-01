@@ -1,0 +1,132 @@
+/* Marketing identity adapted for the working interface. Scoped to admin only. */
+.admin-app {
+  --brand: #1745ed;
+  --muted: #616976;
+  --line: #e1e3e7;
+  color: #171a20;
+  background: #f5f5f3;
+}
+.admin-app h1, .admin-app h2, .admin-app h3 { color: #171a20; }
+.admin-app :focus-visible { outline: 3px solid #6387ff; outline-offset: 4px; }
+.admin-app .wordmark { font-size: 46px; letter-spacing: -3.5px; color: #171a20; }
+.admin-app .wordmark small { font-size: 8px; letter-spacing: 1.6px; color: #68717d; margin-top: 14px; }
+.admin-app .dashboard-sidebar { background: #0c0d0f; border: 0; width: 240px; padding: 34px 18px 18px; }
+.admin-app .sidebar-brand { padding: 0 16px 48px; }
+.admin-app .sidebar-brand .wordmark { color: #f4f3ef; }
+.admin-app .sidebar-brand .wordmark small { color: #979ba5; }
+.admin-app .sidebar-label { color: #898e99; font-size: 10px; padding-left: 16px; }
+.admin-app .nav-item { color: #b6bac3; border-radius: 6px; min-height: 46px; }
+.admin-app .nav-item > span { font-size: 12px; }
+.admin-app .nav-item:hover { color: white; background: #ffffff0d; }
+.admin-app .nav-item.active { background: var(--brand); color: white; box-shadow: none; }
+.admin-app .sidebar-note { background: radial-gradient(circle at 100% 0, #1745ed30, transparent 70%), #181a20; border: 1px solid #ffffff16; border-radius: 8px; padding: 20px 16px; }
+.admin-app .sidebar-note strong { color: #f4f3ef; font-size: 12px; }
+.admin-app .sidebar-note p { color: #a4a9b5; }
+.admin-app .sidebar-note button { color: #aabdff; font-size: 11px; }
+.admin-app .sidebar-note .icon-tile { color: #aabdff; background: #1745ed30; }
+.admin-app .sidebar-version { border-color: #ffffff20; color: #8f95a0; }
+.admin-app .dashboard-body { margin-left: 240px; }
+.admin-app .dashboard-topbar { background: #f5f5f3; height: 80px; border-color: var(--line); }
+.admin-app .global-search { background: #fff; border-color: #dedfe3; border-radius: 6px; }
+.admin-app .global-search input, .admin-app .workspace-picker select { color: #4f5764; }
+.admin-app .topbar-account strong { color: #252a32; font-size: 12px; }
+.admin-app .topbar-account div > span { color: #69717e; }
+.admin-app .avatar { background: #e6ebfc; color: var(--brand); border: 0; width: 38px; height: 38px; }
+.admin-app .dashboard-main { padding: 26px 36px; }
+.admin-app .workspace-toolbar { margin-bottom: 24px; }
+.admin-app .workspace-picker select { font-size: 12px; }
+.admin-app .text-button { color: #606978; font-size: 12px; }
+.admin-app .text-button:hover, .admin-app .blue-text { color: var(--brand); }
+.admin-app .page-heading { margin-bottom: 30px; }
+.admin-app .page-heading h1 { font-size: clamp(28px, 3vw, 42px); letter-spacing: -.055em; font-weight: 500; line-height: 1.12; }
+.admin-app .page-heading p:not(.eyebrow) { color: #616976; font-size: 13px; line-height: 1.7; }
+.admin-app .eyebrow { color: #606978; font-size: 9px; letter-spacing: .16em; }
+.admin-app .workspace-welcome { position: relative; isolation: isolate; overflow: hidden; min-height: 244px; padding: 34px 36px 60px; align-items: center; background: #10264b; border-radius: 9px; gap: 26px; }
+.admin-app .workspace-welcome::before { content: ''; position: absolute; inset: 0; z-index: -2; background: linear-gradient(90deg, #071a3bee, #082557b0 60%, #08132380), url('../assets/workspace-waves.jpg') center 57% / cover; }
+.admin-app .workspace-welcome::after { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .23; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(90deg, transparent 35%, black); pointer-events: none; }
+.admin-app .workspace-welcome h1 { color: #f4f3ef; max-width: 470px; font-size: clamp(34px, 3.8vw, 56px); }
+.admin-app .workspace-welcome .eyebrow { color: #b7c8ee; margin-bottom: 18px; }
+.admin-app .workspace-welcome p:not(.eyebrow) { color: #cbd4e2; max-width: 370px; margin-top: 16px; }
+.admin-app .welcome-signoff { position: absolute; bottom: 18px; left: 36px; right: 36px; border-top: 1px solid #ffffff30; padding-top: 12px; display: flex; justify-content: space-between; color: #c2cde0; font-size: 8px; letter-spacing: .17em; }
+.admin-app .welcome-signoff > span { font-size: 16px; line-height: 1; }
+.admin-app .btn-primary { background: var(--brand); border-color: var(--brand); border-radius: 5px; box-shadow: none; min-height: 42px; }
+.admin-app .btn-primary:hover { background: #1037c6; border-color: #1037c6; }
+.admin-app .workspace-welcome .btn-primary { flex-shrink: 0; background: #f4f3ef; color: #152039; border-color: #f4f3ef; }
+.admin-app .workspace-welcome .btn-primary:hover { background: #dfe7ff; }
+.admin-app .input, .admin-app .btn-ghost { border-radius: 5px; }
+.admin-app .input { background-color: #fafafa; border-color: #d9dde3; }
+.admin-app .stat-card, .admin-app .panel { border-color: var(--line); border-radius: 8px; box-shadow: none; }
+.admin-app .stat-value { font-size: 40px; font-weight: 500; letter-spacing: -2px; }
+.admin-app .stat-note, .admin-app .stat-top p, .admin-app .panel-heading p, .admin-app .chart-footnote { color: #626c7b; }
+.admin-app h2 { font-size: 16px; font-weight: 600; }
+.admin-app .icon-tile { border-radius: 6px; }
+.admin-app .icon-tile.blue { background: #edf1ff; color: var(--brand); }
+.admin-app .service-section-heading { margin-bottom: 22px; }
+.admin-app .service-section-heading h2::before { content: '+'; margin-right: 10px; font-size: 18px; font-weight: 400; color: var(--brand); }
+.admin-app .service-section-heading p { color: #66707e; }
+.admin-app .workspace-label { color: #5e6876; border-color: #d9dde3; background: transparent; border-radius: 4px; }
+.admin-app .service-filters { gap: 6px; margin-bottom: 20px; }
+.admin-app .service-filters button { background: transparent; border-color: transparent; border-radius: 4px; color: #5e6876; min-height: 38px; }
+.admin-app .service-filters button.selected { background: #171a20; color: #fff; border-color: #171a20; }
+.admin-app .service-filters button:hover:not(.selected) { background: #e9ecf3; color: var(--brand); }
+.admin-app .service-cards { gap: 16px; }
+.admin-app .service-card { background: #fff; border: 1px solid #dedfe3; border-radius: 8px; padding: 25px; overflow: hidden; }
+.admin-app button.service-card:hover { border-color: #8da6fb; transform: translateY(-3px); box-shadow: 0 12px 28px #1420440a; }
+.admin-app .service-card-top { margin-bottom: 26px; }
+.admin-app .service-card .icon-tile { color: var(--brand); background: #edf1ff; width: 42px; height: 42px; }
+.admin-app .service-card-top > svg { color: #3d485b; transform: rotate(-45deg); }
+.admin-app .service-status { border: 1px solid #e2e5e9; background: #fafafa; color: #626b78; font-size: 10px; }
+.admin-app .service-status.not-included { color: #866336; background: #faf6ed; border-color: #eae0cd; }
+.admin-app .service-category { color: #657083; text-transform: uppercase; letter-spacing: .13em; font-size: 8px; }
+.admin-app .service-card h3 { font-size: 25px; font-weight: 500; letter-spacing: -.8px; }
+.admin-app .service-card > p { font-size: 12px; color: #616c7d; }
+.admin-app .service-card-bottom { border-color: #e6e8ec; margin-top: 26px; padding-top: 16px; }
+.admin-app .service-card-bottom > span { color: #626d7d; font-size: 11px; }
+.admin-app .service-card-bottom strong { color: #1e293e; font-size: 30px; font-weight: 500; }
+.admin-app .service-upcoming, .admin-app .service-locked { background: #eeefed; border-style: dashed; }
+.admin-app .service-upcoming .service-card-bottom strong { color: #67707a; }
+.admin-app .service-status.upcoming { color: #736044; background: #f5f0e7; border-color: #e2d9ca; }
+.admin-app .plan-storage-note { color: #697383; }
+.admin-app .activity-list strong, .admin-app .next-action strong { color: #364256; font-size: 12px; }
+.admin-app .activity-list small, .admin-app .activity-list time { color: #687589; }
+.admin-app .next-action { background: #f7f8fa; border-color: #e5e7ec; border-radius: 5px; }
+.admin-app .next-service { color: #647187; }
+.admin-app .requests-table th { color: #626d7e; background: #f5f6f8; }
+.admin-app .customer-cell small, .admin-app .date-cell, .admin-app .date-cell small, .admin-app .table-pagination { color: #647084; }
+.admin-app .demo-banner { background: #eef1fa; color: #3555a1; border-color: #dbe2f5; border-radius: 5px; }
+.admin-app .demo-banner > span:last-child { color: #60708d; }
+.admin-app .dashboard-footer { color: #68717d; border-color: #dcdfe3; font-size: 10px; }
+.admin-app .login-scene { background: #f5f5f3; display: grid; grid-template-columns: 1.2fr 1fr; padding: 0; gap: 0; }
+.admin-app .login-editorial { position: relative; isolation: isolate; overflow: hidden; align-self: stretch; padding: 64px 10%; display: flex; flex-direction: column; justify-content: center; background: linear-gradient(135deg, #06162bee, #072c6a99), url('../assets/workspace-waves.jpg') center / cover; }
+.admin-app .login-editorial .eyebrow { position: absolute; top: 48px; color: #bac8e3; }
+.admin-app .login-editorial h2 { font-size: clamp(42px, 5vw, 78px); font-weight: 500; line-height: 1.05; letter-spacing: -.055em; color: #f4f3ef; }
+.admin-app .login-editorial p { margin-top: 24px; color: #bccae0; line-height: 1.8; font-size: 14px; }
+.admin-app .login-editorial-mark { font-size: clamp(100px, 18vw, 270px); line-height: .85; letter-spacing: -.085em; font-weight: 800; color: #ffffff12; margin-top: 70px; }
+.admin-app .login-card { background: transparent; box-shadow: none; justify-self: center; width: 430px; padding: 40px; }
+.admin-app .login-card > p, .admin-app .login-help, .admin-app .login-footer { color: #667180; }
+.admin-app .login-caption { position: absolute; bottom: 24px; right: 0; width: 45.45%; text-align: center; color: #677180; }
+@media (max-width: 1200px) {
+  .admin-app .dashboard-sidebar { width: 210px; padding-inline: 12px; }
+  .admin-app .dashboard-body { margin-left: 210px; }
+  .admin-app .dashboard-main { padding: 24px; }
+  .admin-app .workspace-welcome { flex-wrap: wrap; padding: 30px 28px 62px; }
+  .admin-app .welcome-signoff { left: 28px; right: 28px; }
+}
+@media (max-width: 760px) {
+  .admin-app .dashboard-body { margin-left: 0; }
+  .admin-app .dashboard-main { padding: 20px 16px; }
+  .admin-app .dashboard-topbar { height: 68px; }
+  .admin-app .mobile-nav { background: #0c0d0f; padding: 10px 12px; border: 0; }
+  .admin-app .mobile-nav button { color: #bac0cc; min-height: 40px; font-size: 11px; }
+  .admin-app .mobile-nav button.active { background: var(--brand); color: white; }
+  .admin-app .workspace-toolbar { flex-wrap: wrap; gap: 12px; }
+  .admin-app .workspace-welcome { padding: 28px 24px 62px; gap: 22px; }
+  .admin-app .workspace-welcome h1 { font-size: 39px; }
+  .admin-app .welcome-signoff { left: 24px; right: 24px; }
+  .admin-app .service-card { padding: 22px; }
+  .admin-app .dashboard-footer { flex-wrap: wrap; gap: 8px; }
+  .admin-app .login-scene { display: flex; padding: 28px 16px; }
+  .admin-app .login-editorial { display: none; }
+  .admin-app .login-card { padding: 32px 20px; }
+  .admin-app .login-caption { position: static; width: auto; margin-top: 12px; }
+}
