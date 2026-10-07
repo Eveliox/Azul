@@ -19,6 +19,7 @@ export const SERVICES = [
   { id: 'calls', name: 'AI Answering Service', icon: 'phone', color: 'green', category: 'Never miss the conversation', description: 'Plan your bilingual receptionist and its call handoff.', status: 'Vapi not connected', action: 'Open answering service plan' },
   { id: 'reviews', name: 'Review Booster', icon: 'star', color: 'pink', category: 'Listen to your customers', description: 'Send requests, personalize messages, and collect feedback.', status: 'Workspace available', action: 'Open reviews' },
   { id: 'seo', name: 'Local Proof SEO', icon: 'pin', color: 'purple', category: 'Show up locally', description: 'Organize approved content and monthly visibility reporting.', status: 'Manual delivery', action: 'Open SEO plan' },
+  { id: 'agents', name: 'Custom AI Agents', icon: 'agents', color: 'blue', category: 'A little less busywork', description: 'Draft estimate follow-ups, review approvals, and track agent work.', status: 'Approval-first workflow', action: 'Open AI agents plan' },
 ]
 // Services on the roadmap. Shown as "Coming soon" cards; cannot be added to a plan yet.
 // Social already has SETUP/MONTHLY_SOCIAL/DELIVERY config below; enabling it = move this entry to SERVICES,
@@ -29,6 +30,7 @@ export const UPCOMING = [
 ]
 // Per-service copy for the delivery view. Keeps ServiceWorkspace data-driven.
 export const DELIVERY = {
+  agents: { intro: 'Choose a role below, then work through the launch plan. This workspace tracks preparation; agents are not running here yet.', setupTitle: 'From idea to first assignment', sideTitle: 'Start with one useful job', side: 'Pick a repeatable task with a clear input and result. Agree who reviews the output and when the agent should hand work back to your team.', noteTitle: 'Agent runtime not connected', note: 'These are planning checkmarks, not deployment controls. Live runs, tool connections, approvals, and performance reporting need a separate integration.', link: 'https://azulwebdev.com/services/custom-ai-agents', linkLabel: 'Explore the AI Agents service', linkNote: 'Opens Azul’s service page with examples and build options.' },
   website: { intro: 'Track the delivery work here. Hosting, deployment, and analytics stay in your existing tools.', setupTitle: 'Setup & launch checklist', sideTitle: 'Keep delivery focused', side: 'Agree on scope, collect approved content, test on mobile, and make sure enquiries reach the right person.', noteTitle: 'Website monitoring not connected', note: 'This is a launch checklist, not an uptime monitor or a website builder.', link: 'https://vercel.com/dashboard', linkLabel: 'Open Vercel' },
   calls: { intro: 'Use this plan alongside Vapi. Checking a task does not configure a phone number or deploy an agent.', setupTitle: 'Setup & launch checklist', sideTitle: 'Before the first real call', side: 'Verify call routing, callbacks, human fallback, and privacy requirements. A good test call is not proof that every real call will work.', noteTitle: 'Vapi not connected to this dashboard', note: 'Call volume, captured leads, and recordings will appear only after a real integration is built.', link: 'https://dashboard.vapi.ai/', linkLabel: 'Open Vapi' },
   seo: { intro: 'Your manual workflow: collect → draft → approve → publish → measure.', setupTitle: 'One-time onboarding', monthlyTitle: 'Monthly delivery', monthlySub: '8 posts total · 1 website update · 1 visibility report', sideTitle: 'What the client sends you', side: 'Approved non-patient photos, a factual description, and approval of the final copy. Start with verified business information—not assumed services or locations.', noteTitle: 'GBP & ranking tools not connected', note: 'Publish in Google’s interface and run your ranking scans externally. This checklist does not auto-post, run AI, or track rankings.', link: 'https://business.google.com/', linkLabel: 'Open Google Business Profile' },
@@ -39,6 +41,13 @@ export const SEO_SETUP = [
   { id: 'seo-baseline', title: 'Record a local visibility baseline', detail: 'Choose 3 real service queries; save the scan grid settings and export privately.' },
 ]
 export const SETUP = {
+  agents: [
+    { id: 'agent-role', title: 'Define the role & first assignment', detail: 'Choose one repeated task. Write down what starts it, what information it needs, and what a good result looks like.' },
+    { id: 'agent-tools', title: 'Confirm tools & access', detail: 'List the systems the agent needs and have the owner approve the access required for this job.' },
+    { id: 'agent-handoff', title: 'Agree on approvals & human handoff', detail: 'Decide what can happen automatically, what needs review, and who receives exceptions.' },
+    { id: 'agent-test', title: 'Review sample work together', detail: 'Test typical tasks, missing information, and tool failures with sample data. Check the result with the business owner.' },
+    { id: 'agent-pilot', title: 'Approve a monitored pilot', detail: 'Agree the pilot scope, review schedule, and how to pause the agent before enabling it in the connected system.' },
+  ],
   website: [
     { id: 'web-scope', title: 'Confirm pages, content & domain ownership', detail: 'Agree the scope with the owner and gather approved brand assets.' },
     { id: 'web-build', title: 'Review the site with the client', detail: 'Check both languages, service details, and mobile layouts.' },

@@ -103,3 +103,14 @@ Emails the business owner after every real AI-answered call. Vapi sends its end-
 **Vapi setup:** Assistant → Advanced → Server URL: `https://app.azulwebdev.com/api/vapi-webhook`, Server URL Secret: same value as `VAPI_WEBHOOK_SECRET`, Server Messages: `end-of-call-report`.
 
 Calls under 8s with no transcript (hang-ups) are ignored. If Resend fails, the endpoint still returns 200 (Vapi won't retry) and the error is in the Vercel function logs. Transcripts can contain personal details — set `VAPI_LEAD_TRANSCRIPT=false` for clients who only want the summary.
+
+## AI Agents operations
+
+Estimate Follow-Up now supports individual accounts, manual estimate intake,
+AI-generated drafts, human approval, bounded background processing, email delivery,
+audit history and shared checklist progress. Other agent roles remain previews.
+
+Follow [PRODUCTION.md](./PRODUCTION.md) for the ordered database migrations,
+account provisioning, provider configuration, scheduler and pilot verification.
+Sending remains disabled until explicitly configured and a named user approves
+an email. Existing client plans are unchanged by the migrations.

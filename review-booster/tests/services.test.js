@@ -21,3 +21,10 @@ test('invite message includes the login URL, key, and plan names', () => {
   assert.match(text, /abc123/)
   assert.match(text, /Review Booster, Local Proof SEO/)
 })
+
+test('AI Agents is assignable without widening existing client plans', () => {
+  assert.deepEqual(normalizeServices(['agents', 'agents', 'unknown']), ['agents'])
+  assert.deepEqual(activeServices({ services: ['reviews'] }, false), ['reviews'])
+  assert.deepEqual(activeServices({ services: ['agents'] }, false), ['agents'])
+  assert.match(inviteMessage({ services: ['agents'] }, 'https://azul.app'), /Custom AI Agents/)
+})

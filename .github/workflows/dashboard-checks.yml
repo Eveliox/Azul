@@ -1,0 +1,27 @@
+name: Dashboard checks
+on:
+  pull_request:
+    paths: ['review-booster/**', '.github/workflows/dashboard-checks.yml']
+  push:
+    branches: [main]
+    paths: ['review-booster/**', '.github/workflows/dashboard-checks.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: review-booster
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: review-booster/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run test:database
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=moderate

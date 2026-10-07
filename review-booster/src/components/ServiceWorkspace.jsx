@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api } from '../api.js'
+import AgentStudio from './AgentStudio.jsx'
 import { Icon } from './DashboardVisuals.jsx'
 import { SERVICES, UPCOMING, SETUP, MONTHLY, DELIVERY, activeServices, monthId, planKey, readPlan, reviewEvents } from './servicePlan.js'
 import './service-workspace.css'
@@ -7,16 +9,33 @@ const ALL_SETUP = Object.values(SETUP).flat()
 const ALL_MONTHLY = Object.entries(MONTHLY).flatMap(([service, tasks]) => tasks.map((t) => ({ ...t, service })))
 const months = Array.from({ length: 12 }, (_, i) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); return monthId(d) })
 
-function useChecklist(key, tasks) {
+function useChecklist(key, tasks, clientId, demo, period) {
   const [error, setError] = useState('')
-  const [done, setDone] = useState(() => { try { return readPlan(localStorage, key, tasks.map((t) => t.id)) } catch { return {} } })
-  function toggle(id) {
+  const [busy, setBusy] = useState(!demo)
+  const [done, setDone] = useState(() => { if (!demo) return {}; try { return readPlan(localStorage, key, tasks.map((t) => t.id)) } catch { return {} } })
+  const load = () => api(`/api/progress?client_id=${encodeURIComponent(clientId)}&period=${encodeURIComponent(period)}`)
+  useEffect(() => {
+    if (demo) return
+    let current=true
+    load().then(data=>{if(current){setDone(data.done);setError('')}}).catch(e=>{if(current)setError(e.message)}).finally(()=>{if(current)setBusy(false)})
+    return ()=>{current=false}
+  }, [clientId, demo, period])
+  async function toggle(id) {
+    if (busy) return
     const next = { ...done }
     if (next[id]) delete next[id]; else next[id] = new Date().toISOString()
-    setDone(next)
-    try { localStorage.setItem(key, JSON.stringify(next)); setError('') } catch { setError('Browser storage is unavailable. These checkmarks will be lost when you leave this view.') }
+    if (demo) {
+      setDone(next)
+      try { localStorage.setItem(key, JSON.stringify(next)); setError('') } catch { setError('Browser storage is unavailable. Demo checkmarks will be lost when you leave this view.') }
+      return
+    }
+    setBusy(true)
+    try {
+      await api('/api/progress', {method:'POST',body:{client_id:clientId,period,task_id:id,completed:Boolean(next[id])}})
+      setDone((await load()).done);setError('')
+    } catch(e) { setError(e.message) } finally {setBusy(false)}
   }
-  return { done, toggle, error }
+  return { done, toggle, error, busy }
 }
 
 export default function ServiceWorkspace(props) {
@@ -28,8 +47,8 @@ export default function ServiceWorkspace(props) {
 function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loading, error, month, setMonth }) {
   const [filter, setFilter] = useState('all')
   const [activityFilter, setActivityFilter] = useState('all')
-  const setup = useChecklist(planKey(client.client_id, demo, 'setup'), ALL_SETUP)
-  const monthly = useChecklist(planKey(client.client_id, demo, month), ALL_MONTHLY)
+  const setup = useChecklist(planKey(client.client_id, demo, 'setup'), ALL_SETUP, client.client_id, demo, 'setup')
+  const monthly = useChecklist(planKey(client.client_id, demo, month), ALL_MONTHLY, client.client_id, demo, month)
   const isOverview = view === 'overview'
   const service = SERVICES.find((s) => s.id === view)
   const included = activeServices(client, isMaster)
@@ -42,11 +61,11 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
   const taskEvents = [
     ...ALL_SETUP.filter((t) => setup.done[t.id]).map((t) => ({ ...t, date: setup.done[t.id], service: Object.keys(SETUP).find((s) => SETUP[s].some((x) => x.id === t.id)) })),
     ...ALL_MONTHLY.filter((t) => monthly.done[t.id]).map((t) => ({ ...t, date: monthly.done[t.id] })),
-  ].map((t) => ({ ...t, state: 'completed', detail: 'Manually checked in this browser · not provider-verified' }))
+  ].map((t) => ({ ...t, state: 'completed', detail: demo ? 'Demo checkmark · saved in this browser' : 'Team planning update · not provider-verified' }))
   const events = [...reviewEvents(requests), ...taskEvents]
     .filter((e) => (filter === 'all' || e.service === filter) && (activityFilter === 'all' || e.state === activityFilter))
     .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8)
-  const nextTasks = visible.filter((s) => s.id !== 'reviews' && (filter === 'all' || s.id === filter)).flatMap((s) => {
+  const nextTasks = visible.filter((s) => !['reviews','agents'].includes(s.id) && (filter === 'all' || s.id === filter)).flatMap((s) => {
     const tasks = [...SETUP[s.id], ...(MONTHLY[s.id] || [])]
     const task = tasks.find((t) => !(MONTHLY[s.id]?.includes(t) ? monthly.done[t.id] : setup.done[t.id]))
     return task ? [{ ...task, service: s }] : []
@@ -54,10 +73,11 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
 
   function metric(s) {
     if (s.id === 'reviews') return [client.rated ?? 0, 'feedback responses · all time']
+    if (s.id === 'agents') return ['Open', 'estimates, approvals & run history']
     if (MONTHLY[s.id]) return [`${count(posts(s.id), monthly.done)} / ${posts(s.id).length}`, `posts checked off · ${month}`]
     return [`${count(SETUP[s.id], setup.done)} / ${SETUP[s.id].length}`, 'setup steps checked off']
   }
-  const storageNote = <p className="plan-storage-note"><Icon name="shield" size={15}/><span>Planning only: checkmarks are saved in this browser for this business, not synced to your team or verified by providers. No credentials or patient details belong here.</span></p>
+  const storageNote = <p className="plan-storage-note"><Icon name="shield" size={15}/><span>{demo ? 'Demo planning: checkmarks stay in this browser.' : 'Shared planning: checkmarks are saved for your team. They do not confirm provider activity.'}</span></p>
 
   return <div className="service-workspace">
     {(setup.error || monthly.error) && <div className="error-banner" role="alert">{setup.error || monthly.error}</div>}
@@ -75,7 +95,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
       {isMaster && locked.length > 0 && <p className="plan-storage-note"><Icon name="key" size={15}/><span>{client.name} is subscribed to {subscribed.length ? subscribed.map((id) => SERVICES.find((s) => s.id === id).name).join(', ') : 'no services yet'}. Their key only shows those. Change the plan under Workspace access.</span></p>}
       {storageNote}
       <div className="service-home-grid">
-        <section className="panel service-activity"><div className="panel-heading"><div><h2>Recent activity</h2><p>Review request states + your local planning updates</p></div><select className="input" aria-label="Filter recent activity" value={activityFilter} onChange={(e) => setActivityFilter(e.target.value)}><option value="all">All activity</option><option value="attention">Needs attention</option><option value="completed">Completed</option></select></div>
+        <section className="panel service-activity"><div className="panel-heading"><div><h2>Recent activity</h2><p>Review request states + planning updates</p></div><select className="input" aria-label="Filter recent activity" value={activityFilter} onChange={(e) => setActivityFilter(e.target.value)}><option value="all">All activity</option><option value="attention">Needs attention</option><option value="completed">Completed</option></select></div>
           {error && <div className="error-banner" role="alert">Review activity is unavailable: {error}</div>}
           {loading ? <div className="empty-state" role="status">Loading review activity…</div> : !events.length ? <div className="empty-state"><Icon name="clock" size={25}/><h3>No activity for this filter</h3><p>{included.includes('reviews') ? 'Complete a planning step or use Review Booster to start.' : 'Complete a planning step to see it here.'}</p></div> : <ul className="activity-list">{events.map((event) => <li key={event.id}><span className={`activity-dot ${event.state}`}/><button onClick={() => navigate(event.service)}><strong>{event.title}</strong><small>{event.detail}</small></button><time dateTime={event.date}>{new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</time></li>)}</ul>}
           <p className="chart-footnote">Website analytics, call logs, and Google rankings are not connected. No leads or revenue are inferred from this feed.</p>
@@ -83,11 +103,12 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
         <aside className="panel next-actions"><div className="panel-heading"><div><h2>Up next</h2><p>Your next steps, not a live calendar</p></div><Icon name="clock" size={18}/></div>
           {included.includes('reviews') && (filter === 'all' || filter === 'reviews') && <button className="next-action" onClick={() => navigate('requests')}><span className="next-service">REVIEW BOOSTER</span><strong>{client.pending || 0} requests scheduled</strong><span>Open customer activity<Icon name="chevron" size={15}/></span></button>}
           {nextTasks.map((t) => <button key={t.id} className="next-action" onClick={() => navigate(t.service.id)}><span className="next-service">{t.service.name}</span><strong>{t.title}</strong><span>Open delivery plan<Icon name="chevron" size={15}/></span></button>)}
-          {!nextTasks.length && filter !== 'all' && filter !== 'reviews' && <p className="muted">All planning steps for this service are checked off in this browser.</p>}
+          {!nextTasks.length && filter !== 'all' && filter !== 'reviews' && <p className="muted">All planning steps for this service are checked off.</p>}
         </aside>
       </div>
     </> : service && (() => { const d = DELIVERY[view]; return <>
       <section className={`service-intro service-${service.color}`}><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{d.intro}</p></div></section>
+      {view === 'agents' && <AgentStudio/>}
       {storageNote}
       <div className="delivery-grid"><div className="delivery-main">
         <TaskList title={d.setupTitle} tasks={SETUP[view]} state={setup}/>
@@ -96,7 +117,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
         <p>{d.side}</p>
         <div className="integration-note"><Icon name="shield" size={17}/><strong>{d.noteTitle}</strong><p>{d.note}</p></div>
         <a className="btn-ghost" href={d.link} target="_blank" rel="noreferrer">{d.linkLabel}<Icon name="chevron" size={14}/></a>
-        <p className="chart-footnote">Opens a separate tool. Access and subscriptions are managed there.</p>
+        <p className="chart-footnote">{d.linkNote || 'Opens a separate tool. Access and subscriptions are managed there.'}</p>
       </aside></div>
     </> })()}
   </div>
@@ -107,6 +128,6 @@ function TaskList({ title, tasks, state, embedded }) {
   return <section className={embedded ? 'embedded-tasks' : 'panel'}>{title && <div className="panel-heading"><h2>{title}</h2><span className="count-badge">{completed} / {tasks.length} checked</span></div>}
     <div className="plan-progress" role="progressbar" aria-label={title || 'Monthly delivery checkmarks'} aria-valuemin={0} aria-valuemax={tasks.length} aria-valuenow={completed}><span style={{ width: `${completed / tasks.length * 100}%` }}/></div>
     {embedded && <p className="muted">{completed} of {tasks.length} steps manually checked off</p>}
-    <ul className="task-list">{tasks.map((task) => <li key={task.id}><label><input type="checkbox" checked={!!state.done[task.id]} onChange={() => state.toggle(task.id)}/><span><strong>{task.title}</strong><small>{task.detail}</small></span></label></li>)}</ul>
+    <ul className="task-list">{tasks.map((task) => <li key={task.id}><label><input type="checkbox" disabled={state.busy} checked={!!state.done[task.id]} onChange={() => state.toggle(task.id)}/><span><strong>{task.title}</strong><small>{task.detail}</small></span></label></li>)}</ul>
   </section>
 }

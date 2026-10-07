@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     let q = db().from('rb_client_stats').select('*').order('name')
-    if (auth.role === 'client') q = q.eq('client_id', auth.clientId)
+    if (auth.role === 'client') q = auth.clientIds ? q.in('client_id', auth.clientIds) : q.eq('client_id', auth.clientId)
     const { data, error } = await q
     if (error) return res.status(500).json({ error: error.message })
     const clients = auth.role === 'master' ? data : data.map(({ access_key, ...c }) => c)

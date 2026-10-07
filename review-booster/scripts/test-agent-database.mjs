@@ -1,0 +1,61 @@
+// Usage: PGLITE_MODULE=/absolute/path/to/@electric-sql/pglite/dist/index.js node scripts/test-agent-database.mjs
+// Isolated PostgreSQL engine. Never connects to production.
+import assert from 'node:assert/strict'
+import {readFile} from 'node:fs/promises'
+const {PGlite}=await import(process.env.PGLITE_MODULE || '@electric-sql/pglite')
+const db=new PGlite()
+await db.exec(`create role anon; create role authenticated; create role service_role;
+create schema auth;create table auth.users(id uuid primary key);
+create table rb_clients(id uuid primary key,name text,active boolean default true,services text[] default '{agents}');`)
+const migration=await readFile(new URL('../supabase/migrations/20261008_agent_operations.sql',import.meta.url),'utf8')
+await db.exec(migration)
+await db.exec(migration) // must be safe to apply twice
+const c1='11111111-1111-4111-8111-111111111111', c2='22222222-2222-4222-8222-222222222222',u='33333333-3333-4333-8333-333333333333'
+await db.query('insert into rb_clients(id,name) values($1,$2),($3,$4)',[c1,'One',c2,'Two'])
+await db.query('insert into auth.users(id) values($1)',[u])
+const payload=(key,ref)=>JSON.stringify({request_key:key,estimate_ref:ref,customer_name:'Test',customer_email:'customer@example.com',estimate_summary:'Quoted repair',language:'en',contact_confirmed:true})
+const create=async(client,key,ref)=>(await db.query('select (public.rb_create_agent_run($1,$2,$3::jsonb)).*',[client,u,payload(key,ref)])).rows[0]
+const claim=async()=> (await db.query("select * from rb_claim_agent_work(true,3,'Test <sender@example.com>')")).rows[0]
+const finish=async(run,result)=>(await db.query('select rb_finish_agent_work($1,$2,$3::jsonb) as ok',[run.id,run.lease_token,JSON.stringify(result)])).rows[0].ok
+const run=await create(c1,'44444444-4444-4444-8444-444444444444','Q-1')
+assert.equal((await create(c1,'44444444-4444-4444-8444-444444444444','Q-1')).id,run.id)
+await assert.rejects(()=>create(c1,'55555555-5555-4555-8555-555555555555','Q-1'))
+await assert.rejects(()=>db.query("select rb_agent_action($1,$2,$3,'approve','Subject','Text')",[c2,run.id,u]))
+await assert.rejects(()=>db.query("select rb_agent_action($1,$2,$3,'approve','Subject','Text')",[c1,run.id,u]))
+const claims=await Promise.all([claim(),claim()]);assert.equal(claims.filter(Boolean).length,1,'concurrent workers cannot claim same run')
+const draft=claims.find(Boolean);assert.equal(draft.status,'drafting')
+assert.equal(await finish({...draft,lease_token:'66666666-6666-4666-8666-666666666666'},{subject:'Bad',body:'Bad'}),false,'stale worker blocked')
+assert.equal(await finish(draft,{subject:'Follow-up',body:'Approved draft',model:'test',input_tokens:40,output_tokens:20,estimated_cost_cents:.02}),true)
+await db.query("select rb_agent_action($1,$2,$3,'approve','Edited subject','Edited body')",[c1,run.id,u])
+assert.equal(await claim(),undefined,'testing never sends approved email')
+await db.query("update rb_agent_settings set mode='active',reply_to='team@example.com' where client_id=$1",[c1])
+const send=await claim();assert.equal(send.status,'sending');assert.equal(send.envelope.text,'Edited body')
+assert.equal(await claim(),undefined,'live lease blocks other worker')
+await finish(send,{error:'timeout'})
+await db.query("update rb_agent_runs set lease_until=now()-interval '1 minute',next_attempt_at=now()-interval '1 minute' where id=$1",[send.id])
+const retry=await claim();assert.deepEqual(retry.envelope,send.envelope);assert.equal(retry.send_attempts,2)
+await db.query("update rb_agent_runs set lease_until=now()-interval '1 minute',first_send_at=now()-interval '21 hours' where id=$1",[send.id])
+assert.equal(await claim(),undefined,'never resend outside provider idempotency window')
+assert.equal((await db.query('select status from rb_agent_runs where id=$1',[send.id])).rows[0].status,'needs_attention')
+await db.query("update rb_agent_settings set mode='paused' where client_id=$1",[c1])
+await assert.rejects(()=>create(c1,'77777777-7777-4777-8777-777777777777','Q-2'))
+await db.query("update rb_agent_settings set mode='testing',monthly_limit=1 where client_id=$1",[c1])
+await assert.rejects(()=>create(c1,'77777777-7777-4777-8777-777777777777','Q-2'))
+await create(c2,'88888888-8888-4888-8888-888888888888','Q-1')
+await db.query('update rb_agent_settings set monthly_budget_cents=2 where client_id=$1',[c2])
+assert.equal(await claim(),undefined,'budget limit enforced before model call')
+await db.query('update rb_agent_settings set monthly_budget_cents=6 where client_id=$1',[c2])
+const b=await claim();await finish(b,{error:'AI temporary failure'})
+await db.query("update rb_agent_runs set next_attempt_at=now()-interval '1 minute' where id=$1",[b.id])
+const b2=await claim();assert.equal(b2.reserved_cents,6,'each attempt reserves additional budget')
+await finish(b2,{error:'AI temporary failure'})
+await db.query("update rb_agent_runs set next_attempt_at=now()-interval '1 minute' where id=$1",[b.id])
+assert.equal(await claim(),undefined,'retries cannot exceed budget')
+const events=(await db.query('select * from rb_agent_events where run_id=$1',[run.id])).rows
+assert.ok(events.some(e=>e.action==='approved' && e.actor_id===u))
+await db.exec('set role anon')
+await assert.rejects(()=>db.query('select * from rb_agent_runs'))
+await assert.rejects(()=>db.query("select * from rb_claim_agent_work(true,3,'sender@example.com')"))
+await db.exec('reset role')
+await db.close()
+console.log('PASS: reapplicable migration, tenant scoping, approval enforcement, worker leases, immutable retry envelope, retry cutoff, pause, monthly quota/budget, audit and public access restrictions.')

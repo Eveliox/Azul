@@ -1,0 +1,29 @@
+name: Estimate follow-up worker
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '3,8,13,18,23,28,33,38,43,48,53,58 * * * *'
+permissions: {}
+concurrency:
+  group: azul-agent-worker
+  cancel-in-progress: false
+jobs:
+  tick:
+    if: vars.AGENT_WORKER_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Process one approved or drafting job
+        env:
+          APP_URL: ${{ vars.AGENT_APP_URL }}
+          CRON_SECRET: ${{ secrets.AGENT_CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$APP_URL" != https://* || -z "$CRON_SECRET" ]]; then
+            echo "Configure AGENT_APP_URL and AGENT_CRON_SECRET before enabling the worker."
+            exit 1
+          fi
+          curl --fail --silent --show-error --max-time 55 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/agent-worker"

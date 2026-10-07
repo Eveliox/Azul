@@ -4,12 +4,23 @@ import ServiceWorkspace from '../components/ServiceWorkspace.jsx'
 import { ActivityChart, Icon, ResponseCard, StatCards } from '../components/DashboardVisuals.jsx'
 import { SERVICES, SERVICE_IDS, activeServices, inviteMessage } from '../components/servicePlan.js'
 import { api, getAdminKey, setAdminKey, clearAdminKey } from '../api.js'
+import { authClient, signOutAccount } from '../auth.js'
+import AgentOperations from '../components/AgentOperations.jsx'
+import TeamAccess from '../components/TeamAccess.jsx'
 import './admin.css'
 import './workspace-brand.css'
 
 export default function Admin() {
   const [authed, setAuthed] = useState(!!getAdminKey())
-  return <div className="admin-app">{authed ? <Dashboard onLogout={() => { clearAdminKey(); setAuthed(false) }} /> : <Login onOk={() => setAuthed(true)} />}</div>
+  const [checking, setChecking] = useState(Boolean(authClient))
+  useEffect(() => {
+    if (!authClient) return
+    authClient.auth.getSession().then(({data}) => { setAuthed(Boolean(data.session || getAdminKey())); setChecking(false) })
+    const {data} = authClient.auth.onAuthStateChange((_event, session) => setAuthed(Boolean(session || getAdminKey())))
+    return () => data.subscription.unsubscribe()
+  }, [])
+  if (checking) return <div className="admin-app empty-state" role="status">Loading your account…</div>
+  return <div className="admin-app">{authed ? <Dashboard onLogout={async () => { clearAdminKey(); await signOutAccount(); setAuthed(false) }} /> : <Login onOk={() => setAuthed(true)} />}</div>
 }
 
 function Wordmark() {
@@ -18,11 +29,20 @@ function Wordmark() {
 
 function Login({ onOk }) {
   const [key, setKey] = useState('')
+  const [email, setEmail] = useState('')
+  const [emailLogin, setEmailLogin] = useState(Boolean(authClient))
   const [show, setShow] = useState(false)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   async function submit(e) {
-    e.preventDefault(); setBusy(true); setErr(''); setAdminKey(key.trim())
+    e.preventDefault(); setBusy(true); setErr('')
+    if (emailLogin) {
+      const {error} = await authClient.auth.signInWithPassword({email:email.trim(),password:key})
+      setBusy(false)
+      if (error) { setErr('Sign-in failed. Check your email and password.'); return }
+      clearAdminKey(); onOk(); return
+    }
+    setAdminKey(key.trim())
     try { await api('/api/clients'); onOk() } catch (e) {
       clearAdminKey(); setErr(e.message === 'Unauthorized' ? 'That access key was not recognized. Please try again.' : 'Unable to connect. Check that the API server is running and try again.')
     } finally { setBusy(false) }
@@ -32,21 +52,24 @@ function Login({ onOk }) {
     <form onSubmit={submit} className="login-card">
       <Wordmark/><span className="login-icon"><Icon name="shield" size={28}/></span>
       <h1>Welcome back</h1><p>Your services. Your next steps.<br/>One place to bring it all together.</p>
-      <label className="label" htmlFor="access-key">Workspace access key</label>
-      <div className="password-field"><input id="access-key" className="input" required autoFocus type={show ? 'text' : 'password'} autoComplete="current-password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Enter your access key"/><button type="button" aria-label={show ? 'Hide access key' : 'Show access key'} aria-pressed={show} onClick={() => setShow(!show)}><Icon name="eye" size={18}/></button></div>
-      <p className="login-help">Use the key provided by your workspace administrator.</p>
+      {emailLogin && <><label className="label" htmlFor="account-email">Email</label><input id="account-email" className="input" type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)}/></>}
+      <label className="label" htmlFor="access-key">{emailLogin ? 'Password' : 'Workspace access key'}</label>
+      <div className="password-field"><input id="access-key" className="input" required autoFocus type={show ? 'text' : 'password'} autoComplete="current-password" value={key} onChange={(e) => setKey(e.target.value)} placeholder={emailLogin ? 'Enter your password' : 'Enter your access key'}/><button type="button" aria-label={show ? 'Hide access key' : 'Show access key'} aria-pressed={show} onClick={() => setShow(!show)}><Icon name="eye" size={18}/></button></div>
+      <p className="login-help">{emailLogin ? 'Use your individual team account. Ask your administrator for an invitation.' : 'Use the key provided by your workspace administrator.'}</p>
       {err && <div className="error-banner" role="alert">{err}</div>}
       <button className="btn-primary login-submit" disabled={busy || !key.trim()}>{busy ? 'Signing in…' : 'Sign in to your workspace'}<Icon name="chevron" size={16}/></button>
+      {authClient && <button type="button" className="text-button account-login-toggle" onClick={()=>{setEmailLogin(!emailLogin);setKey('');setErr('')}}>{emailLogin ? 'Use a legacy access key' : 'Use email sign-in'}</button>}
       <div className="login-footer"><Icon name="key" size={14}/> Private access. One workspace for your business.</div>
     </form>
     <p className="login-caption">A better home for your business growth.</p>
   </div>
 }
 
-const NAV = [['overview', 'Dashboard', 'grid'], ['website', 'Website', 'globe'], ['calls', 'AI Answering', 'phone'], ['reviews', 'Reviews', 'star'], ['seo', 'Local SEO', 'pin'], ['access', 'Workspace access', 'key']]
+const NAV = [['overview', 'Dashboard', 'grid'], ['website', 'Website', 'globe'], ['calls', 'AI Answering', 'phone'], ['reviews', 'Reviews', 'star'], ['seo', 'Local SEO', 'pin'], ['agents', 'AI Agents', 'agents'], ['access', 'Workspace access', 'key']]
 const REVIEW_TABS = [['reviews', 'Overview'], ['requests', 'Requests'], ['messages', 'Messages']]
 const TITLES = {
   overview: ['Your business, connected.', 'Pick a service, see what’s happening, and take the next step.'],
+  agents: ['Your next great teammate.', 'Give everyday work a clear process, with a person in control.'],
   website: ['Website workspace', 'From the first draft to a confident launch.'],
   calls: ['AI Answering Service', 'Plan a better first conversation with your customers.'],
   seo: ['Local SEO workspace', 'Turn real business updates into a consistent local presence.'],
@@ -139,6 +162,7 @@ function Dashboard({ onLogout }) {
         {client && <>
           {inReviews && <nav className="review-subnav" aria-label="Review Booster sections">{REVIEW_TABS.map(([id, label]) => <button key={id} aria-current={activeTab === id ? 'page' : undefined} className={activeTab === id ? 'active' : ''} onClick={() => setTab(id)}>{label}</button>)}</nav>}
           {['overview', 'website', 'calls', 'seo'].includes(activeTab) && <ServiceWorkspace key={`${demo}:${selected}`} client={client} demo={demo} isMaster={isMaster} view={activeTab} navigate={setTab} requests={requests} loading={requestLoading} error={requestError}/>}
+          {activeTab === 'agents' && <AgentOperations key={`${demo}:${selected}`} client={client} demo={demo} isMaster={isMaster}/>}
           {activeTab === 'reviews' && !hasReviews && <div className="panel empty-state"><span className="icon-tile pink"><Icon name="star"/></span><h2>Review Booster is not in this plan</h2><p>{client.name} is not subscribed to Review Booster. Enable it under Workspace access to start sending requests.</p><button className="btn-ghost" onClick={() => setTab('access')}>Manage plan</button></div>}
           {activeTab === 'reviews' && hasReviews && <>
             <StatCards client={client}/>
@@ -148,9 +172,10 @@ function Dashboard({ onLogout }) {
           </>}
           {activeTab === 'requests' && <section className="panel table-panel">{requestError && <div className="error-banner" role="alert">{requestError}</div>}<RequestBrowser key={selected} requests={requests} query={query} setQuery={setQuery} loading={requestLoading} onCreate={() => setModal('request')}/></section>}
           {activeTab === 'messages' && <section className="panel"><MessagesPanel key={selected} clientId={selected} business={client.name} notify={notify}/></section>}
-          {activeTab === 'access' && isMaster && <section className="panel"><AccessKey key={selected} c={client} onRotated={() => { reload(); notify('New key issued. Share it securely with the team.') }} onPlanSaved={() => { reload(); notify('Plan updated. Their workspace now shows the new services.') }}/></section>}
+          {activeTab === 'access' && isMaster && <section className="panel"><TeamAccess client={client} demo={demo}/><AccessKey key={selected} c={client} onRotated={() => { reload(); notify('New key issued. Share it securely with the team.') }} onPlanSaved={() => { reload(); notify('Plan updated. Their workspace now shows the new services.') }}/></section>}
         </>}
-        <footer className="dashboard-footer"><span>Azul Business Workspace</span><span>Website · AI Answering · Reviews · Local SEO</span></footer>
+        {authClient && <AccountPassword/>}
+        <footer className="dashboard-footer"><span>Azul Business Workspace</span><span>Website · AI Answering · Reviews · Local SEO · AI Agents</span></footer>
       </main>
     </div>
     {toast && <div className="toast" role="status"><Icon name="check" size={18}/>{toast}<button aria-label="Dismiss notification" onClick={() => setToast('')}><Icon name="close" size={16}/></button></div>}
@@ -286,4 +311,19 @@ function NewClientForm({ onDone, onClose }) {
     <Field label="Message style" id="client-tone" className="sm:col-span-2"><select className="input" id="client-tone" value={f.tone} onChange={set('tone')}>{['friendly', 'professional', 'casual', 'warm'].map((t) => <option key={t} value={t}>{t[0].toUpperCase() + t.slice(1)}</option>)}</select></Field></>}
     {err && <p className="error-banner sm:col-span-2" role="alert">{err}</p>}<button className="btn-primary sm:col-span-2" disabled={busy}>{busy ? 'Creating…' : 'Create workspace & get key'}</button>
   </form>
+}
+
+function AccountPassword() {
+  const [open,setOpen]=useState(false)
+  const [password,setPassword]=useState('')
+  const [message,setMessage]=useState('')
+  const [busy,setBusy]=useState(false)
+  async function save(e) {
+    e.preventDefault();setBusy(true);setMessage('')
+    const {error}=await authClient.auth.updateUser({password})
+    setMessage(error ? 'Password could not be updated. Sign in again and retry.' : 'Password updated.')
+    if(!error)setPassword('')
+    setBusy(false)
+  }
+  return <div className="account-password"><button className="text-button" onClick={()=>setOpen(!open)} aria-expanded={open}>Set or change your account password</button>{open && <form onSubmit={save}><label className="label" htmlFor="new-password">New password</label><input id="new-password" className="input" type="password" autoComplete="new-password" minLength={12} required value={password} onChange={e=>setPassword(e.target.value)}/><button className="btn-ghost" disabled={busy}>Save password</button><p role="status">{message}</p></form>}</div>
 }
