@@ -21,3 +21,4 @@ create index if not exists free_report_leads_created_at on free_report_leads (cr
 
 -- No policies: only the server (service role key) can read or write.
 alter table free_report_leads enable row level security;
+revoke all on table free_report_leads from public, anon, authenticated;

@@ -1,6 +1,6 @@
-// Google lookups for the free report: Places API (New) and PageSpeed Insights.
-// Both use GOOGLE_API_KEY. Each returns null on any failure so one missing
-// source never sinks the whole report.
+// Google lookups for the free report, via Places API (New) and GOOGLE_API_KEY.
+// Each returns an empty result on any failure so one missing source never
+// sinks the whole report.
 
 const PLACE_FIELDS = [
   'id', 'displayName', 'formattedAddress', 'rating', 'userRatingCount', 'websiteUri',
@@ -42,30 +42,5 @@ export async function searchCompetitors(key, { term, city, location }) {
   } catch (err) {
     console.error('free-report: competitor lookup failed', err.message)
     return []
-  }
-}
-
-/** Mobile Lighthouse scores for a URL. Slow: usually 10–30 seconds. */
-export async function pageSpeed(key, url) {
-  const query = new URLSearchParams({ url, strategy: 'mobile', key })
-  query.append('category', 'performance')
-  query.append('category', 'seo')
-  try {
-    const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${query}`, { signal: AbortSignal.timeout(45000) })
-    if (!res.ok) throw new Error(`PageSpeed ${res.status}: ${(await res.text()).slice(0, 300)}`)
-    const { lighthouseResult: lh } = await res.json()
-    const perf = lh?.categories?.performance?.score
-    const seo = lh?.categories?.seo
-    if (typeof perf !== 'number' || typeof seo?.score !== 'number') return null
-    const lcp = lh.audits?.['largest-contentful-paint']?.numericValue
-    return {
-      performance: Math.round(perf * 100),
-      seo: Math.round(seo.score * 100),
-      lcpSeconds: typeof lcp === 'number' ? Math.round(lcp / 100) / 10 : null,
-      seoFailed: (seo.auditRefs || []).filter(ref => ref.weight > 0 && lh.audits[ref.id]?.score === 0).length,
-    }
-  } catch (err) {
-    console.error('free-report: PageSpeed failed', err.message)
-    return null
   }
 }

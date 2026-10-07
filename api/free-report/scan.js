@@ -1,6 +1,6 @@
 import { analyzeHtml, buildReport, parseScanInput, pickCompetitors, previewOf, TRADES } from '../_lib/report.js'
 import { fetchSite } from '../_lib/fetchSite.js'
-import { findPlace, pageSpeed, searchCompetitors } from '../_lib/google.js'
+import { findPlace, searchCompetitors } from '../_lib/google.js'
 import { clientIp, rateLimited, readJson } from '../_lib/http.js'
 import { seal } from '../_lib/seal.js'
 
@@ -27,9 +27,8 @@ export default async function handler(req, res) {
   const website = input.website || place?.websiteUri || ''
   const term = TRADES[input.trade] || place?.primaryTypeDisplayName?.text || null
 
-  const [found, speed, fetched] = await Promise.all([
+  const [found, fetched] = await Promise.all([
     searchCompetitors(key, { term, city: input.city, location: place?.location }),
-    website ? pageSpeed(key, website) : null,
     website ? fetchSite(website).catch(err => { console.error('free-report: site fetch failed', err.message); return null }) : null,
   ])
 
@@ -40,7 +39,6 @@ export default async function handler(req, res) {
     website,
     site: fetched ? analyzeHtml(fetched.html, fetched.finalUrl) : null,
     siteError: Boolean(website && !fetched),
-    speed,
   })
   res.setHeader('Cache-Control', 'no-store')
   return res.json({ preview: previewOf(report), token: seal({ input, report }, process.env.FREE_REPORT_SECRET) })

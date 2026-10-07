@@ -61,9 +61,9 @@ test('competitors exclude the business itself and results without review counts'
 })
 
 test('report: gaps are measured, ranked by severity and scored', () => {
-  const report = buildReport({ input, place: place(), competitors, website: 'https://sunshine.example/', site: analyzeHtml('<html><title>x</title></html>' + '<p>text </p>'.repeat(100), 'https://sunshine.example/'), speed: { performance: 41, seo: 83, lcpSeconds: 6.2, seoFailed: 2 } })
+  const report = buildReport({ input, place: place(), competitors, website: 'https://sunshine.example/', site: analyzeHtml('<html><title>x</title></html>' + '<p>text </p>'.repeat(100), 'https://sunshine.example/') })
   const ids = report.findings.map(f => f.id)
-  assert.deepEqual(ids.slice(0, 3), ['reviews_behind', 'speed_slow', 'not_mobile'])
+  assert.deepEqual(ids.slice(0, 3), ['reviews_behind', 'not_mobile', 'rating_low'])
   assert.deepEqual(report.findings[0].values, { yours: 12, avg: 150, gap: 138 })
   assert.ok(ids.includes('rating_low') && ids.includes('photos_few') && ids.includes('after_hours') && ids.includes('no_spanish'))
   assert.ok(!ids.includes('phone_missing') && !ids.includes('hours_missing'))
@@ -132,7 +132,6 @@ test('scan then unlock: free preview, then full report after the lead is saved',
       if (body.pageSize === 1) return json({ places: [place({ websiteUri: 'https://93.184.215.14/' })] })
       return json({ places: [{ id: 'self', displayName: { text: 'Sunshine Roofing' }, userRatingCount: 12 }, ...competitors.map(c => ({ id: c.name, displayName: { text: c.name }, rating: c.rating, userRatingCount: c.reviews }))] })
     }
-    if (href.includes('pagespeedonline')) return json({ lighthouseResult: { categories: { performance: { score: 0.41 }, seo: { score: 0.83, auditRefs: [{ id: 'meta-description', weight: 1 }] } }, audits: { 'largest-contentful-paint': { numericValue: 6240 }, 'meta-description': { score: 0 } } } })
     if (href.startsWith('https://93.184.215.14')) return new Response('<html lang="en"><title>Sunshine</title><meta name="viewport" content="x">' + '<p>We fix roofs. </p>'.repeat(60), { status: 200 })
     if (href.startsWith('https://db.example/rest/v1/free_report_leads')) { saved.push(JSON.parse(init.body)); return new Response(null, { status: 201 }) }
     throw new Error(`unexpected fetch ${href}`)
@@ -143,7 +142,7 @@ test('scan then unlock: free preview, then full report after the lead is saved',
   assert.equal(scanned.code, 200)
   const { preview, token } = scanned.body
   assert.equal(preview.top[0].id, 'reviews_behind')
-  assert.ok(preview.top.some(f => f.id === 'speed_slow' && f.values.seconds === 6.2))
+  assert.ok(preview.top.some(f => f.id === 'no_spanish')) // From the website's own HTML.
   assert.equal(JSON.stringify(preview).includes('"A"'), false) // Competitor names stay in the full report.
 
   const rejected = mockRes()

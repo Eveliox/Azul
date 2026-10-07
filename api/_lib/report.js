@@ -23,13 +23,11 @@ export const FINDINGS = {
   reviews_behind: { severity: 'high', service: 'review-booster' },
   reviews_few: { severity: 'medium', service: 'review-booster' },
   rating_low: { severity: 'medium', service: 'review-booster' },
-  speed_slow: { severity: 'high', service: 'website-build' },
   not_mobile: { severity: 'high', service: 'website-build' },
   no_https: { severity: 'high', service: 'website-build' },
   phone_missing: { severity: 'high', service: 'local-proof-seo' },
   no_spanish: { severity: 'medium', service: 'website-build' },
   no_tap_to_call: { severity: 'medium', service: 'website-build' },
-  seo_issues: { severity: 'medium', service: 'website-build' },
   meta_missing: { severity: 'medium', service: 'website-build' },
   hours_missing: { severity: 'medium', service: 'local-proof-seo' },
   photos_few: { severity: 'medium', service: 'local-proof-seo' },
@@ -37,7 +35,7 @@ export const FINDINGS = {
   no_schema: { severity: 'low', service: 'local-proof-seo' },
   after_hours: { severity: 'low', service: 'ai-answering-service' },
 }
-export const PASSES = ['reviews_ahead', 'rating_strong', 'speed_good', 'has_spanish', 'has_tap_to_call', 'has_https', 'gbp_complete']
+export const PASSES = ['reviews_ahead', 'rating_strong', 'has_spanish', 'has_tap_to_call', 'has_https', 'gbp_complete']
 const WEIGHT = { high: 14, medium: 7, low: 3 }
 const SEVERITY_ORDER = ['high', 'medium', 'low']
 const findingOrder = Object.keys(FINDINGS)
@@ -160,9 +158,8 @@ export function pickCompetitors(places, self) {
  * competitors: [{ name, rating, reviews }]
  * website: the URL we checked, or ''
  * site: analyzeHtml() result | null; siteError: true if the site didn't load
- * speed: { performance, seo, lcpSeconds, seoFailed } | null
  */
-export function buildReport({ input, place, competitors = [], website, site, siteError, speed }) {
+export function buildReport({ input, place, competitors = [], website, site, siteError }) {
   const findings = []
   const passes = []
   const add = (id, values = {}) => findings.push({ id, ...FINDINGS[id], values })
@@ -193,13 +190,8 @@ export function buildReport({ input, place, competitors = [], website, site, sit
   }
 
   if (!website) add('site_missing')
-  else if (siteError && !speed) add('site_unreachable', { url: website })
+  else if (siteError) add('site_unreachable', { url: website })
   else {
-    if (speed) {
-      if (speed.performance < 90) add('speed_slow', { score: speed.performance, seconds: speed.lcpSeconds })
-      else passes.push({ id: 'speed_good', values: { score: speed.performance, seconds: speed.lcpSeconds } })
-      if (speed.seo < 90) add('seo_issues', { score: speed.seo, failed: speed.seoFailed })
-    }
     if (site) {
       if (!site.https) add('no_https')
       else passes.push({ id: 'has_https', values: {} })
@@ -225,7 +217,7 @@ export function buildReport({ input, place, competitors = [], website, site, sit
     score,
     findings,
     passes,
-    checked: { google: Boolean(place), website: Boolean(website && (site || speed)) },
+    checked: { google: Boolean(place), website: Boolean(website && site) },
     google: place ? {
       name: place.displayName?.text || input.business,
       address: place.formattedAddress || null,
@@ -237,7 +229,6 @@ export function buildReport({ input, place, competitors = [], website, site, sit
     competitors,
     averages: compared ? { reviews: avgReviews, rating: avgRating } : null,
     website: website || null,
-    speed: speed || null,
     services: [...new Set(findings.map(f => f.service))],
     checkedAt: new Date().toISOString(),
   }

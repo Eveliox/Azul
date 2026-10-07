@@ -86,12 +86,6 @@
 .fr-table .is-you th { border-left: 3px solid var(--blue); padding-left: 12px; }
 .fr-table .is-avg th, .fr-table .is-avg td { color: #c9ccd4; border-bottom: 0; }
 
-.fr-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 0; max-width: 900px; }
-.fr-stats > div { background: #14161b; border: 1px solid var(--line); padding: 22px; }
-.fr-stats dt { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-.fr-stats dd { margin: 10px 0 0; font-size: clamp(34px, 3.5vw, 48px); font-weight: 600; letter-spacing: -.05em; }
-.fr-stats dd small { font-size: 13px; color: var(--muted); letter-spacing: 0; font-weight: 400; margin-left: 3px; }
-.fr-stats p { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
 .fr-unchecked { list-style: none; padding: 0; margin: 30px 0 0; font-size: 12px; color: var(--muted); }
 .fr-passes { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 10px 30px; }
@@ -115,7 +109,6 @@
 
 @media (max-width: 900px) {
   .fr-intro { grid-template-columns: 1fr; }
-  .fr-stats { grid-template-columns: 1fr; }
   .fr-cta { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 600px) {

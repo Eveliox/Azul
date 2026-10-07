@@ -23,12 +23,9 @@ Google requires a billing account for the Places API, even when usage stays insi
 
 **Billing** (left menu) → **Link a billing account** → add a card.
 
-## 3. Enable the two APIs
+## 3. Enable Places API (New)
 
-**APIs & Services → Library**, then search for each one and click **Enable**:
-
-- **Places API (New)**. Make sure it's the one with "(New)"; the legacy Places API won't work.
-- **PageSpeed Insights API**
+**APIs & Services → Library** → search for **Places API (New)** → **Enable**. Make sure it's the one with "(New)"; the legacy Places API won't work. It's the only Google API the report uses.
 
 ## 4. Create the key
 
@@ -38,12 +35,12 @@ Google requires a billing account for the Places API, even when usage stays insi
 
 On the key's page:
 
-- **API restrictions → Restrict key** → tick **Places API (New)** and **PageSpeed Insights API** → **Save**.
+- **API restrictions → Restrict key** → tick **Places API (New)** → **Save**.
 - Leave **Application restrictions** set to **None**. The key is only used from the server (Vercel), which has no fixed IP address, and a website restriction would block those calls. The key never reaches the browser.
 
 ## 6. Cap your costs
 
-Each report makes **2 Places searches** (the business and its competitors) and **1 PageSpeed test**. PageSpeed is free. Places has a free monthly allowance, then bills per request. Check current prices at https://developers.google.com/maps/billing-and-pricing/pricing (the report uses **Text Search**, at the tier that includes ratings, phone and hours).
+Each report makes **2 Places searches** (the business and its competitors). Places has a free monthly allowance, then bills per request. Check current prices at https://developers.google.com/maps/billing-and-pricing/pricing (the report uses **Text Search**, at the tier that includes ratings, phone and hours).
 
 Set two safety nets:
 
@@ -80,7 +77,7 @@ To run it locally, `npm run dev` does not serve `/api`. Use `npx vercel link` on
 
 ## What it measures, and what it doesn't
 
-- **Measured:** Google rating, review count, phone, hours, photo count (Google returns up to 10) and website link; the first 3 businesses Google shows for the trade in that city; mobile speed and search-basics scores from Google PageSpeed; and HTTPS, mobile setup, tap-to-call, Spanish version, search title and description, and business structured data from the homepage.
-- **Not measured:** missed calls, website traffic, and exact search ranking positions.
-- **Browser-rendered sites** (React, Vue and similar) send almost no HTML, so the homepage checks are skipped rather than reporting gaps that may not be real. The speed and Google checks still run.
+- **Measured:** Google rating, review count, phone, hours, photo count (Google returns up to 10) and website link; the first 3 businesses Google shows for the trade in that city; and HTTPS, mobile setup, tap-to-call, Spanish version, search title and description, and business structured data from the homepage.
+- **Not measured:** website speed, missed calls, website traffic, and exact search ranking positions.
+- **Browser-rendered sites** (React, Vue and similar) send almost no HTML, so the homepage checks are skipped rather than reporting gaps that may not be real. The Google checks, HTTPS and mobile setup still run.
 - **Abuse limits:** 5 scans per visitor per 10 minutes (per server instance), a hidden spam-trap field, and the daily Google quota from step 6, which is the hard cost cap.

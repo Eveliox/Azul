@@ -77,7 +77,7 @@ function Scanning() {
   const t = freeReportCopy[lang].scanning
   const [step, setStep] = useState(0)
   useEffect(() => {
-    const timer = setInterval(() => setStep(s => Math.min(s + 1, t.steps.length - 1)), 6500)
+    const timer = setInterval(() => setStep(s => Math.min(s + 1, t.steps.length - 1)), 3000)
     return () => clearInterval(timer)
   }, [t.steps.length])
   return (
@@ -154,17 +154,6 @@ function Report({ report, onRestart }) {
               </tbody>
             </table>
           </div>
-        </section>
-      )}
-
-      {report.speed && (
-        <section className="fr-block" aria-labelledby="fr-website">
-          <h3 id="fr-website" className="fr-subhead">{r.websiteTitle}</h3>
-          <dl className="fr-stats">
-            <div><dt>{r.speedScore}</dt><dd>{report.speed.performance}<small>/100</small></dd></div>
-            {report.speed.lcpSeconds && <div><dt>{r.loadTime}</dt><dd>{r.seconds(report.speed.lcpSeconds)}</dd><p>{r.target}</p></div>}
-            <div><dt>{r.seoScore}</dt><dd>{report.speed.seo}<small>/100</small></dd></div>
-          </dl>
         </section>
       )}
 
