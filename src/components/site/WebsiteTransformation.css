@@ -27,7 +27,7 @@
 .transformation-upgrade-wrap{position:absolute;inset:0;z-index:4;display:grid;place-items:center;background:#14182524;pointer-events:none}
 .transformation-upgrade{pointer-events:auto;border:1px solid #7191ff;border-radius:8px;background:#1745ed;color:white;padding:20px 30px;font-size:clamp(14px,1.6vw,22px)!important;font-weight:600!important;box-shadow:0 8px 50px #1745ed66;display:flex;align-items:center;gap:16px}
 .transformation-upgrade>span{font-size:30px;font-weight:400}.transformation-upgrade:hover{background:#315df1}
-.transformation-phase--playing .transformation-upgrade-wrap{animation:transformation-button 1.15s both;pointer-events:none}.transformation-phase--playing .transformation-before{animation:transformation-reveal 1.7s .9s cubic-bezier(.65,0,.2,1) forwards}.transformation-phase--done .transformation-before{clip-path:inset(0 100% 0 0)}
+.transformation-phase--playing .transformation-upgrade-wrap{animation:transformation-button 1.15s both;pointer-events:none}.transformation--watch .transformation-phase--playing .transformation-before{animation:transformation-reveal 1.7s .9s cubic-bezier(.65,0,.2,1) forwards}.transformation--watch .transformation-phase--done .transformation-before{clip-path:inset(0 100% 0 0)}
 .transformation-cursor{position:absolute;left:58%;top:55%;width:32px;height:40px;z-index:5;pointer-events:none;animation:transformation-click 1.3s both}
 .transformation-divider{position:absolute;left:var(--split);top:0;bottom:0;width:2px;background:white;z-index:4;pointer-events:none;transform:translateX(-50%);box-shadow:0 0 14px #0006}
 .transformation-divider span{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:#fff;border-radius:50%;color:#1745ed;display:grid;place-items:center;font-size:24px;font-weight:600;box-shadow:0 3px 16px #0004;white-space:pre}
@@ -54,3 +54,23 @@
 @media(max-width:900px){.transformation-heading{align-items:flex-start;gap:24px}.transformation-heading>p{max-width:260px;font-size:14px}.transformation-toolbar{align-items:flex-start;flex-direction:column}.transformation-points{gap:16px;flex-wrap:wrap}.transformation-details{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){.transformation-heading{display:block;margin-bottom:28px}.transformation-heading>p{max-width:100%;margin-top:20px}.transformation-projects{width:100%;gap:12px}.transformation-projects button{padding:12px 0;flex:1;text-align:left;font-size:12px}.transformation-projects button span{margin-right:6px}.transformation-modes{width:100%}.transformation-modes button{flex:1}.transformation-browser{border-radius:8px}.transformation-chrome{height:34px;padding-inline:10px}.transformation-chrome>span:nth-child(2){min-width:0;width:auto;font-size:9px;padding:4px 8px}.transformation-chrome-brand{font-size:14px}.transformation-dots{gap:4px}.transformation-dots i{width:5px;height:5px}.transformation-badges{inset:8px 8px auto}.transformation-badges>span{font-size:7px;padding:6px;letter-spacing:.025em}.transformation-upgrade{padding:12px 16px;gap:10px}.transformation-upgrade>span{font-size:22px}.transformation-divider span{width:36px;height:36px;font-size:20px}.transformation-player{font-size:10px;padding:10px;min-height:44px}.transformation-player button{font-size:10px}.transformation-points{flex-direction:column;gap:12px}.transformation-disclosure{font-size:10px!important}}
 @media(prefers-reduced-motion:reduce){.transformation *{animation:none!important;transition:none!important}}
+
+.transformation-after>img,.transformation-after>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.transformation-range{user-select:none;-webkit-user-select:none}
+.transformation-actions{flex-wrap:wrap}
+/* Aspire's fictional contractor template is structurally different from the wellness brochure. */
+.old-contractor{padding:0 4cqw;background:#d4d4d4;font-family:Arial,Helvetica,sans-serif;color:#222}
+.contractor-top{background:#fafafa;font-size:3.3cqw;font-weight:900;letter-spacing:-.13cqw;padding:4.5cqw 2.5cqw 2.5cqw;border-bottom:.7cqw solid #a34123}
+.contractor-top>span{float:right;font-size:1cqw;letter-spacing:.12cqw;color:#666;margin-top:1.6cqw}
+.contractor-nav{display:flex;background:#353535;color:#fff;justify-content:space-around;font-size:1cqw;padding:1.4cqw}
+.contractor-banner{display:flex;align-items:center;gap:2cqw;background:linear-gradient(#b4603e,#854029);color:white;padding:2.5cqw 3cqw;border-bottom:.4cqw solid #643624}
+.contractor-banner>span{font-size:7cqw;line-height:1}.contractor-banner h3{font-family:Arial,sans-serif;font-size:2.6cqw;font-weight:900;line-height:1.2;letter-spacing:-.05cqw;text-transform:uppercase;max-width:57cqw;margin:0}
+.contractor-banner p{font-size:.95cqw;letter-spacing:.08cqw;margin:1.5cqw 0 0;color:#eed7c8}
+.contractor-columns{display:grid;grid-template-columns:1.1fr 1fr;gap:3cqw;background:#eee;padding:3cqw 2.5cqw}
+.contractor-copy h4{font:bold 1.75cqw Arial,sans-serif;margin:0 0 1.5cqw}.contractor-copy p{font:1.15cqw/1.6 Arial,sans-serif;color:#555;margin:0 0 1.5cqw}
+.contractor-copy ul{list-style:square;margin:1.5cqw 0;padding-left:2cqw;font-size:1.1cqw;line-height:1.8}.contractor-more{font-size:1cqw;color:#903e22;text-decoration:underline}
+.contractor-roof{height:7cqw;background:repeating-linear-gradient(0deg,transparent,transparent 1cqw,#594c43 1.1cqw,#594c43 1.3cqw),repeating-linear-gradient(90deg,#807264,#807264 3cqw,#a3927e 3.1cqw,#a3927e 6cqw);border:4px ridge #c6c0b8}
+.contractor-form{background:#d8d8d8;border:1px solid #b2b2b2;padding:2cqw;box-shadow:.3cqw .3cqw 0 #bbb}
+.contractor-form>b{display:block;color:#81351c;font-size:1.3cqw;border-bottom:2px solid #aaa;padding-bottom:1cqw;margin-bottom:1.6cqw}
+.contractor-form>div{margin-bottom:1.2cqw}.contractor-form span{display:block;font-size:1cqw;margin-bottom:.5cqw}.contractor-form i{display:block;background:white;border:2px inset #ccc;height:2.5cqw}.contractor-form i.contractor-textarea{height:5cqw}.contractor-form strong{display:block;background:#963e20;color:white;text-align:center;font-size:1cqw;padding:1cqw;border:2px outset #bb694b}
+.contractor-footer{background:#363636;padding:1.5cqw;text-align:center;color:#bbb;font-size:.9cqw}
