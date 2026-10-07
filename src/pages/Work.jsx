@@ -6,6 +6,7 @@ import { SplitText } from '../components/motion/SplitText'
 import { DotGrid } from '../components/motion/DotGrid'
 import { FilterChips, Modal, Arrow } from '../components/site/UI'
 import { bookingUrl } from '../components/site/Layout'
+import { WebsiteTransformation } from '../components/site/WebsiteTransformation'
 
 export default function Work() {
   const { c } = useLanguage()
@@ -36,6 +37,7 @@ export default function Work() {
       </div>
       {!projects.length && <div className="work-empty"><h2>{c.work.empty}</h2><p>{c.work.emptyBody}</p><button className="text-link" onClick={() => setFilter('all')}>{c.work.reset}<Arrow /></button></div>}
     </section>
+    <WebsiteTransformation initialMode="compare" />
     <section className="work-clients section"><SectionEyebrow>{c.work.clients}</SectionEyebrow><div>{workProjects.filter(p=>p.category!=='studio').map(p=><span key={p.id}>{c.work.projects[p.id].title}</span>)}</div></section>
     <section className="work-cta section"><SectionEyebrow>{c.contact}</SectionEyebrow><SplitText>{c.work.ctaTitle}</SplitText><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.work.cta}<Arrow /></a></section>
     {selected && <Modal title={copy.title} onClose={() => setSelected(null)}><img className="work-modal-image" src={selected.image} alt={copy.imageAlt}/><p>{copy.description}</p><h3 className="work-modal-label">{c.work.scope}</h3><div className="work-tags">{copy.tags.map(tag=><span key={tag}>{tag}</span>)}</div><a className="button" href={selected.url} target="_blank" rel="noreferrer">{c.work.visit}<Arrow /></a></Modal>}

@@ -13,6 +13,7 @@ import { Marquee } from '../components/motion/Marquee'
 import { SplitText } from '../components/motion/SplitText'
 import { Wordmark } from '../components/motion/Wordmark'
 import { HeroFilm } from '../components/site/HeroFilm'
+import { WebsiteTransformation } from '../components/site/WebsiteTransformation'
 import { AgentOrbit } from '../components/agents/AgentOrbit'
 import { HoursComparison } from '../components/agents/HoursComparison'
 import { JobPostingButton } from '../components/agents/JobPostingDrawer'
@@ -175,6 +176,7 @@ export default function Home() {
   const { c } = useLanguage()
   return <>
     <Hero />
+    <WebsiteTransformation />
     <section className="section who" id="who">
       <SectionEyebrow>{c.who.eyebrow}</SectionEyebrow>
       <SplitText>{c.who.title}</SplitText>
