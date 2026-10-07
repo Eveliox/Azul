@@ -51,6 +51,18 @@ const b2=await claim();assert.equal(b2.reserved_cents,6,'each attempt reserves a
 await finish(b2,{error:'AI temporary failure'})
 await db.query("update rb_agent_runs set next_attempt_at=now()-interval '1 minute' where id=$1",[b.id])
 assert.equal(await claim(),undefined,'retries cannot exceed budget')
+await db.query("update rb_agent_settings set mode='testing',monthly_limit=10 where client_id=$1",[c1])
+const successful=await create(c1,'99999999-9999-4999-8999-999999999999','Q-2')
+await db.query("update rb_agent_runs set status='failed' where id=$1",[successful.id])
+await db.query("select rb_agent_action($1,$2,$3,'retry_draft')",[c1,successful.id,u])
+const recovered=await claim();assert.equal(recovered.id,successful.id)
+await finish(recovered,{subject:'Recovered',body:'Please reply with any questions.',model:'test',input_tokens:10,output_tokens:10,estimated_cost_cents:.01})
+await db.query("select rb_agent_action($1,$2,$3,'approve','Reviewed','Reviewed body')",[c1,successful.id,u])
+await db.query("update rb_agent_settings set mode='active' where client_id=$1",[c1])
+const successSend=await claim();await finish(successSend,{message_id:'provider-success'})
+const sentRecord=(await db.query('select status,provider_message_id from rb_agent_runs where id=$1',[successful.id])).rows[0]
+assert.deepEqual(sentRecord,{status:'sent',provider_message_id:'provider-success'})
+await assert.rejects(()=>db.query("select rb_agent_action($1,$2,$3,'retry_draft')",[c1,successful.id,u]))
 const events=(await db.query('select * from rb_agent_events where run_id=$1',[run.id])).rows
 assert.ok(events.some(e=>e.action==='approved' && e.actor_id===u))
 await db.exec('set role anon')

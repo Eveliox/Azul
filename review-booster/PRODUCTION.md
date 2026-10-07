@@ -24,8 +24,10 @@ CRM imports, delivery webhooks and automatic reply handling are not implemented.
    go into browser builds. Never prefix a service-role, model or email key with VITE.
    Set APP_URL to the production origin. Set AGENT_EMAIL_FROM to a verified Resend
    sender; this is separate from the existing review sender.
-5. Choose an accessible text model supporting Responses structured outputs; set
-   OPENAI_AGENT_MODEL and its standard (noncached) per-million input/output prices.
+5. The example configuration uses GPT-4.1 Mini for short, structured drafts at
+   $0.40 input / $1.60 output per million tokens (verified October 7, 2026).
+   Confirm account access and pricing before activation. If changing models, update
+   OPENAI_AGENT_MODEL and both standard (noncached) token prices together.
    Set AGENTS_ENABLED=true, AGENTS_EMAIL_ENABLED=false initially. Configure a
    provider-side project spending limit too. Prices must be updated when the model
    or provider rates change. The app budget is based on configured prices, not a
@@ -103,5 +105,12 @@ production. Live model, email and deployment checks must be completed with the
 connected provider accounts before calling this production-ready.
 
 References: [structured output](https://developers.openai.com/api/docs/guides/structured-outputs),
+[model and pricing](https://developers.openai.com/api/docs/models/gpt-4.1-mini),
 [Resend idempotency](https://resend.com/docs/dashboard/emails/idempotency-keys),
 [GitHub schedule behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+
+Browser checks are in `scripts/test-agent-ui.cjs` (mocked APIs) and
+`scripts/test-review-ui.cjs` (local demo + mocked public review API). Start the demo
+on port 3014 and run them with Playwright available, or point PLAYWRIGHT_MODULE to
+an installed Playwright module. UI_TEST_ORIGIN can override the local origin.
+These are fixtures, not evidence of live delivery or client business results.
