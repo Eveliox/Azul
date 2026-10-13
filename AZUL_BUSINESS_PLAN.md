@@ -40,13 +40,13 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 | 1 | Review Booster | $79/mo | Free review audit | Live |
 | 2 | Social Media AI | $149/mo | 5 free posts | Live |
 | 3 | Website Build | $199/mo + $499 setup | Free mockup | Live |
-| 4 | Local Proof SEO | $299/mo | Free local presence check | Live |
+| 4 | Found Everywhere | $599/mo | Free Google + AI visibility audit | Live |
 | 5 | AI Answering Service | $349/mo | 7-day free trial | Beta (first 5 clients only) |
 | 6 | AI Facebook Ads | TBD | Join waitlist | Coming Soon |
 
 ### Bundle: Azul Growth Suite
 
-- **Standard price:** $549/mo (vs $1,075 à la carte)
+- **Standard price:** $549/mo (vs $1,375 à la carte — the bundle costs less than one standalone service)
 - **Founding Client price:** $399/mo locked for life (first 10 clients only)
 - **Includes:** all live services + optional AI Answering add-on
 - **No long-term contracts** — 30 days notice to cancel
@@ -81,27 +81,52 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 
 ---
 
-### 3.2 Local Proof SEO ($299/mo)
+### 3.2 Found Everywhere ($599/mo)
 
-**Purpose:** Keep the client's Google Business Profile continuously active with local, bilingual content so they rank in Miami-area local search.
+**Purpose:** Make the client the answer in both places customers look — Google local search ("roofer near me") AND the AI engines ("best roofer in Miami" to ChatGPT, Perplexity, Gemini, Siri, Google AI Overviews). Traditional Local SEO handles Google ranking; AEO (AI Engine Optimization) handles who the AI names. Found Everywhere does both as one service.
+
+**Why one tier, no $299 option:** AI citation work and Google ranking work share the same inputs (job content, bilingual copy, authority signals) but reach different surfaces. Splitting them undercharges for the labor and leaves clients half-visible on surfaces where ~60% of local search is heading by 2027.
 
 **Tool stack:**
 - Google Business Profile Manager (free)
-- Localo or Publer (schedule to Google Business Profile), or post directly in GBP Manager
-- Claude API or ChatGPT Plus (content generation)
-- LocalFalcon ($40/mo) for local ranking reports
+- Localo or Publer, or post directly in GBP Manager
+- Claude API + ChatGPT Plus (content + outreach drafting)
+- LocalFalcon ($40/mo shared) — local rank reports
+- Dedicated Reddit account per client (owner-visible, authentic)
+- Client-owned YouTube channel (set up during onboarding if missing)
+- Semrush / Ahrefs free tier for citation + backlink audits
+
+**Monthly deliverables per client:**
+1. **4 bilingual Google Business Profile posts** (one per week).
+2. **1 authority listicle placement/mention** — pitch to local news, neighborhood blogs, Yelp Top 10 pages, Expertise.com, Three Best Rated, etc. Paid slots used sparingly on month 1 to seed authority.
+3. **2 Reddit mentions** — authentic answers in `r/Miami`, `r/florida`, `r/HomeImprovement`, and vertical-specific subs. Real stories from real jobs. Never spam.
+4. **1 YouTube Short (60-90 sec)** — client narrates on-site, you edit + bilingual captions + upload with keyword-rich title and description.
+5. **LocalBusiness + Service schema** audited and refreshed on their site.
+6. **Monthly report (bilingual):** LocalFalcon rank scan + AI Citation Check ("I asked ChatGPT / Perplexity / Gemini X — here's what each said about you vs competitors") + 2-sentence commentary.
+
+**One-time onboarding (first 60 days):**
+- Google Business Profile audit → categories (up to 10), service area zips (up to 20), Q&A (5-10 common questions), photos refresh.
+- Baseline LocalFalcon scan.
+- Baseline AI citation audit — test target queries in ChatGPT, Perplexity, Gemini, Google AI Overviews.
+- Reddit account creation + karma warm-up (participate in local subs for 2-3 weeks before posting about the client).
+- YouTube channel setup + branded intro/outro template.
+- LocalBusiness + Service schema deployed on client site.
 
 **Workflow:**
-1. Onboarding: client adds you as a **manager** on their Google Business Profile.
-2. Weekly: collect job info from client via WhatsApp (built-in intake form) — 1-2 photos + 3-sentence description of the job.
-3. Feed to Claude/GPT with a prompt template:
-   > "Write a 100-word Google Business post in [English/Spanish] for a [industry] business in [Miami neighborhood] about [job description]. Include the neighborhood name naturally. End with a soft CTA."
-4. Human review the AI output (5 min).
-5. Schedule via Localo / Publer or post manually — 1-2 posts/week.
-6. Monthly: run LocalFalcon rank scan → export PDF → email to client with 2-sentence commentary.
+1. Client adds you as a **manager** on GBP and gives access to their Reddit + YouTube accounts (or you create them in their name during onboarding).
+2. Weekly WhatsApp intake: 1-2 photos + 3-sentence job description. Same pipeline as Social Media AI.
+3. Claude turns one job into: 1 GBP post + 1 Reddit answer (if a relevant thread exists this week) + 1 YouTube Short script.
+4. Human review the AI output (10 min).
+5. Schedule / post / film / upload.
+6. Monthly: run LocalFalcon rank scan, run AI citation audit, email bilingual report with commentary.
 
-**Effort per client:** ~2-3 hours/month total.
-**Bottleneck:** getting clients to actually send photos. Build a WhatsApp submission flow on day one.
+**Effort per client:** ~4-6 hours/month after onboarding.
+**Bottlenecks:** (a) client photo intake — same bottleneck as before, WhatsApp flow is critical, (b) finding Reddit threads worth answering — build a saved-search prompt that scans target subs weekly.
+
+**Variable cost per client:** ~$0-50/mo (optional paid listicle slot; LocalFalcon is shared).
+**Margin:** best of any service. This is the one that justifies pushing the bundle.
+
+**Guarantee (used in sales):** if the client isn't getting cited by at least one AI engine on target queries within 90 days, refund month 3. Scope: queries are chosen together during onboarding and are realistic ("best roofer in [specific neighborhood]", not "best roofer in Florida").
 
 ---
 
@@ -114,7 +139,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 - Claude/GPT for captions
 
 **Workflow:**
-1. Reuse the WhatsApp photo intake pipeline from Local SEO.
+1. Reuse the WhatsApp photo intake pipeline from Found Everywhere.
 2. AI generates bilingual captions with hashtags — same prompt library as SEO but tuned for social tone.
 3. Schedule 3-4 posts/week per platform (FB + IG).
 4. Monthly analytics summary sent to client: reach, engagement, top post.
