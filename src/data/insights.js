@@ -39,7 +39,7 @@ export const insightArticles = [
     "slug": "local-search-starts-with-the-basics",
     "category": "local",
     "visual": "local",
-    "service": "local-proof-seo",
+    "service": "found-everywhere",
     "sources": [
       {
         "url": "https://support.google.com/business/answer/7091?hl=en",

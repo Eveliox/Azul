@@ -18,7 +18,7 @@ export const stripeLinks = {
   // Social Media AI ($149/mo)
   socialMedia: 'https://buy.stripe.com/7sYbJ31Lr97KaIy5olc7u04',
 
-  // Local Proof SEO ($299/mo)
+  // Local Proof SEO ($299/mo) — retired. Found Everywhere ($599/mo) needs its own link; not used by any page.
   localSeo: 'https://buy.stripe.com/fZudRbdu9bfSbMC4khc7u05',
 
   // AI Answering ($349/mo)

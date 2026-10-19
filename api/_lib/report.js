@@ -17,7 +17,7 @@ export const TRADES = {
 // Every finding the report can raise, in display order within a severity.
 // service: the Azul service slug that addresses it.
 export const FINDINGS = {
-  gbp_missing: { severity: 'high', service: 'local-proof-seo' },
+  gbp_missing: { severity: 'high', service: 'found-everywhere' },
   site_missing: { severity: 'high', service: 'website-build' },
   site_unreachable: { severity: 'high', service: 'website-build' },
   reviews_behind: { severity: 'high', service: 'review-booster' },
@@ -25,14 +25,14 @@ export const FINDINGS = {
   rating_low: { severity: 'medium', service: 'review-booster' },
   not_mobile: { severity: 'high', service: 'website-build' },
   no_https: { severity: 'high', service: 'website-build' },
-  phone_missing: { severity: 'high', service: 'local-proof-seo' },
+  phone_missing: { severity: 'high', service: 'found-everywhere' },
   no_spanish: { severity: 'medium', service: 'website-build' },
   no_tap_to_call: { severity: 'medium', service: 'website-build' },
   meta_missing: { severity: 'medium', service: 'website-build' },
-  hours_missing: { severity: 'medium', service: 'local-proof-seo' },
-  photos_few: { severity: 'medium', service: 'local-proof-seo' },
+  hours_missing: { severity: 'medium', service: 'found-everywhere' },
+  photos_few: { severity: 'medium', service: 'found-everywhere' },
   gbp_no_website: { severity: 'medium', service: 'website-build' },
-  no_schema: { severity: 'low', service: 'local-proof-seo' },
+  no_schema: { severity: 'low', service: 'found-everywhere' },
   after_hours: { severity: 'low', service: 'ai-answering-service' },
 }
 export const PASSES = ['reviews_ahead', 'rating_strong', 'has_spanish', 'has_tap_to_call', 'has_https', 'gbp_complete']

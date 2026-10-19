@@ -109,12 +109,12 @@ export const content = {
           bullets: ['Automated SMS & email requests', 'Review shield for negative feedback', 'Review dashboard & tracking'],
         },
         {
-          price: '$299/mo',
-          title: 'Local Proof SEO',
-          badge: 'Free local presence check',
+          price: '$599/mo',
+          title: 'Found Everywhere',
+          badge: 'Free Google + AI visibility audit',
           description:
-            'We turn your real completed jobs into local SEO content. Google Business Profile posts, service-area updates, and job summaries that show Google your business is active in Miami-Dade & Broward.',
-          bullets: ['Weekly Google Business posts', 'Service-area location content', 'AI-written local updates (EN/ES)'],
+            'Be the business customers find on Google and the one AI names when they ask for a recommendation. We keep your Google Business Profile active with your real jobs, and earn mentions on the local sites, Reddit threads, and YouTube videos that ChatGPT, Gemini, and Google’s AI answers often draw from.',
+          bullets: ['Weekly bilingual Google Business posts', 'Mentions on local sites, Reddit & YouTube', 'Monthly Google + AI visibility report'],
         },
         {
           price: 'Coming Soon',
@@ -184,17 +184,16 @@ export const content = {
           ctaLabel: 'Get Started',
         },
         {
-          title: 'Local Proof SEO',
-          price: '$299',
-          badge: 'Free local check',
-          stripeLinkKey: 'localSeo',
+          title: 'Found Everywhere',
+          price: '$599',
+          badge: 'Free Google + AI audit',
           features: [
-            'Weekly Google Business Profile posts',
-            'Service-area location content',
-            'AI-written local updates (EN/ES)',
-            'Monthly local ranking report',
+            'Weekly Google Business posts (EN/ES)',
+            'Monthly mentions in sources AI pulls from',
+            'Website schema kept up to date',
+            'Monthly Google rank + AI citation report',
           ],
-          ctaLabel: 'Start Local SEO',
+          ctaLabel: 'Get Found Everywhere',
         },
         {
           title: 'Social Media AI',
@@ -258,7 +257,7 @@ export const content = {
         features: [
           'Professional website + chat widget',
           '5-star review automation',
-          'Local Proof SEO content',
+          'Local SEO content',
           'Missed-call text-back',
           'Customer pipeline & tracking',
           'Full automation setup',
@@ -352,7 +351,7 @@ export const content = {
         interestOptions: [
           { value: 'Custom plan', label: 'A custom combination of services' },
           { value: 'Review Booster', label: 'Review Booster' },
-          { value: 'Local Proof SEO', label: 'Local Proof SEO' },
+          { value: 'Found Everywhere', label: 'Found Everywhere (Google + AI)' },
           { value: 'Social Media AI', label: 'Social Media AI' },
           { value: 'Website Build', label: 'Website Build' },
           { value: 'AI Answering', label: 'AI Answering' },
@@ -388,7 +387,7 @@ export const content = {
       },
       serviceLinks: [
         'Review Booster',
-        'Local Proof SEO',
+        'Found Everywhere',
         'Social Media AI',
         'Website Build',
         'AI Answering',
@@ -514,12 +513,12 @@ export const content = {
           bullets: ['Solicitudes SMS & email automáticas', 'Escudo para feedback negativo', 'Panel de reseñas & seguimiento'],
         },
         {
-          price: '$299/mes',
-          title: 'Local Proof SEO',
-          badge: 'Chequeo local gratis',
+          price: '$599/mes',
+          title: 'Found Everywhere',
+          badge: 'Auditoría gratis de Google + AI',
           description:
-            'Convertimos sus trabajos reales completados en contenido de SEO local. Posts en Google Business, actualizaciones de área de servicio, y resúmenes de trabajos que le muestran a Google que su negocio está activo en Miami-Dade y Broward.',
-          bullets: ['Posts semanales de Google Business', 'Contenido de área de servicio', 'Actualizaciones AI (EN/ES)'],
+            'Sea el negocio que encuentran en Google y el que nombra la AI cuando alguien pide una recomendación. Mantenemos activo su Perfil de Empresa de Google con sus trabajos reales y logramos menciones en sitios locales, Reddit y YouTube, fuentes que ChatGPT, Gemini y las respuestas AI de Google suelen consultar.',
+          bullets: ['Posts semanales bilingües en Google Business', 'Menciones en sitios locales, Reddit y YouTube', 'Reporte mensual de visibilidad en Google + AI'],
         },
         {
           price: 'Próximamente',
@@ -589,17 +588,16 @@ export const content = {
           ctaLabel: 'Empezar',
         },
         {
-          title: 'Local Proof SEO',
-          price: '$299',
-          badge: 'Chequeo local gratis',
-          stripeLinkKey: 'localSeo',
+          title: 'Found Everywhere',
+          price: '$599',
+          badge: 'Auditoría gratis de Google + AI',
           features: [
-            'Posts semanales en Google Business',
-            'Contenido de área de servicio',
-            'Actualizaciones AI (EN/ES)',
-            'Reporte mensual de posicionamiento',
+            'Posts semanales en Google Business (EN/ES)',
+            'Menciones mensuales en fuentes que usa la AI',
+            'Schema del sitio web siempre al día',
+            'Reporte mensual de Google + citas en AI',
           ],
-          ctaLabel: 'Empezar SEO Local',
+          ctaLabel: 'Empezar Found Everywhere',
         },
         {
           title: 'Social Media AI',
@@ -663,7 +661,7 @@ export const content = {
         features: [
           'Sitio web profesional + chat widget',
           'Automatización de reseñas 5 estrellas',
-          'Contenido de Local Proof SEO',
+          'Contenido de SEO local',
           'SMS de llamadas perdidas',
           'Pipeline de clientes & seguimiento',
           'Configuración completa automatizada',
@@ -757,7 +755,7 @@ export const content = {
         interestOptions: [
           { value: 'Custom plan', label: 'Una combinación de servicios' },
           { value: 'Review Booster', label: 'Review Booster' },
-          { value: 'Local Proof SEO', label: 'Local Proof SEO' },
+          { value: 'Found Everywhere', label: 'Found Everywhere (Google + AI)' },
           { value: 'Social Media AI', label: 'Social Media AI' },
           { value: 'Website Build', label: 'Sitio Web' },
           { value: 'AI Answering', label: 'Contestación AI' },
@@ -793,7 +791,7 @@ export const content = {
       },
       serviceLinks: [
         'Review Booster',
-        'Local Proof SEO',
+        'Found Everywhere',
         'Social Media AI',
         'Sitio Web',
         'Contestación AI',

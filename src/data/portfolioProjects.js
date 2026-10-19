@@ -14,7 +14,7 @@ export const portfolioProjects = [
     features: [
       "Website build + hosting",
       "Automated 5-star review requests",
-      "Local Proof SEO content (bilingual)",
+      "Local SEO content (bilingual)",
       "Missed-call text-back",
       "Lead capture connected to CRM",
       "Mobile-optimized, conversion-focused"

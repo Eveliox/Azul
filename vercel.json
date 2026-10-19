@@ -1,6 +1,20 @@
 {
-  "rewrites": [{ "source": "/((?!api/|.*\\.).*)", "destination": "/index.html" }],
+  "redirects": [
+    {
+      "source": "/services/local-proof-seo",
+      "destination": "/services/found-everywhere",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!api/|.*\\.).*)",
+      "destination": "/index.html"
+    }
+  ],
   "functions": {
-    "api/free-report/scan.js": { "maxDuration": 60 }
+    "api/free-report/scan.js": {
+      "maxDuration": 60
+    }
   }
 }
