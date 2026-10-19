@@ -86,8 +86,8 @@ export const leadAgentCopy = {
   en: {
     name: 'AI Lead Agent', pilot: 'Pilot', quote: 'Quoted after a call',
     meta: { title: 'AI Lead Agent — Bilingual lead callbacks | Azul', description: 'Bilingual callbacks, qualification and appointment booking for new home-service leads. HVAC pilot spots open; Roofing is next.' },
-    title: 'Every lead called back in about a minute, in English or Spanish.',
-    intro: 'AI Lead Agent calls new leads from your website or ad forms, asks the right questions, and books the next visit on your calendar.',
+    title: 'A new lead.\nA real conversation.\nIn about a minute.',
+    intro: 'In English or Spanish, AI Lead Agent calls your new website and ad leads, asks the right questions, and books the next visit.',
     availability: 'In pilot, not generally available. HVAC pilot spots are open. Roofing is next.',
     cta: 'Book a call', explore: 'Find your trade', row: 'From a new lead to a booked visit, in English or Spanish.',
     how: 'How it works', howTitle: 'A clear next step for every new lead.',
@@ -122,8 +122,8 @@ export const leadAgentCopy = {
   es: {
     name: 'Agente AI de prospectos', pilot: 'Piloto', quote: 'Cotización después de una llamada',
     meta: { title: 'Agente AI de prospectos — Llamadas bilingües | Azul', description: 'Llamadas, evaluación y citas en inglés y español para nuevos prospectos de servicios del hogar. Piloto de HVAC abierto; techos será el próximo.' },
-    title: 'Cada prospecto recibe una llamada en aproximadamente un minuto, en inglés o español.',
-    intro: 'El agente AI de prospectos llama a quienes completan sus formularios web o de anuncios, hace las preguntas adecuadas y agenda la próxima visita en su calendario.',
+    title: 'Un nuevo prospecto.\nUna conversación.\nEn cerca de un minuto.',
+    intro: 'En inglés o español, el agente AI llama a sus nuevos prospectos de formularios web y anuncios, hace las preguntas adecuadas y agenda la próxima visita.',
     availability: 'En fase piloto, aún no disponible al público general. Hay cupos para HVAC. Techos será el próximo.',
     cta: 'Agende una llamada', explore: 'Encuentre su oficio', row: 'De un nuevo prospecto a una visita agendada, en inglés o español.',
     how: 'Cómo funciona', howTitle: 'Un próximo paso claro para cada prospecto.',
@@ -159,7 +159,7 @@ export const leadAgentCopy = {
 
 export const leadVisualCopy = {
   en: {
-    flowReceived: 'Request received', flowCalling: 'A conversation begins', flowCalendar: 'An opening becomes a visit', flowSummary: 'Your booking summary', flowQualified: 'Service area confirmed', flowConfirmed: 'Confirmation sent',
+    heroLabel: 'From interest to appointment', heroAgent: 'Your AI Lead Agent', heroReady: 'Ready for the next conversation', heroTime: 'About a minute', heroPilot: 'HVAC pilot · Open for applications', flowReceived: 'Request received', flowCalling: 'A conversation begins', flowCalendar: 'An opening becomes a visit', flowSummary: 'Your booking summary', flowQualified: 'Service area confirmed', flowConfirmed: 'Confirmation sent',
     example: 'Illustrative workflow', play: 'Play workflow', pause: 'Pause',
     stages: ['New lead', 'First conversation', 'Visit booked', 'Owner notified'],
     headlines: ['A request comes in.', 'A real next step starts.', 'Make room on the calendar.', 'Keep your team in the loop.'],
@@ -172,7 +172,7 @@ export const leadVisualCopy = {
     controlBody: 'Calling hours, consent, and a person when it matters.',
   },
   es: {
-    flowReceived: 'Solicitud recibida', flowCalling: 'Comienza una conversación', flowCalendar: 'Un espacio se convierte en visita', flowSummary: 'El resumen de su cita', flowQualified: 'Área de servicio confirmada', flowConfirmed: 'Confirmación enviada',
+    heroLabel: 'Del interés a la cita', heroAgent: 'Su agente AI de prospectos', heroReady: 'Listo para la próxima conversación', heroTime: 'Cerca de un minuto', heroPilot: 'Piloto de HVAC · Solicitudes abiertas', flowReceived: 'Solicitud recibida', flowCalling: 'Comienza una conversación', flowCalendar: 'Un espacio se convierte en visita', flowSummary: 'El resumen de su cita', flowQualified: 'Área de servicio confirmada', flowConfirmed: 'Confirmación enviada',
     example: 'Flujo ilustrativo', play: 'Reproducir flujo', pause: 'Pausar',
     stages: ['Nuevo prospecto', 'Primera conversación', 'Visita agendada', 'Dueño notificado'],
     headlines: ['Llega una solicitud.', 'Comienza el próximo paso.', 'Un espacio en el calendario.', 'Su equipo se mantiene al tanto.'],

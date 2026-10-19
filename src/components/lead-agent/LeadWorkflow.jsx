@@ -72,13 +72,18 @@ export function LeadWorkflow() {
 export function LeadHeroVisual() {
   const { lang } = useLanguage()
   const v = leadVisualCopy[lang]
-  return <div className="lead-hero-art" aria-hidden="true">
-    <div className="lead-art-grid"/><div className="lead-art-halo"/>
-    <span className="lead-art-kicker">{v.example}</span>
-    <div className="lead-art-center"><span>azul</span><div className="lead-art-wave">{[18,32,52,36,68,44,26,58,38,20,12].map((h,i)=><i key={i} style={{height:h}}/>)}</div><span>{v.bilingual}</span></div>
-    <div className="lead-art-card card-input"><LeadIcon kind={0}/><span>{v.stages[0]}<small>{v.form}</small></span><i /></div>
-    <div className="lead-art-card card-output"><LeadIcon kind={2}/><span>{v.stages[2]}<small>{v.confirmation}</small></span><span className="lead-art-check">✓</span></div>
-    <svg className="lead-art-wires" viewBox="0 0 500 500" preserveAspectRatio="none"><path d="M60 100H250V250M250 250V400H440"/><circle cx="250" cy="250" r="170"/></svg>
-    <span className="lead-art-foot">{v.caption}</span>
+  return <div className="lead-hero-portrait" aria-hidden="true">
+    <div className="lead-portrait-grid"/>
+    <div className="lead-portrait-heading"><span>{v.heroLabel}</span><span className="lead-portrait-example">{v.example}</span></div>
+    <div className="lead-portrait-inbox"><span className="lead-portrait-icon"><LeadIcon kind={0}/></span><div><strong>{v.stages[0]}</strong><small>{v.form}</small></div><span className="lead-portrait-dot"/></div>
+    <div className="lead-portrait-connector"><i/><span>{v.heroTime}</span></div>
+    <div className="lead-portrait-agent">
+      <div className="lead-portrait-agent-top"><span className="lead-portrait-brand">azul<span>✳</span></span><span className="lead-portrait-language">{v.bilingual}</span></div>
+      <div className="lead-portrait-voice"><div className="lead-portrait-voice-halo"/><span className="lead-portrait-phone"><LeadIcon kind={1}/></span><div className="lead-portrait-wave">{Array.from({length:31},(_,i)=><i key={i} style={{'--bar':`${12 + (i * 19 % 55)}px`,'--delay':`${i*.035}s`}}/>)}</div></div>
+      <strong>{v.heroAgent}</strong><p>{v.heroReady}</p>
+    </div>
+    <div className="lead-portrait-connector last"><i/></div>
+    <div className="lead-portrait-booking"><span className="lead-portrait-icon"><LeadIcon kind={2}/></span><div><strong>{v.stages[2]}</strong><small>{v.confirmation}</small></div><b>✓</b></div>
+    <div className="lead-portrait-foot"><span>01 — 03</span><span>{v.caption}</span></div>
   </div>
 }
