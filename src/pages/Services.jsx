@@ -14,7 +14,7 @@ import { serviceSlugs } from '../data/services'
 import { ServicePrice } from '../components/site/ServicePrice'
 
 const slugs = [...serviceSlugs, 'custom-ai-agents']
-const visibleIndices = slugs.map((_, index) => index).filter(index => slugs[index] !== 'social-media-ai')
+const visibleIndices = slugs.map((_, index) => index).filter(index => !['social-media-ai', 'ai-facebook-ads'].includes(slugs[index]))
 const NEW_INDEX = 6
 
 // One service per row, copy and preview swapping sides every other row.
