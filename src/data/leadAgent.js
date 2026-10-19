@@ -159,6 +159,7 @@ export const leadAgentCopy = {
 
 export const leadVisualCopy = {
   en: {
+    flowReceived: 'Request received', flowCalling: 'A conversation begins', flowCalendar: 'An opening becomes a visit', flowSummary: 'Your booking summary', flowQualified: 'Service area confirmed', flowConfirmed: 'Confirmation sent',
     example: 'Illustrative workflow', play: 'Play workflow', pause: 'Pause',
     stages: ['New lead', 'First conversation', 'Visit booked', 'Owner notified'],
     headlines: ['A request comes in.', 'A real next step starts.', 'Make room on the calendar.', 'Keep your team in the loop.'],
@@ -171,6 +172,7 @@ export const leadVisualCopy = {
     controlBody: 'Calling hours, consent, and a person when it matters.',
   },
   es: {
+    flowReceived: 'Solicitud recibida', flowCalling: 'Comienza una conversación', flowCalendar: 'Un espacio se convierte en visita', flowSummary: 'El resumen de su cita', flowQualified: 'Área de servicio confirmada', flowConfirmed: 'Confirmación enviada',
     example: 'Flujo ilustrativo', play: 'Reproducir flujo', pause: 'Pausar',
     stages: ['Nuevo prospecto', 'Primera conversación', 'Visita agendada', 'Dueño notificado'],
     headlines: ['Llega una solicitud.', 'Comienza el próximo paso.', 'Un espacio en el calendario.', 'Su equipo se mantiene al tanto.'],
