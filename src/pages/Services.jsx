@@ -14,11 +14,12 @@ import { serviceSlugs } from '../data/services'
 import { ServicePrice } from '../components/site/ServicePrice'
 
 const slugs = [...serviceSlugs, 'custom-ai-agents']
+const visibleIndices = slugs.map((_, index) => index).filter(index => slugs[index] !== 'social-media-ai')
 const NEW_INDEX = 6
 
 // One service per row, copy and preview swapping sides every other row.
 // The copy rises in; the preview wipes up like ImageReveal.
-function ServiceFeature({ index, name, description, chips }) {
+function ServiceFeature({ index, position, name, description, chips }) {
   const { c } = useLanguage()
   const p = c.servicesPage
   const ref = useRef(null)
@@ -26,16 +27,16 @@ function ServiceFeature({ index, name, description, chips }) {
     .from(el.querySelectorAll('.service-feature-copy > *'), { y: 28, autoAlpha: 0, duration: 1, stagger: 0.07 })
     .fromTo(el.querySelector('.service-feature-visual'), { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'expo.inOut', clearProps: 'clipPath' }, 0.1), { start: 'top 80%' })
   return (
-    <article className={`service-feature ${index % 2 ? 'is-flipped' : ''} ${index === NEW_INDEX ? 'is-new' : ''}`.trim()} ref={ref}>
+    <article className={`service-feature ${position % 2 ? 'is-flipped' : ''} ${index === NEW_INDEX ? 'is-new' : ''}`.trim()} ref={ref}>
       <div className="service-feature-copy">
-        <span className="service-index">{String(index + 1).padStart(2, '0')}</span>
+        <span className="service-index">{String(position + 1).padStart(2, '0')}</span>
         <h2>{name}{index === NEW_INDEX && <span className="new-badge">{p.newLabel}</span>}</h2>
         <p>{description}</p>
         {chips && <ul className="service-chips">{chips.map(chip => <li key={chip}>{chip}</li>)}</ul>}
         <ServicePrice slug={slugs[index]} />
         <MagneticButton as={Link} className="text-link" to={`/services/${slugs[index]}`}>{p.learn}<Arrow /></MagneticButton>
       </div>
-      <div className="service-feature-visual" aria-hidden="true"><ServiceVisual index={index} total={slugs.length} /></div>
+      <div className="service-feature-visual" aria-hidden="true"><ServiceVisual index={index} position={position} total={visibleIndices.length} /></div>
     </article>
   )
 }
@@ -53,7 +54,7 @@ export default function Services() {
       <p>{p.body}</p>
     </section>
     <section className="services-rows section" aria-label={p.eyebrow}>
-      {names.map((name, i) => <ServiceFeature key={slugs[i]} index={i} name={name} description={descriptions[i]} chips={i === NEW_INDEX ? c.agents.row.chips : null} />)}
+      {visibleIndices.map((i, position) => <ServiceFeature key={slugs[i]} index={i} position={position} name={names[i]} description={descriptions[i]} chips={i === NEW_INDEX ? c.agents.row.chips : null} />)}
     </section>
     <section className="work-cta section">
       <SectionEyebrow>{c.contact}</SectionEyebrow>

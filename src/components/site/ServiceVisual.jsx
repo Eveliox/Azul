@@ -2,12 +2,12 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import { AgentOrbit } from '../agents/AgentOrbit'
 
 /** Illustrative product interfaces, kept in React so every label switches language. */
-export function ServiceVisual({ index, total = 6 }) {
+export function ServiceVisual({ index, position = index, total = 6 }) {
   const { c } = useLanguage()
   const v = c.serviceVisuals
   return <div className={`service-demo demo-${index}`}>
     <div className="demo-top"><b>{c.brand}</b><span>{v.example}</span><i aria-hidden="true" /></div>
-    <div className="demo-heading"><span>0{index + 1} / {String(total).padStart(2, '0')}</span><h3>{v.titles[index]}</h3></div>
+    <div className="demo-heading"><span>{String(position + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span><h3>{v.titles[index]}</h3></div>
     {index === 0 && <div className="demo-phone"><div className="phone-notch"/><span className="demo-label">{v.messages}</span><div className="message-bubble">{v.reviewRequest}</div><div className="review-panel"><span className="review-stars" aria-hidden="true">★★★★★</span><b>{v.reviewTitle}</b><p>{v.reviewBody}</p><span className="demo-action">{v.leaveReview} ↗</span></div><p className="demo-footnote">{v.reviewNote}</p></div>}
     {index === 1 && <div className="social-planner"><div className="planner-top"><span>{v.week}</span><span>← &nbsp; →</span></div><div className="planner-days">{v.days.map((d,i)=><span className={i===2?'selected':''} key={i}>{d}<b>{12+i}</b></span>)}</div><div className="social-post"><img src="/images/svc-roofing.jpg" alt=""/><div><span className="demo-label">{v.scheduled}</span><b>{v.socialTitle}</b><p>{v.socialBody}</p><span className="social-icons" aria-hidden="true">♡ &nbsp; ◯ &nbsp; ↗</span></div></div><div className="demo-chip">{v.bilingual}</div></div>}
     {index === 2 && <div className="website-devices"><div className="browser-frame"><div className="browser-bar"><i/><i/><i/><span>{v.website}</span></div><img src="/images/work/aspire.jpg" alt=""/></div><div className="mobile-frame"><img src="/images/work/aspire-mobile.jpg" alt=""/></div><div className="demo-chip">{v.responsive}</div></div>}
