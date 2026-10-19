@@ -19,6 +19,7 @@ import { HoursComparison } from '../components/agents/HoursComparison'
 import { JobPostingButton } from '../components/agents/JobPostingDrawer'
 import { ServiceList } from '../components/site/ServiceList'
 import { Arrow, DownloadModal } from '../components/site/UI'
+import { content } from '../data/content'
 import { bookingUrl } from '../components/site/Layout'
 
 import { serviceSlugs } from '../data/services'
@@ -173,7 +174,8 @@ function Dashboard() {
 }
 
 export default function Home() {
-  const { c } = useLanguage()
+  const { c, lang } = useLanguage()
+  const industries = content[lang].industries
   return <>
     <Hero />
     <WebsiteTransformation />
@@ -194,6 +196,11 @@ export default function Home() {
       <div className="section-intro"><SplitText>{c.build.title}</SplitText><p>{c.build.body}</p></div>
       <ServiceList services={c.build.services} slugs={serviceSlugs} waitlist={c.build.waitlist} waitlistIndex={5} />
       <Link className="text-link" to="/services">{c.build.all}<Arrow /></Link>
+    </section>
+    <section className="section home-industries" id="industries">
+      <SectionEyebrow>{industries.eyebrow}</SectionEyebrow>
+      <SplitText>{industries.headline}</SplitText>
+      <ul>{industries.items.map(item => <li key={item.name}>{item.href ? <Link to={item.href}>{item.name}<Arrow /></Link> : item.name}</li>)}</ul>
     </section>
     <AgentsFeature />
     <Purpose />

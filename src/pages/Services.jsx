@@ -1,3 +1,4 @@
+import { leadAgentCopy } from '../data/leadAgent'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -13,14 +14,14 @@ import { bookingUrl } from '../components/site/Layout'
 import { serviceSlugs } from '../data/services'
 import { ServicePrice } from '../components/site/ServicePrice'
 
-const slugs = [...serviceSlugs, 'custom-ai-agents']
+const slugs = [...serviceSlugs, 'custom-ai-agents', 'ai-lead-agent']
 const visibleIndices = slugs.map((_, index) => index).filter(index => !['social-media-ai', 'ai-facebook-ads'].includes(slugs[index]))
 const NEW_INDEX = 6
 
 // One service per row, copy and preview swapping sides every other row.
 // The copy rises in; the preview wipes up like ImageReveal.
 function ServiceFeature({ index, position, name, description, chips }) {
-  const { c } = useLanguage()
+  const { c, lang } = useLanguage()
   const p = c.servicesPage
   const ref = useRef(null)
   useReveal(ref, el => gsap.timeline({ paused: true })
@@ -36,16 +37,16 @@ function ServiceFeature({ index, position, name, description, chips }) {
         <ServicePrice slug={slugs[index]} />
         <MagneticButton as={Link} className="text-link" to={`/services/${slugs[index]}`}>{p.learn}<Arrow /></MagneticButton>
       </div>
-      <div className="service-feature-visual" aria-hidden="true"><ServiceVisual index={index} position={position} total={visibleIndices.length} /></div>
+      <div className="service-feature-visual" aria-hidden="true">{slugs[index] === 'ai-lead-agent' ? <div className="lead-service-preview"><span className="lead-badge">{leadAgentCopy[lang].pilot}</span><h3>{leadAgentCopy[lang].title}</h3><ol>{leadAgentCopy[lang].steps.map(step => <li key={step.title}>{step.title}</li>)}</ol></div> : <ServiceVisual index={index} position={position} total={visibleIndices.length} />}</div>
     </article>
   )
 }
 
 export default function Services() {
-  const { c } = useLanguage()
+  const { c, lang } = useLanguage()
   const p = c.servicesPage
-  const names = [...c.build.services, c.agents.name]
-  const descriptions = [...c.build.descriptions, c.agents.row.description]
+  const names = [...c.build.services, c.agents.name, leadAgentCopy[lang].name]
+  const descriptions = [...c.build.descriptions, c.agents.row.description, leadAgentCopy[lang].row]
   return <>
     <section className="services-hero section">
       <DotGrid />

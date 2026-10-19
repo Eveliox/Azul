@@ -282,8 +282,8 @@ export const content = {
       fallbackLink: 'Talk to us',
       fallbackAfter: ". If you're a local business in South Florida, chances are the system fits.",
       items: [
-        { name: 'Roofing', primary: true },
-        { name: 'HVAC', primary: true },
+        { name: 'Roofing', primary: true, href: '/services/ai-lead-agent?trade=roofing' },
+        { name: 'HVAC', primary: true, href: '/services/ai-lead-agent?trade=hvac' },
         { name: 'Plumbing' },
         { name: 'Pool Services' },
         { name: 'Landscaping' },
@@ -687,8 +687,8 @@ export const content = {
       fallbackLink: 'Hable con nosotros',
       fallbackAfter: '. Si es un negocio local del sur de Florida, seguramente el sistema le sirve.',
       items: [
-        { name: 'Techos', primary: true },
-        { name: 'HVAC', primary: true },
+        { name: 'Techos', primary: true, href: '/services/ai-lead-agent?trade=roofing' },
+        { name: 'HVAC', primary: true, href: '/services/ai-lead-agent?trade=hvac' },
         { name: 'Plomería' },
         { name: 'Servicios de Piscina' },
         { name: 'Jardinería' },

@@ -8,6 +8,7 @@ import { PageTransition } from './components/motion/PageTransition'
 import { SmoothScroll } from './components/motion/SmoothScroll'
 import { SplitText } from './components/motion/SplitText'
 import CustomAIAgents from './pages/CustomAIAgents'
+import AILeadAgent from './pages/AILeadAgent'
 import Home from './pages/Home'
 import About from './pages/About'
 import Services from './pages/Services'
@@ -29,5 +30,5 @@ function PendingPage() {
   return <section className="pending section"><DotGrid /><SectionEyebrow>{c.pending.label}</SectionEyebrow><SplitText as="h1">{legal ? c.legal.title : c.pending.title}</SplitText><p>{legal ? c.legal.body : c.pending.body}</p><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.ai.cta} ↗</a><Link className="text-link" to="/">{c.pending.home} ↗</Link></section>
 }
 export default function App() {
-  return <BrowserRouter><SmoothScroll><PageTransition>{location => <Routes location={location}><Route element={<Layout />}><Route index element={<Home />} /><Route path="about" element={<About />} /><Route path="insights" element={<InsightRoute><Insights /></InsightRoute>} />{insightArticles.map(article => <Route key={article.slug} path={`insights/${article.slug}`} element={<InsightRoute><InsightArticle key={article.slug} article={article} /></InsightRoute>} />)}<Route path="work" element={<Work />} /><Route path="services" element={<Services />} />{serviceSlugs.map(slug => <Route key={slug} path={`services/${slug}`} element={<ServiceDetail key={slug} slug={slug} />} />)}<Route path="services/custom-ai-agents" element={<CustomAIAgents />} /><Route path="free-report" element={<Suspense fallback={<section className="section free-report" />}><FreeReport /></Suspense>} /><Route path="*" element={<PendingPage key={location.pathname} />} /></Route></Routes>}</PageTransition></SmoothScroll></BrowserRouter>
+  return <BrowserRouter><SmoothScroll><PageTransition>{location => <Routes location={location}><Route element={<Layout />}><Route index element={<Home />} /><Route path="about" element={<About />} /><Route path="insights" element={<InsightRoute><Insights /></InsightRoute>} />{insightArticles.map(article => <Route key={article.slug} path={`insights/${article.slug}`} element={<InsightRoute><InsightArticle key={article.slug} article={article} /></InsightRoute>} />)}<Route path="work" element={<Work />} /><Route path="services" element={<Services />} />{serviceSlugs.map(slug => <Route key={slug} path={`services/${slug}`} element={<ServiceDetail key={slug} slug={slug} />} />)}<Route path="services/custom-ai-agents" element={<CustomAIAgents />} /><Route path="services/ai-lead-agent" element={<AILeadAgent />} /><Route path="free-report" element={<Suspense fallback={<section className="section free-report" />}><FreeReport /></Suspense>} /><Route path="*" element={<PendingPage key={location.pathname} />} /></Route></Routes>}</PageTransition></SmoothScroll></BrowserRouter>
 }
