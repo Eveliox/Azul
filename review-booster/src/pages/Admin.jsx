@@ -44,7 +44,8 @@ function Login({ onOk }) {
     }
     setAdminKey(key.trim())
     try { await api('/api/clients'); onOk() } catch (e) {
-      clearAdminKey(); setErr(e.message === 'Unauthorized' ? 'That access key was not recognized. Please try again.' : 'Unable to connect. Check that the API server is running and try again.')
+      // fetch() throws a TypeError only when the request never got a response.
+      clearAdminKey(); setErr(e.message === 'Unauthorized' ? 'That access key was not recognized. Please try again.' : e instanceof TypeError ? 'Unable to connect. Check your internet connection and try again.' : `Sign-in failed: ${e.message}`)
     } finally { setBusy(false) }
   }
   return <div className="login-scene">
