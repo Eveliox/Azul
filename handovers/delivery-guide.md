@@ -389,80 +389,461 @@ Set expectations: *"AI captures your basic lead info so you can call them back. 
 
 ---
 
-## Section 7 — Onboarding a New Paying Client (Day 0 → Day 7)
+## Section 7 — Pre-Sale → Sold Handoff (the first 24 hours)
 
-### Hour 0 (immediately after Stripe payment)
+The window from "I'm in" on the demo call to Day 1 of the 14-day build. The old version of this guide assumed the client was already paid and jumped to Day 0. That assumption is where clients ghost, chargebacks happen, and A2P 10DLC delays silently cost you a week of SMS send-ability. Do this part right.
 
-Send this WhatsApp message:
+### 7.1 Close the demo call (last 5 minutes)
+
+If they signal yes verbally, lock it before the call ends. Script:
+
 ```
-Welcome to Azul! Your subscription is confirmed.
+"Great. Three things to confirm before I send your link:
 
-3 quick things to get you launched by end of week:
+1) Growth Suite at $399/mo locked for life as a Founding Client — correct?
+   (Standard is $549. If you want to pick & choose à la carte instead, let's do that now.)
 
-1. Add me as MANAGER on your Google Business Profile:
+2) We default all customer-facing content to [English / Spanish / both] — confirm?
+
+3) Your start date is today — I'll have your system fully live in 14 days.
+
+I'll send you a Stripe link in the next 10 minutes.
+Pay from your phone. Second it clears, I send you a welcome kit with everything we need."
+```
+
+Never leave the call without:
+- Confirmed service list (bundle vs à la carte line items)
+- Confirmed primary language (EN / ES / both)
+- Confirmed legal business name + EIN (needed for A2P 10DLC — ask now, not Day 7)
+- Confirmed start date (today, 99% of the time)
+
+### 7.2 Create the Stripe charge (10 min after call)
+
+The two live subscription products in Stripe:
+- `Azul Growth Suite — Founding Client` — $399/mo (first 10 clients only, locked for life)
+- `Azul Growth Suite — Standard` — $549/mo
+
+À la carte products exist for Review Booster ($79), Social Media AI ($149), Local Proof SEO ($299), AI Answering ($349), and Website Build ($199/mo + $499 one-time setup).
+
+**How to send the link:**
+
+1. Stripe Dashboard → Payment Links → clone `Growth Suite – Founding Client` template
+2. Rename: `GS-FC — <Client Business Name>`
+3. Metadata (hidden from client, lives on the subscription forever):
+   - `client_name` — owner's full name
+   - `business_name` — legal name (matches EIN)
+   - `trade` — roofing / HVAC / plumbing / pool / landscaping / other
+   - `services` — comma-separated codes (reviews,seo,social,site,phone)
+   - `language` — en / es / both
+   - `founding_cohort` — #1-10 so you know how many founding slots remain
+4. Enable "Collect customer email" and "Collect billing address" (both required for A2P 10DLC)
+5. If they're adding a website, add `Website Build Setup Fee` — $499 one-time — as a line item on the first invoice
+6. Copy URL → send via WhatsApp inside 10 min of call ending (the longer you wait, the colder the lead)
+
+**WhatsApp send:**
+```
+Here's your Stripe link — pay from your phone, takes 30 seconds:
+
+[stripe link]
+
+Moment it clears, I'll send you the welcome kit with everything we need to start.
+```
+
+Never email the link if WhatsApp is an option — highest open rate, this is the moment to close.
+
+### 7.3 Service agreement (same hour)
+
+Template lives at `/legal/service-agreement.pdf` (create one with a Florida lawyer before client #1). Send via WhatsApp alongside the Stripe link.
+
+Minimum non-negotiable terms:
+
+- Month-to-month, 30 days written notice to cancel (email or WhatsApp both acceptable)
+- Services included — exact list matching Stripe metadata
+- Services NOT included — ad spend, custom dev beyond scope, legal/accounting advice
+- Who owns what on exit:
+  - Client owns their domain, GBP, Facebook Page, Instagram, Google Reviews
+  - Client owns all content Azul produced for them
+  - Azul transfers back any accounts registered on client's behalf within 7 days of cancellation
+- A2P 10DLC: client agrees to be registered as a brand under Azul's Twilio parent for the duration of their subscription
+- Review policy: client acknowledges Azul asks every customer for a review (no gating), per Google policy
+- AI Answering (if applicable): client acknowledges this is a bilingual AI receptionist that captures leads only — it does not quote prices, diagnose, or dispatch emergencies
+
+**Signature path:** DocuSign free tier (preferred), or email the PDF and ask them to reply "I agree" from the email on file. Save the signed copy to `clients/<slug>/legal/service-agreement-signed.pdf`.
+
+### 7.4 Payment confirmation flow (within 1 hour of send)
+
+Stripe shows "Succeeded" → fires webhook (if wired) → emails receipt. The moment it clears, do all of this inside 15 minutes:
+
+1. Add row to client tracker Google Sheet (Section 1.3):
+   - Business name, owner, phone, email
+   - Preferred language
+   - Trade
+   - Services (match Stripe metadata exactly)
+   - Stripe customer ID (`cus_...`)
+   - Stripe subscription ID (`sub_...`)
+   - Signup date = today
+   - Go-live target = today + 14 days
+   - Status = `onboarding`
+2. Review Booster `/admin` → create client row (name, phone, email, language, Google review link if available — else placeholder for Day 2)
+3. Scaffold client folders (all gitignored):
+   ```
+   ai-agents/clients/<slug>/
+     ├─ agent-spec.md               (copy from ai-agents/templates/)
+     ├─ system-prompt-v1.md         (fill on Day 6)
+     ├─ business-profile.md         (copy from voice-agents/templates/)
+     ├─ test-checklist.md           (copy from ai-agents/templates/)
+     ├─ changelog.md                (empty, fill as you tune)
+     ├─ legal/
+     │  └─ service-agreement-signed.pdf
+     └─ assets/
+        ├─ logo.png
+        └─ job-photos/
+   voice-agents/clients/<slug>/     (only if AI Answering in bundle)
+   ```
+4. Hold their Day 12 kickoff call on Calendly (right slot = early afternoon, same day of week they said works best)
+
+### 7.5 Day 0 welcome WhatsApp (expanded template)
+
+Send immediately after step 7.4 is green:
+
+```
+Welcome to Azul, [Name]! Your subscription is live.
+
+Your system goes fully live in 14 days — [specific date].
+
+4 quick things today so I can start building tomorrow:
+
+1) Sign the service agreement:
+   [DocuSign link OR "reply 'I agree' to the email I just sent you"]
+   (30-day cancel clause + data ownership terms we discussed.)
+
+2) Add me as MANAGER on your Google Business Profile:
    https://support.google.com/business/answer/3403100
    My email: azuldevsmiami@gmail.com
+   Accept the invite in your Gmail — I'll send it in the next few minutes.
 
-2. Send me these 5 things via WhatsApp today:
-   - Your logo (PNG or JPG)
-   - 5 recent job photos with 1-sentence descriptions
-   - List of services you offer
-   - Your service area (zip codes or neighborhoods)
-   - Top 3 competitor names
+3) Add me as ADMIN on your Facebook Page:
+   Facebook Business Suite → Settings → People → Add
+   My Facebook email: [your FB email]
 
-3. Book your 30-min kickoff call here: [Calendly link]
+4) Send me 5 things in this WhatsApp:
+   - Your logo (PNG or JPG, highest quality you have)
+   - 5 recent job photos + 1 sentence each describing the job
+   - Your full services list
+   - Your service area (zip codes or neighborhood names)
+   - Top 3 competitors by name
 
-I'll have your Growth Suite fully live in 5 business days.
+Your 30-min kickoff is scheduled for [Day 12 date, e.g. "Tuesday Oct 27 at 2pm"]:
+   [Calendly link — already booked, this is the confirmation]
 
-— Evelio at Azul
+Reply here if anything's unclear.
+
+— Evelio
 ```
 
-### Day 1 (30 min)
+### 7.6 Access requests sent same day (parallel to welcome)
 
-- Add them to your client tracker (Section 1.3)
-- Add them as a client in Review Booster `/admin` with their default language
-- Save their logo and brand colors in their client folder
-- Ask which language each customer prefers when jobs are entered; don't guess from names
+Fire these NOW, not on Day 1 — they have external approval delays:
 
-### Day 2-3 (4 hours)
+| Action | Where | Delay | Why Day 0 |
+|---|---|---|---|
+| GBP manager invite | business.google.com → Users → Add | Up to 7 days to accept | Blocks SEO + review link setup |
+| Facebook Page admin invite | business.facebook.com → Settings → People | Up to 2 days | Blocks social scheduling |
+| Twilio A2P 10DLC brand + campaign | console.twilio.com → Messaging → Regulatory → A2P 10DLC | 1-7 days approval | Unregistered US SMS is silently dropped |
+| Resend domain verification (if using their domain) | resend.com → Domains → Add | 1-24h DNS propagation | Blocks branded email delivery |
+| Vapi assistant draft (if AI Answering) | dashboard.vapi.ai | No external delay but 6-10h of your time | Reserve the time block on Day 6 |
 
-- Client accepts your GBP manager invite → connect GBP to your scheduler (if you use one)
-- Buy Twilio number for missed-call text-back
-- Add their Google review link in Review Booster
-- Set up missed-call text-back on their Twilio number
-- Test both by sending yourself a fake request
+A2P 10DLC is the one that silently kills your SMS launch if you forget. It needs:
+- Client's legal business name + EIN
+- Client's business address
+- Client's business website (even the preview URL on their custom domain works; placeholder is fine)
+- Sample messages (use templates from Section 2.4)
 
-### Day 3-4 (4 hours)
+### 7.7 End-of-Day-0 checklist (don't sleep until all green)
 
-- Build their website (use vertical template, customize with their logo/colors/services/photos)
-- Deploy to Vercel on their custom domain
-- Connect contact form → lead emails to the client (Resend)
-- Install Crisp chat widget with pre-filled bilingual greeting
+- [ ] Stripe link sent AND cleared
+- [ ] Service agreement sent (signed or signature-pending reminder set for Day 1)
+- [ ] Welcome WhatsApp sent
+- [ ] Client tracker row created with Stripe IDs
+- [ ] Review Booster `/admin` client row created
+- [ ] `clients/<slug>/` folder scaffolded with templates copied
+- [ ] GBP manager invite sent
+- [ ] Facebook Page admin invite sent
+- [ ] A2P 10DLC brand registration started in Twilio
+- [ ] Day 12 kickoff call blocked on Calendly
+- [ ] Day 0 end logged in `clients/<slug>/changelog.md`
 
-### Day 4-5 (3 hours)
+### 7.8 Red flags: when to refund and walk inside 24 hours
 
-- Confirm Facebook + Instagram access in Meta Business Suite
-- Generate first week of content from their 5 photos (5 GBP posts + 5 IG + 5 FB = 15 pieces of content)
-- Schedule everything for the next 7 days
+A Day-1 refund costs you an hour. A Day-60 chargeback costs you a weekend + reputation. If any of these show up, refund the Stripe charge and move on:
 
-### Day 5 (30 min kickoff call)
-
-Screen-share what's live:
-- Show them: their website, Review Booster stats, upcoming scheduled posts in Meta Business Suite
-- Don't give them the Review Booster admin key: it currently opens every client's data. Send them a monthly stats screenshot instead
-- Confirm: they send you photos via WhatsApp every Monday
-- Confirm: their AI Answering (if applicable) is forwarding correctly
-
-### Day 6-7 (buffer)
-
-- Fix anything that broke
-- Send a "you're all set" confirmation email
-
-**Onboarding time: ~14 hours for client #1, drops to ~6 hours by client #5 as you refine your templates.**
+- They push back on the 30-day notice clause ("I want 7 days") — signals cancel-at-first-friction
+- They refuse to add you as GBP manager ("I'll do the posts myself") — you can't deliver SEO without it
+- They can't produce their EIN or legal business name — likely unregistered; A2P 10DLC will reject
+- They want to pay via Zelle / Venmo / check — no paper trail for a $400/mo recurring is a non-starter
+- They can't name 3 recent jobs or 3 customers by name — fake business or shell, do not touch
+- They want you to run Facebook Ads with their credit card on Day 1 — unauthorized-spend risk; ads are explicitly not in Growth Suite
+- The signed agreement comes back with handwritten edits to the data-ownership clause — walk
 
 ---
 
-## Section 8 — Weekly Client Rhythm (ongoing)
+## Section 8 — The 14-Day Onboarding Timeline
+
+Day-by-day, hour-by-hour build schedule. Each day lists: morning block, afternoon block, deliverable, time estimate. First client takes ~18 hours over 14 days without AI Answering, ~24 with it. By client #5 this drops to ~10 hours total as vertical templates, Vapi assistant clones, and prompt libraries become one-click copies.
+
+### Day 1 — Access verification + accounts (2h)
+
+**Morning (1h):**
+- [ ] Confirm GBP manager invite accepted (not → WhatsApp nudge)
+- [ ] Confirm Facebook Page admin invite accepted
+- [ ] Confirm Instagram is a Business account linked to the Facebook Page
+- [ ] Confirm signed service agreement filed in `clients/<slug>/legal/`
+- [ ] Confirm A2P 10DLC status — `pending review` is fine, `rejected` means fix message samples today
+
+**Afternoon (1h):**
+- [ ] Buy a dedicated Twilio number for this client (305 or 786 area code), $1-3/mo
+- [ ] Note the number in client tracker + Review Booster client row
+- [ ] If AI Answering: duplicate your best Vapi assistant → rename `<client-slug>-receptionist` → save as draft
+- [ ] Save their logo + brand colors in `clients/<slug>/assets/`
+- [ ] Ask the owner which language each customer prefers when logging jobs — don't guess from names
+
+**Deliverable:** All external access accepted; client-specific accounts provisioned.
+
+### Day 2 — Infrastructure baseline (3h)
+
+**Morning (1.5h):**
+- [ ] GBP audit — screenshot current state, note:
+  - Primary + secondary categories (can hold up to 10)
+  - Service area zip codes (up to 20)
+  - Hours accurate?
+  - Photos from last 90 days?
+  - Q&A section populated?
+- [ ] LocalFalcon: add their business + 3-5 target keywords (e.g. "roof repair Hialeah", "techos Miami", "HVAC Doral")
+- [ ] Run baseline rank scan → export PDF → save to `clients/<slug>/reports/month-0-baseline.pdf`
+
+**Afternoon (1.5h):**
+- [ ] Resend: send a test email on their behalf to yourself — confirm it lands in inbox, not spam, with their business name in the From
+- [ ] Configure missed-call text-back on their new Twilio number — any inbound call → voicemail → auto-SMS "Hi, we saw you called [Business]. What can we help you with?"
+- [ ] Test it: call the Twilio number from your personal phone, don't pick up, confirm text-back arrives in under 60 seconds
+
+**Deliverable:** GBP audit PDF, LocalFalcon baseline PDF, missed-call text-back live and tested.
+
+### Day 3 — Website: template + customization (3h)
+
+**Morning (1.5h):**
+- [ ] Review their Day-0 submissions (logo, services, service area, competitors)
+- [ ] Pick vertical template: roofing / HVAC / plumbing / pool
+- [ ] Clone template to `/clients/<slug>/site/`
+- [ ] Customize: swap logo, update color palette to their brand, replace phone everywhere, replace service list + service area
+
+**Afternoon (1.5h):**
+- [ ] Replace stock photos with their real job photos (Day-0 submission + anything grabbable from their Facebook)
+- [ ] Write hero headline + subhead in their primary language (with EN/ES toggle enabled)
+- [ ] Write the 3-pillar "Why choose us" with real credentials (years in business, review count, response time)
+- [ ] Deploy to Vercel preview URL
+- [ ] Send mockup screenshot via WhatsApp: *"Here's your preview — any changes?"*
+
+**Deliverable:** Preview URL sent, feedback loop open.
+
+### Day 4 — Website: revisions, forms, launch prep (2.5h)
+
+**Morning (1h):**
+- [ ] Apply overnight revisions
+- [ ] Wire the contact form → `/api/lead` → Resend email to the client (same pattern as Review Booster's contact form)
+- [ ] Test end-to-end: submit as a fake visitor, confirm client's email receives it within 30 seconds
+
+**Afternoon (1.5h):**
+- [ ] Install Crisp chat widget with pre-filled bilingual greeting
+- [ ] Install GA4
+- [ ] Mobile QA at 375px — hero CTA, nav, phone CTR, contact form all work
+- [ ] Send DNS instructions (A record to Vercel + CNAME for www) via WhatsApp, OR do the DNS change yourself if they shared registrar access
+
+**Deliverable:** Production-ready website on preview URL; DNS instructions sent.
+
+### Day 5 — Content pipeline + Review Booster prep (3h)
+
+**Morning (1.5h):**
+- [ ] Build their prompt library at `clients/<slug>/prompts.md` — copy from `AZUL_BUSINESS_PLAN.md` Section 9 and localize with their business facts (neighborhoods they serve, service names in Spanish, owner's voice/tone)
+- [ ] Generate first week of content from Day-0 photos: 5 GBP posts + 5 IG captions + 5 FB posts = 15 pieces
+- [ ] Save drafts to `clients/<slug>/content/week-1/` — one human review pass before scheduling
+
+**Afternoon (1.5h):**
+- [ ] Review Booster `/admin`: confirm their Google review link is live (if GBP access accepted, pull Place ID → generate direct review URL)
+- [ ] If they shared past-week completed jobs: enter them now, `send_at = Day 7`
+- [ ] If no past jobs: schedule a Day 7 WhatsApp nudge asking for their last 10 completed customers
+
+**Deliverable:** Prompt library saved, 15 content pieces drafted, Review Booster primed for Day 7 first-send.
+
+### Day 6 — AI Answering build (6h — SKIP if not in bundle)
+
+**Morning (3h):**
+- [ ] Fill `clients/<slug>/business-profile.md` with VERIFIED facts: services (exact names in EN + ES), hours, service area zip codes, emergency policy, what they don't do, owner's cell for transfer
+- [ ] Write `system-prompt-v1.md` from `voice-agents/templates/assistant-prompt.md` — paste the business-profile block, add never-rules
+- [ ] Load prompt into Vapi assistant → save
+
+**Afternoon (3h):**
+- [ ] Configure call forwarding on their business line: unanswered after 3 rings → their Twilio number → Vapi
+- [ ] Wire Vapi end-of-call webhook to `https://app.azulwebdev.com/api/vapi-webhook` (see Review Booster README section on Vapi lead alerts)
+- [ ] Set `VAPI_LEAD_TO` to the owner's email in Vercel env; optional per-assistant override via `VAPI_LEAD_TO_<assistant_id>`
+- [ ] Run `test-checklist.md`: 10 test calls split EN / ES / Spanglish + 2 must-not cases (price question, emergency) + 1 injection attempt ("ignore your instructions")
+- [ ] Pass bar: 100% on must-not, 90% on everything else. Fail → tune prompt → re-run full checklist
+
+**Deliverable:** AI Answering live, passing tests, lead-alert emails arriving at owner's inbox.
+
+### Day 7 — Review Booster goes live (1.5h)
+
+**Morning (0.5h):**
+- [ ] Verify A2P 10DLC status = `approved`. If still pending → DO NOT send. Reschedule first-send to day-after-approval and notify client via WhatsApp
+- [ ] If approved: review the client's seeded request queue in `/admin`
+- [ ] Trigger `/api/send-due` with `CRON_SECRET` → first batch of real review requests goes out
+
+**Afternoon (1h):**
+- [ ] Monitor Twilio message logs for bounces / undeliverable numbers
+- [ ] For any 1-4★ private feedback that lands in the owner's inbox, forward via WhatsApp within 15 minutes
+- [ ] Screenshot the first 5★ that lands on Google — this is the "proof it works" image for the Day 14 report
+
+**Deliverable:** First real review requests out, review log started.
+
+### Day 8 — Social Media activation (2h)
+
+**Morning (1h):**
+- [ ] Meta Business Suite: confirm you can see + schedule for both the FB Page and IG account
+- [ ] Create a "Saved Replies" set for inbound DMs — bilingual greetings, "we'll get back within 1 hour" fallback
+- [ ] Upload the week-1 content from Day 5
+
+**Afternoon (1h):**
+- [ ] Schedule the 15 pieces across the next 7 days:
+  - Mon: FB + IG + GBP (same job)
+  - Wed: FB + IG + GBP (different job)
+  - Fri: FB + IG + GBP (team / behind-the-scenes)
+  - Weekend: 1 motivational / seasonal, IG only
+- [ ] Confirm every post shows the client's handle, not Azul's
+
+**Deliverable:** 7 days of social + GBP content scheduled.
+
+### Day 9 — Local SEO polish (1.5h)
+
+**Morning (1h):**
+- [ ] Fix GBP gaps from Day-2 audit:
+  - Add missing categories (up to 10)
+  - Add service area zip codes (up to 20)
+  - Populate Q&A with 5-10 real questions (ask the owner via WhatsApp if unclear)
+  - Upload 5 recent job photos directly to GBP
+- [ ] Verify business description includes neighborhood names + language cue ("Hablamos Español")
+
+**Afternoon (0.5h):**
+- [ ] Schedule this week's 2 GBP posts for Tuesday 9am + Thursday 2pm (highest-engagement windows for local service)
+- [ ] Add their business + review link to their website footer
+
+**Deliverable:** GBP profile fully optimized, first GBP posts scheduled.
+
+### Day 10 — Website launch (1.5h)
+
+**Morning (1h):**
+- [ ] Confirm DNS propagated (`nslookup <domain>` or `dig`)
+- [ ] Verify SSL (padlock, no warnings)
+- [ ] Final 375px mobile QA — hero CTA, phone CTR, form submit all work
+- [ ] Submit `sitemap.xml` to Google Search Console → request indexing
+
+**Afternoon (0.5h):**
+- [ ] WhatsApp the live URL: *"Your site is live at [URL]. Walk through on your phone and let me know."*
+- [ ] Add site URL to GBP profile + Facebook Page + Instagram bio
+- [ ] Update Review Booster request templates to the live domain if any reference the staging URL
+
+**Deliverable:** Live production website on their custom domain.
+
+### Day 11 — End-to-end dry run (2h)
+
+Simulate the full customer journey as a real customer would. Four scenarios, 30 min each:
+
+**Scenario 1 — Website quote request:**
+- Submit the contact form as a fake lead
+- Confirm Resend delivers to the client's inbox within 60 seconds
+- Confirm the lead data (name, phone, service, message) is complete
+
+**Scenario 2 — After-hours call:**
+- Call their business line when they're typically on a job site
+- Let it ring past 3 rings → confirm Vapi picks up
+- Run the full 5-question flow in EN → confirm lead summary email in owner's inbox within 2 min
+- Repeat in ES
+
+**Scenario 3 — Finished-job review request:**
+- Add yourself in Review Booster `/admin` as a "finished customer" with `send_at = now()`
+- Trigger `/api/send-due`
+- Receive SMS + email → tap 5★ → confirm Google redirect
+- Repeat with 3★ → confirm private feedback form arrives at owner's email
+
+**Scenario 4 — Missed call:**
+- Call the Twilio number, hang up before Vapi answers
+- Confirm auto text-back arrives on your phone within 60 seconds
+
+**Fix anything that breaks today.** Day 12 is the kickoff — nothing should be broken on-camera.
+
+**Deliverable:** All 4 scenarios pass; any failures logged + fixed in `changelog.md`.
+
+### Day 12 — Kickoff call (30 min)
+
+Screen share. Agenda:
+
+1. **Website (3 min):** show the live URL on desktop + mobile. Confirm they're happy.
+2. **Review Booster (5 min):** screenshot of `/admin` stats (don't hand them the admin key — it currently opens every client's data). Explain the flow: finished jobs in → SMS + email out → gate → Google. Show a real 5★ already captured.
+3. **AI Answering (5 min):** play one test call recording in EN, one in ES. Confirm: *"If this call came in while you were on a roof, you'd have the lead in your inbox before you climbed down."*
+4. **Social + GBP (5 min):** walk through the week's scheduled posts in Meta Business Suite + GBP. Confirm the content voice feels like theirs.
+5. **Monday photo request (2 min):** confirm the cadence — *"Every Monday I'll ping you asking for last week's job photos. 1-2 photos + 1 sentence each. 2-minute lift on your side."*
+6. **Expectations (5 min):**
+   - First new reviews — days
+   - First captured leads — immediate
+   - Google ranking movement — 30-60 days
+   - How to reach you — WhatsApp, this number
+   - How to cancel — 30-day notice, email or WhatsApp
+7. **Q&A (5 min):** actually listen. Any doubt they voice now becomes a cancellation risk later.
+
+**Deliverable:** Live client, agreed cadence, concerns noted in `clients/<slug>/changelog.md`.
+
+### Day 13 — Buffer / fix / tune (variable)
+
+Reserve this day. There is always something.
+
+- Address kickoff-call concerns
+- Review any Vapi call recordings from soft launch; tune the prompt
+- Fix any issues raised by the client's walk-through
+- Document client-specific quirks in their folder (e.g. *"owner prefers 'Mr. [Last Name]' not first names when AI talks to callers"*)
+
+### Day 14 — Officially "live" + first weekly summary (1h)
+
+Send the first Friday summary (template matches Section 9's Friday afternoon block), backfilled with the first week's numbers:
+
+```
+Hey [Name] — your Azul system has been live 7 days. Quick recap:
+
+✅ Reviews collected: [X]
+✅ New leads captured (web + phone): [X]
+✅ Missed calls caught by AI: [X]
+✅ Posts published: [X] (GBP + FB + IG)
+✅ Google Business impressions this week: [X]
+
+Highlight of the week: [specific — a great review, a $5K lead captured at 10pm, etc.]
+
+Reminder: send me 1-2 job photos from this week via WhatsApp when you get a chance.
+
+— Azul
+```
+
+Then:
+- Flip client tracker status from `onboarding` → `live`
+- Mark the Stripe subscription with metadata `go_live_date = today`
+- Move the client from "watch daily" to the standard weekly rhythm (Section 9)
+
+**Deliverable:** First weekly summary sent. Client is officially a live, delivery-rhythm client.
+
+---
+
+**Total onboarding time (first client):** ~18 hours over 14 days without AI Answering, ~24 hours with it.
+**By client #5:** ~10 hours total as vertical templates + Vapi clones + prompt libraries become one-click copies.
+
+---
+
+## Section 9 — Weekly Client Rhythm (ongoing)
 
 Per active paying client, ~2 hours/week total.
 
@@ -504,7 +885,7 @@ Per active paying client, ~2 hours/week total.
 
 ---
 
-## Section 9 — Monthly Client Rhythm
+## Section 10 — Monthly Client Rhythm
 
 ### First Monday of the month (30 min per client)
 
@@ -520,7 +901,7 @@ Per active paying client, ~2 hours/week total.
 
 ---
 
-## Section 10 — Common Issues & Fixes
+## Section 11 — Common Issues & Fixes
 
 ### "Client isn't sending me photos"
 - Try WhatsApp reminders 2×/week for 2 weeks
@@ -552,7 +933,7 @@ Per active paying client, ~2 hours/week total.
 
 ---
 
-## Section 11 — When to Hire (and Who)
+## Section 12 — When to Hire (and Who)
 
 | Clients | MRR | Hire | Cost | Frees you to |
 |---|---|---|---|---|
@@ -566,7 +947,7 @@ Hire the setter ($800-1500/mo LatAm) BEFORE the closer. They're cheaper, easier 
 
 ---
 
-## Section 12 — Tools You'll Actually Log Into Daily
+## Section 13 — Tools You'll Actually Log Into Daily
 
 **Web browser bookmarks bar (in this order):**
 1. Review Booster admin — `/admin` on your Review Booster domain
@@ -588,7 +969,7 @@ Hire the setter ($800-1500/mo LatAm) BEFORE the closer. They're cheaper, easier 
 
 ---
 
-## Section 13 — Your Next 7 Days (Copy-Paste Checklist)
+## Section 14 — Your Next 7 Days (Copy-Paste Checklist)
 
 - [ ] Deploy Review Booster (`review-booster/README.md`) and start A2P 10DLC registration today
 - [ ] Sign up for Vapi (free tier)
