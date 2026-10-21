@@ -18,14 +18,24 @@ export const stripeLinks = {
   // Social Media AI ($149/mo)
   socialMedia: 'https://buy.stripe.com/7sYbJ31Lr97KaIy5olc7u04',
 
-  // Local Proof SEO ($299/mo) — retired. Found Everywhere ($599/mo) needs its own link; not used by any page.
+  // Local Proof SEO ($299/mo) — retired. Kept for reference; not linked from any page.
   localSeo: 'https://buy.stripe.com/fZudRbdu9bfSbMC4khc7u05',
+
+  // Found Everywhere ($599/mo) — replaces Local Proof SEO.
+  // TODO: paste the real Stripe payment link once the $599/mo product is created in the dashboard.
+  foundEverywhere: 'TODO_FOUND_EVERYWHERE_URL',
 
   // AI Answering ($349/mo)
   aiAnswering: 'https://buy.stripe.com/00waEZdu997K4kaaIFc7u06',
 
   // Review Booster ($79/mo)
   reviewBooster: 'https://buy.stripe.com/bJe9AVbm1fw86si4khc7u07',
+
+  // AI Lead Agent + Website Build — $3,500 one-time package (only 5 spots)
+  aiLeadAgentWebsite: 'https://buy.stripe.com/9B64gB75L1Fi4kaeYVc7u08',
+
+  // AI Lead Agent — standalone product (no website build)
+  aiLeadAgent: 'https://buy.stripe.com/6oUeVfeyd4Ru5oeeYVc7u09',
 }
 
 // Helper: check if a Stripe link is configured (not still a TODO placeholder)

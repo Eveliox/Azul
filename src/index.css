@@ -1,7 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root{font-family:'Inter',Arial,sans-serif;color:#f4f3ef;background:#0c0d0f;font-synthesis:none;--blue:#1745ed;--muted:#a3a4aa;--line:#ffffff26;--ease:cubic-bezier(.22,1,.36,1);--nav-h:82px;--gutter:3.5vw;--section-x:6vw;--pad-top:clamp(128px,11vw,168px);--pad-bottom:clamp(72px,8vw,120px);--float-safe:92px}
+:root{font-family:'Inter',Arial,sans-serif;color:#f4f3ef;background:#0c0d0f;font-synthesis:none;--blue:#1745ed;--muted:#a3a4aa;--line:#ffffff26;--ease:cubic-bezier(.22,1,.36,1);--nav-h:82px;--banner-h:44px;--top-h:calc(var(--nav-h) + var(--banner-h));--gutter:3.5vw;--section-x:6vw;--pad-top:clamp(128px,11vw,168px);--pad-bottom:clamp(72px,8vw,120px);--float-safe:92px}
+html.banner-dismissed{--banner-h:0px}
 *{box-sizing:border-box}
 body{margin:0;-webkit-font-smoothing:antialiased;background:#0c0d0f}
 a{color:inherit;text-decoration:none}
@@ -32,7 +33,20 @@ html.lenis,html.lenis body{height:auto}
 
 /* Navigation: transparent over the hero, blurred backdrop after scrolling,
    hidden while scrolling down. Only transform and opacity animate. */
-.site-header{position:fixed;inset:0 0 auto;z-index:40;height:var(--nav-h);padding:0 3.5vw;display:flex;align-items:center;justify-content:space-between;transition:transform .55s var(--ease)}
+.site-banner{position:fixed;top:0;left:0;right:0;z-index:41;height:var(--banner-h);display:flex;align-items:center;justify-content:center;gap:14px;padding:0 3.5vw;background:linear-gradient(90deg,#0b1e8f 0%,var(--blue) 55%,#4668ff 100%);color:#f4f3ef;font-size:13px;letter-spacing:.01em;overflow:hidden}
+.site-banner-link{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;flex:1;min-width:0;padding:0 32px 0 4px;transition:opacity .2s ease}
+.site-banner-link:hover{opacity:.88}
+.site-banner-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;background:#ffffff22;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.site-banner-headline{font-weight:600;white-space:nowrap}
+.site-banner-price{font-weight:500;color:#ffffffd9;white-space:nowrap}
+.site-banner-price::before{content:'·';margin-right:14px;color:#ffffff80}
+.site-banner-spots{font-weight:500;color:#ffdd57;white-space:nowrap}
+.site-banner-spots::before{content:'·';margin-right:14px;color:#ffffff80}
+.site-banner-cta{display:inline-flex;align-items:center;gap:4px;font-weight:600;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.site-banner-cta .arrow{width:14px}
+.site-banner-close{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#ffffffcc;font-size:22px;line-height:1;padding:4px 8px;border-radius:4px;transition:color .15s ease,background .15s ease}
+.site-banner-close:hover{color:#fff;background:#ffffff14}
+.site-header{position:fixed;top:var(--banner-h);left:0;right:0;z-index:40;height:var(--nav-h);padding:0 3.5vw;display:flex;align-items:center;justify-content:space-between;transition:transform .55s var(--ease),top .3s var(--ease)}
 .site-header::before{content:'';position:absolute;inset:0;z-index:-1;background:#0c0d0fcc;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-bottom:1px solid #ffffff12;opacity:0;transition:opacity .45s ease}
 .site-header.is-scrolled::before{opacity:1}
 .site-header.is-hidden{transform:translateY(-100%)}
@@ -64,7 +78,7 @@ html.lenis,html.lenis body{height:auto}
 /* Hero: full screen under the transparent nav. Layers, back to front:
    photo, dot grid, text. The bottom padding keeps the wordmark clear of the
    fixed cookie and AI buttons. */
-.hero{min-height:100svh;position:relative;overflow:hidden;isolation:isolate;padding:calc(var(--nav-h) + 24px) var(--gutter) var(--float-safe);display:flex;flex-direction:column}
+.hero{min-height:100svh;position:relative;overflow:hidden;isolation:isolate;padding:calc(var(--top-h) + 24px) var(--gutter) var(--float-safe);display:flex;flex-direction:column}
 .hero-bg{position:absolute;inset:0;z-index:0}
 .hero-bg>*{position:absolute;inset:0;width:100%;height:100%}
 .hero-image{object-fit:cover;filter:saturate(.35) brightness(.55);object-position:50% 55%}
@@ -90,7 +104,7 @@ html.lenis,html.lenis body{height:auto}
 .wordmark-letter{display:inline-block}
 
 /* Dot grid: always behind text. Dots near text get .is-hidden. */
-.dot-grid{position:absolute;inset:var(--nav-h) 3% 0;z-index:1;pointer-events:none}
+.dot-grid{position:absolute;inset:var(--top-h) 3% 0;z-index:1;pointer-events:none}
 .dot-grid-drift{position:absolute;inset:0}
 .dot{position:absolute;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;background:#fff;opacity:.55}
 .dot.is-hidden{visibility:hidden}
@@ -270,7 +284,12 @@ input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px;flex-shrink
 }
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr);gap:48px 24px}}
 
-@media(max-width:700px){:root{--nav-h:68px;--gutter:22px;--section-x:23px;--pad-top:112px;--pad-bottom:64px;--float-safe:80px}
+@media(max-width:700px){:root{--nav-h:68px;--banner-h:62px;--gutter:22px;--section-x:23px;--pad-top:112px;--pad-bottom:64px;--float-safe:80px}
+.site-banner{padding:0 44px 0 16px;font-size:11.5px;gap:8px}
+.site-banner-link{gap:8px;padding:0}
+.site-banner-badge{font-size:9.5px;padding:2px 7px}
+.site-banner-price::before,.site-banner-spots::before{margin-right:8px}
+.site-banner-close{right:8px;font-size:20px}
 .site-header{padding:0 22px}
 .desktop-nav{display:none}
 .mobile-brand{display:block;font-size:32px;font-weight:800;letter-spacing:-.075em}
@@ -345,7 +364,7 @@ input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px;flex-shrink
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 24px;
-  padding: calc(var(--nav-h) + 20px) var(--gutter) 84px;
+  padding: calc(var(--top-h) + 20px) var(--gutter) 84px;
 }
 .hero-image { object-position: 50% 64%; filter: saturate(.55) brightness(.6); }
 .hero-shade { background: linear-gradient(180deg, #050b18b3, #0b235b44 45%, #050b18cc), linear-gradient(90deg, #06256680, transparent 75%); }
