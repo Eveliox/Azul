@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
 import { useLanguage } from '../../contexts/LanguageContext'
-import { OrbitalArt } from './OrbitalArt'
 
 export function HeroFilm() {
   const { c } = useLanguage()
@@ -32,7 +31,6 @@ export function HeroFilm() {
       <img className="hero-image hero-wave-poster" src="/images/hero-waves.jpg" alt="" fetchPriority="high" />
       {!failed && <video ref={video} className={`hero-film ${ready ? 'is-ready' : ''}`} src={!reduced || requested ? '/videos/hero-waves.mp4' : undefined} poster="/images/hero-waves.jpg" muted loop playsInline preload={reduced ? 'none' : 'metadata'} onPlaying={() => { setReady(true); setPlaying(true) }} onPause={() => setPlaying(false)} onError={() => { setFailed(true); setPlaying(false) }} />}
       <div className="hero-shade" />
-      <OrbitalArt />
       <div className="hero-darken" />
       <div className="hero-curtain" />
     </div>
