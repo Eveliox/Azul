@@ -142,3 +142,22 @@
 @keyframes lead-hero-voice{from{transform:scaleY(.35)}to{transform:scaleY(1)}}
 @media(max-width:1000px){.lead-hero-layout{grid-template-columns:1fr;gap:48px}.lead-hero h1{font-size:clamp(36px,6vw,64px)}.lead-hero-copy{max-width:760px}.lead-hero .lead-intro{max-width:600px}}
 @media(max-width:600px){.lead-hero{padding-top:120px;padding-bottom:60px}.lead-hero h1{font-size:clamp(32px,8.5vw,48px)}.lead-hero .lead-intro{font-size:16px}.lead-hero-portrait{padding:20px 18px 18px;border-radius:16px}.lead-portrait-heading{font-size:9px;gap:8px;margin-bottom:24px}.lead-portrait-example{font-size:7px;padding:4px 6px}.lead-portrait-inbox{margin-right:16px}.lead-portrait-booking{margin-left:16px}.lead-portrait-inbox,.lead-portrait-booking{padding:13px 12px;gap:10px}.lead-portrait-agent{padding:18px 14px}.lead-portrait-wave{gap:2px}.lead-portrait-wave>i{width:2px}.lead-portrait-voice{gap:18px;min-height:100px}.lead-portrait-icon{width:30px;height:30px}.lead-hero-portrait strong{font-size:12px}.lead-portrait-agent>strong{font-size:16px}.lead-portrait-foot{font-size:8px}.lead-pilot-badge{font-size:9px}.lead-hero .lead-ctas{gap:20px}}
+
+/* Isometric lead engine: incoming sources, layered processing, and timing branches. */
+.lead-engine{position:relative;min-width:0;width:100%;max-width:660px;margin:auto;isolation:isolate}
+.lead-engine-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#a3b7d6;font-size:10px;letter-spacing:.04em}
+.lead-engine-heading>span:first-child{display:flex;align-items:center;gap:8px}.lead-engine-heading i{width:5px;height:5px;background:#8aafff;border-radius:50%;box-shadow:0 0 12px #6898ff}
+.lead-engine-heading>span:last-child{color:#92a4bf;border:1px solid #8cafff25;border-radius:20px;padding:5px 9px;font-size:9px}
+.lead-engine-title{font-size:clamp(19px,2vw,27px);letter-spacing:-.045em;color:#dce7fa;margin-top:20px}
+.lead-engine-diagram{display:block;width:110%;max-width:none;margin:-25px -5% -18px;overflow:visible}
+.lead-iso-face{fill:url(#lead-engine-face);stroke:#7195cf;stroke-opacity:.5;stroke-width:1}.lead-iso-edge{fill:#0d1b32;stroke:#5879ae;stroke-opacity:.4;stroke-width:1}
+.lead-iso-label{font-family:inherit;font-size:13px;font-weight:500;fill:#d5e5ff;letter-spacing:-.2px}.lead-iso-sublabel{font-family:inherit;font-size:9px;fill:#94b1dc}.lead-iso-notch{stroke:#729eff;stroke-width:2;stroke-linecap:round}
+.lead-iso-tile.is-core .lead-iso-face{fill:url(#lead-engine-core);stroke:#9fc0ff}.lead-iso-tile.is-core .lead-iso-edge{fill:#204cc4;stroke:#6393ff}.lead-iso-tile.is-core{filter:drop-shadow(0 8px 18px #245fff55)}.lead-iso-tile.is-core .lead-iso-label{font-size:35px;font-weight:600;letter-spacing:-2px;fill:white}.lead-iso-tile.is-core .lead-iso-sublabel{fill:#e2ecff}.lead-iso-tile.is-core .lead-iso-notch{stroke:#d1e2ff}
+.lead-engine-wires path{stroke:#4676d4;stroke-width:1.5;stroke-linecap:round}.lead-engine-wires .lead-engine-signal{stroke:#b3d1ff;stroke-width:2.5;stroke-dasharray:14 190;stroke-dashoffset:204;filter:drop-shadow(0 0 4px #6495ff)}
+.lead-engine-marker{fill:#9bbcff;color:#9bbcff}.lead-engine-marker circle:nth-child(2){stroke:#7fa5ff;stroke-opacity:.3}.lead-engine-marker text{font-size:10px;font-family:inherit;fill:#9ab2d6}
+.lead-engine-footer{display:flex;align-items:center;gap:16px;border-top:1px solid #83a7e322;padding-top:20px;color:#94a8c6;font-size:11px}.lead-engine-footer>span:last-child{margin-left:auto;color:#abc8ff;font-size:22px}.lead-engine-wave{display:flex;align-items:center;gap:3px;height:26px}.lead-engine-wave i{width:2px;height:var(--bar);background:#88afff;border-radius:2px}
+@media(prefers-reduced-motion:no-preference){.lead-iso-tile{animation:lead-engine-enter 1.2s cubic-bezier(.2,.7,.2,1) var(--tile-delay,0s) both}.lead-engine-signal{animation:lead-engine-flow 3.5s linear var(--wire-delay,0s) 5}.lead-engine-wave i{animation:lead-hero-voice .9s ease-in-out var(--delay) 16 alternate}}
+@keyframes lead-engine-flow{to{stroke-dashoffset:0}}
+@keyframes lead-engine-enter{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1000px){.lead-engine{max-width:620px}.lead-engine-title{font-size:27px}}
+@media(max-width:600px){.lead-engine-diagram{width:104%;margin:0 -2% -8px}.lead-engine-heading{font-size:9px;gap:8px}.lead-engine-heading>span:last-child{font-size:8px}.lead-engine-title{font-size:23px}.lead-engine-footer{font-size:10px;gap:12px}}
