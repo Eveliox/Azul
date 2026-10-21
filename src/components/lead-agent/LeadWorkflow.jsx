@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
-import { leadAgentCopy, leadVisualCopy } from '../../data/leadAgent'
+import { leadVisualCopy } from '../../data/leadAgent'
 
 export function LeadIcon({ kind = 0 }) {
   const paths = [
@@ -16,12 +16,24 @@ export function LeadIcon({ kind = 0 }) {
 export function LeadWorkflow() {
   const { lang } = useLanguage()
   const v = leadVisualCopy[lang]
-  const d = leadAgentCopy[lang]
   const reduced = useReducedMotion()
   const [stage, setStage] = useState(0)
   const [playing, setPlaying] = useState(() => !reduced)
   const [visible, setVisible] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const elapsed = useRef(0)
   const ref = useRef(null)
+  const c = lang === 'es' ? {
+    title: 'Un contacto. Todo conectado.', running: 'En curso', ready: 'En espera', done: 'Completado',
+    types: ['ENTRADA', 'AGENTE AI', 'CALENDARIO', 'NOTIFICACIÓN'],
+    outputs: ['Permiso para contactar', 'Área de servicio confirmada', 'Texto + correo enviados', 'Resumen para su equipo'],
+    activity: 'Actividad del flujo', route: 'Cuando hace falta una persona',
+  } : {
+    title: 'One lead. All connected.', running: 'In progress', ready: 'Waiting', done: 'Complete',
+    types: ['TRIGGER', 'AI AGENT', 'CALENDAR', 'NOTIFICATION'],
+    outputs: ['Permission to contact', 'Service area confirmed', 'Text + email sent', 'Summary for your team'],
+    activity: 'Workflow activity', route: 'When a person is needed',
+  }
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.2 })
     observer.observe(ref.current)
@@ -30,23 +42,62 @@ export function LeadWorkflow() {
   useEffect(() => { if (reduced) setPlaying(false) }, [reduced])
   useEffect(() => {
     if (!playing || !visible || reduced) return
-    const timer = setTimeout(() => {
-      if (stage === 3) setPlaying(false)
-      else setStage(stage + 1)
-    }, 4000)
-    return () => clearTimeout(timer)
+    let frame
+    let previous = performance.now()
+    const tick = now => {
+      elapsed.current = Math.min(5200, elapsed.current + Math.min(now - previous, 100))
+      previous = now
+      setProgress(elapsed.current / 5200)
+      if (elapsed.current >= 5200) {
+        elapsed.current = 0
+        if (stage === 3) setPlaying(false)
+        else { setStage(value => value + 1); setProgress(0) }
+        return
+      }
+      frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
   }, [playing, stage, visible, reduced])
-  return <div className={`lead-workflow ${playing && visible ? 'is-playing' : ''}`} ref={ref}>
-    <div className="lead-workflow-toolbar"><span /><button type="button" onClick={() => { if (!playing && stage === 3) setStage(0); setPlaying(!playing) }} disabled={reduced}>{playing ? v.pause : v.play}<span aria-hidden="true">{playing ? 'Ⅱ' : '↻'}</span></button></div>
-    <div className="lead-flow-track" aria-hidden="true">
-      {v.stages.map((label, i) => <div key={label} className={`lead-flow-stop ${i === stage ? 'is-current' : i < stage ? 'is-done' : ''}`}>
-        <div className="lead-flow-node"><LeadIcon kind={i}/>{i < stage && <b>✓</b>}</div>
-        <span>{label}</span>
-        {i < 3 && <div className="lead-flow-connection"><i/><em/></div>}
-      </div>)}
+  const selectStage = index => {
+    setPlaying(false)
+    elapsed.current = 0
+    setProgress(0)
+    setStage(index)
+  }
+  const toggle = () => {
+    if (!playing && stage === 3 && progress === 1) {
+      setStage(0); setProgress(0); elapsed.current = 0
+    }
+    setPlaying(value => !value)
+  }
+  return <div className={`workflow-studio ${playing && visible && !reduced ? 'is-playing' : ''}`} ref={ref}>
+    <div className="workflow-header">
+      <div><span className="workflow-eyebrow">azul / {v.example}</span><h3>{c.title}</h3></div>
+      <button className="workflow-play" type="button" onClick={toggle} disabled={reduced}>{playing ? v.pause : v.play}<span aria-hidden="true">{playing ? 'Ⅱ' : '↻'}</span></button>
     </div>
-    <div className="lead-workflow-grid">
-      <div className="lead-console">
+    <div className="workflow-canvas">
+      <ol className="workflow-nodes" aria-label={v.example}>
+        {v.stages.map((label, i) => <li key={label} className={`${i === stage ? 'is-current' : ''} ${i < stage || (i === 3 && progress === 1) ? 'is-done' : ''}`}>
+          <button className="workflow-node" type="button" aria-pressed={stage === i} onClick={() => selectStage(i)}>
+            <span className="workflow-node-top"><span>{c.types[i]}</span><span>0{i + 1}</span></span>
+            <span className="workflow-node-icon"><LeadIcon kind={i}/></span>
+            <strong>{label}</strong><span className="workflow-node-output">{c.outputs[i]}</span>
+            <span className="workflow-node-status"><i/>{i < stage || (i === 3 && progress === 1) ? c.done : i === stage ? c.running : c.ready}</span>
+            <span className="workflow-node-meter" aria-hidden="true"><i style={{ transform: `scaleX(${i < stage ? 1 : i === stage ? progress : 0})` }}/></span>
+          </button>
+          {i < 3 && <span className="workflow-wire" aria-hidden="true"><i/><b>›</b></span>}
+        </li>)}
+      </ol>
+      <div className="workflow-branch"><span aria-hidden="true">↳</span><span>{c.route}</span><span className="workflow-handoff"><LeadIcon kind={3}/>{v.human}</span></div>
+    </div>
+    <div className="workflow-inspector">
+      <div className="workflow-detail" key={stage}>
+        <span className="workflow-eyebrow">{c.activity} <span> / 0{stage + 1}</span></span>
+        <h4>{v.headlines[stage]}</h4><p>{v.details[stage]}</p>
+        <div className="workflow-event"><span aria-hidden="true">↗</span>{c.outputs[stage]}</div>
+      </div>
+      <div className="workflow-preview">
         <div className={`lead-scene scene-${stage}`} key={`scene-${stage}`} aria-hidden="true">
           <div className="lead-scene-top"><span>azul<span className="lead-scene-dot">.</span></span></div>
           {stage === 0 && <div className="lead-scene-form"><span className="lead-scene-icon"><LeadIcon kind={0}/></span><strong>{v.form}</strong><div className="lead-form-lines"><i/><i/><i/></div><div className="lead-scene-confirm"><span>✓</span>{v.flowReceived}</div></div>}
@@ -54,18 +105,10 @@ export function LeadWorkflow() {
           {stage === 2 && <div className="lead-scene-calendar"><strong>{v.flowCalendar}</strong><div className="lead-calendar-cells">{Array.from({length:14},(_,i)=><span key={i} className={i === 9 ? 'is-booked' : ''}>{i === 9 ? '✓' : String(i + 1).padStart(2,'0')}</span>)}</div><div className="lead-scene-confirm"><span>✓</span>{v.confirmation}</div></div>}
           {stage === 3 && <div className="lead-scene-message"><span className="lead-scene-icon"><LeadIcon kind={3}/></span><strong>{v.flowSummary}</strong><div className="lead-summary-lines"><span><i>✓</i>{v.flowQualified}</span><span><i>✓</i>{v.stages[2]}</span><span><i>✓</i>{v.flowConfirmed}</span></div><span className="lead-scene-pill">{v.human}</span></div>}
         </div>
-        <div className="lead-console-copy" key={stage}>
-          <span className="lead-console-label">{v.stages[stage]}</span>
-          <h3>{v.headlines[stage]}</h3>
-          <p>{v.details[stage]}</p>
-          <div className="lead-console-tags"><span>{v.human}</span></div>
-        </div>
+
       </div>
-      <ol className="lead-workflow-steps" aria-label={d.how}>
-        {d.steps.map((step, i) => <li key={step.title} className={stage === i ? 'is-active' : stage > i ? 'is-complete' : ''}><button type="button" aria-pressed={stage === i} onClick={() => { setPlaying(false); setStage(i) }}><span className="lead-step-number">{stage > i ? '✓' : `0${i + 1}`}</span><span><strong>{step.title}</strong><span className="lead-step-body">{step.body}</span></span><span className="lead-step-arrow" aria-hidden="true">{stage > i ? '✓' : '↗'}</span></button></li>)}
-      </ol>
     </div>
-    <div className="lead-workflow-footer"><div className="lead-flow-progress" aria-hidden="true">{[0,1,2,3].map(i => <span key={i} className={stage >= i ? 'is-filled' : ''} />)}</div><span>{v.caption}</span><span aria-hidden="true">{String(stage + 1).padStart(2,'0')} / 04</span></div>
+    <div className="workflow-footer"><span><i/>{v.caption}</span><span>0{stage + 1} <span>/ 04</span></span></div>
   </div>
 }
 
