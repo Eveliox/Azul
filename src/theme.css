@@ -9,7 +9,62 @@
 }
 
 body { background: #111116; }
-.site-banner { background: linear-gradient(100deg, #232263, #304fe2 65%, #626ee2); }
+
+/* --- Seasonal: Halloween banner. Revert this block after 10/31. --- */
+.site-banner {
+  background:
+    radial-gradient(ellipse at 95% 50%, #ff751888 0%, transparent 55%),
+    radial-gradient(ellipse at 8% 50%, #6b1aad55 0%, transparent 60%),
+    linear-gradient(100deg, #0a0215 0%, #1b0528 35%, #2d0745 70%, #3a0a5a 100%);
+  color: #f5e9d0;
+  overflow: hidden;
+}
+.site-banner::before,
+.site-banner::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 0;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16'><path fill='%23f5e9d0' d='M13 11 L10 7 L6 9 L4 5 L5 10 L9 12 L13 11 L17 12 L21 10 L22 5 L20 9 L16 7 Z'/></svg>") no-repeat center / contain;
+  opacity: .35;
+  animation: bannerBatGlide 22s linear infinite;
+}
+.site-banner::before { top: 32%; animation-delay: -3s; }
+.site-banner::after  { top: 60%; width: 15px; height: 10px; opacity: .25; animation-delay: -13s; animation-duration: 28s; }
+@keyframes bannerBatGlide {
+  0%   { transform: translateX(-40px) translateY(0) scaleX(.85); }
+  20%  { transform: translateX(20vw) translateY(-5px) scaleX(.95); }
+  45%  { transform: translateX(45vw) translateY(3px) scaleX(1); }
+  70%  { transform: translateX(70vw) translateY(-4px) scaleX(.9); }
+  100% { transform: translateX(104vw) translateY(-2px) scaleX(.8); }
+}
+.site-banner-link { position: relative; z-index: 1; }
+.site-banner-close { z-index: 2; }
+.site-banner-badge {
+  background: #ff7518;
+  color: #170422;
+  box-shadow: 0 0 10px #ff751866;
+  animation: bannerCandleFlicker 2.6s ease-in-out infinite;
+}
+@keyframes bannerCandleFlicker {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px #ff751866; }
+  18%      { opacity: .9;  box-shadow: 0 0 6px  #ff751844; }
+  32%      { opacity: 1;   box-shadow: 0 0 14px #ff7518aa; }
+  58%      { opacity: .95; box-shadow: 0 0 10px #ff751866; }
+  72%      { opacity: 1;   box-shadow: 0 0 16px #ff8f3cbb; }
+}
+.site-banner-price { color: #f5e9d0cc; }
+.site-banner-spots { color: #ff8f3c; text-shadow: 0 0 10px #ff751855; }
+.site-banner-price::before,
+.site-banner-spots::before { color: #ff751899; }
+.site-banner-cta { color: #ffd089; text-decoration-color: #ff8f3c; }
+.site-banner-link:hover .site-banner-cta { color: #ffe6b8; }
+.site-banner-close { color: #f5e9d0cc; }
+.site-banner-close:hover { color: #ff8f3c; background: #ff751822; }
+/* --- End seasonal block --- */
+
 .site-header::before { background: #191922ed; border-color: #d9d8fa26; }
 .site-header { text-shadow: 0 1px 12px #10102660; }
 .site-header .languages button { color: #c2c0d3; }
