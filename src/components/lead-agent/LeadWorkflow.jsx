@@ -97,7 +97,6 @@ export function LeadHeroVisual() {
     foot: 'Every lead. A next step.', engine: 'The engine behind your next customer',
   }
   return <div className="lead-engine">
-    <div className="lead-engine-heading"><span><i />{v.heroLabel}</span><span>{v.example}</span></div>
     <div className="lead-engine-title">{c.title}</div>
     <svg className="lead-engine-diagram" viewBox="0 0 640 560" role="img" aria-label={`${c.engine}. ${c.inputs.join(', ')} → ${c.intake} → ${c.consent} → ${c.call} / ${c.retry}.`}>
       <defs>
@@ -111,14 +110,13 @@ export function LeadHeroVisual() {
       <g className="lead-engine-wires" fill="none">
         {['M162 331 203 307 Q213 301 224 307 L286 343', 'M162 393 212 364 Q223 358 233 364 L259 379', 'M162 455 242 409 Q252 403 263 409 L286 422', 'M403 250 465 214 Q475 208 475 196 L475 166', 'M440 270 512 229 Q522 223 532 229 L552 241'].map((path, i) => <g key={path}><path d={path}/><path className="lead-engine-signal" d={path} style={{ '--wire-delay': `${i * .65}s` }}/></g>)}
       </g>
-      <WorkflowTile x={245} y={421} width={225} height={135} label="" />
-      <WorkflowTile x={245} y={393} width={225} height={135} label="" />
-      <WorkflowTile x={245} y={360} width={225} height={135} label="azul" sublabel={c.agent} primary delay={.2}/>
-      <WorkflowTile x={245} y={305} width={225} height={135} label={c.intake} sublabel={c.consent} delay={.4}/>
-      {c.inputs.map((label, i) => <WorkflowTile key={label} x={20} y={334 + i * 62} width={145} height={44} label={label} delay={i * .12}/>)}
-      <WorkflowTile x={369} y={155} width={155} height={65} label={c.call} sublabel={c.now} delay={.6}/>
-      <WorkflowTile x={443} y={239} width={155} height={65} label={c.retry} sublabel={c.later} delay={.8}/>
-      <g className="lead-engine-marker"><circle cx="307" cy="230" r="4"/><circle cx="307" cy="230" r="10" fill="none"/><text x="325" y="234">{v.bilingual}</text></g>
+      <WorkflowTile x={245} y={421} width={225} height={135} label="" delay={0}/>
+      <WorkflowTile x={245} y={393} width={225} height={135} label="" delay={.25}/>
+      <WorkflowTile x={245} y={360} width={225} height={135} label="azul" sublabel={c.agent} primary delay={.5}/>
+      <WorkflowTile x={245} y={305} width={225} height={135} label={c.intake} sublabel={c.consent} delay={.8}/>
+      {c.inputs.map((label, i) => <WorkflowTile key={label} x={20} y={334 + i * 62} width={145} height={44} label={label} delay={1.1 + i * .2}/>)}
+      <WorkflowTile x={369} y={155} width={155} height={65} label={c.call} sublabel={c.now} delay={1.9}/>
+      <WorkflowTile x={443} y={239} width={155} height={65} label={c.retry} sublabel={c.later} delay={2.2}/>
     </svg>
     <div className="lead-engine-footer"><span className="lead-engine-wave" aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i} style={{ '--bar': `${8 + (i * 13 % 17)}px`, '--delay': `${i * .09}s` }}/>)}</span><span>{c.foot}</span><span aria-hidden="true">↗</span></div>
   </div>

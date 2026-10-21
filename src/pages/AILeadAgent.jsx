@@ -74,7 +74,6 @@ export default function AILeadAgent() {
     <section className="section lead-hero">
       <DotGrid />
       <div className="lead-hero-layout"><div className="lead-hero-copy"><SectionEyebrow>{d.name}</SectionEyebrow>
-      <span className="lead-badge lead-pilot-badge"><i aria-hidden="true"/>{v.heroPilot}</span>
       <SplitText as="h1">{d.title}</SplitText>
       <p className="lead-intro">{d.intro}</p><p className="lead-note">{d.availability}</p>
       <div className="lead-ctas"><BookingLink>{d.cta}</BookingLink><MagneticButton as="a" className="text-link" href="#lead-trades">{d.explore}<Arrow /></MagneticButton></div></div><LeadHeroVisual /></div>

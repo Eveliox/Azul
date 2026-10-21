@@ -156,8 +156,14 @@
 .lead-engine-wires path{stroke:#4676d4;stroke-width:1.5;stroke-linecap:round}.lead-engine-wires .lead-engine-signal{stroke:#b3d1ff;stroke-width:2.5;stroke-dasharray:14 190;stroke-dashoffset:204;filter:drop-shadow(0 0 4px #6495ff)}
 .lead-engine-marker{fill:#9bbcff;color:#9bbcff}.lead-engine-marker circle:nth-child(2){stroke:#7fa5ff;stroke-opacity:.3}.lead-engine-marker text{font-size:10px;font-family:inherit;fill:#9ab2d6}
 .lead-engine-footer{display:flex;align-items:center;gap:16px;border-top:1px solid #83a7e322;padding-top:20px;color:#94a8c6;font-size:11px}.lead-engine-footer>span:last-child{margin-left:auto;color:#abc8ff;font-size:22px}.lead-engine-wave{display:flex;align-items:center;gap:3px;height:26px}.lead-engine-wave i{width:2px;height:var(--bar);background:#88afff;border-radius:2px}
-@media(prefers-reduced-motion:no-preference){.lead-iso-tile{animation:lead-engine-enter 1.2s cubic-bezier(.2,.7,.2,1) var(--tile-delay,0s) both}.lead-engine-signal{animation:lead-engine-flow 3.5s linear var(--wire-delay,0s) 5}.lead-engine-wave i{animation:lead-hero-voice .9s ease-in-out var(--delay) 16 alternate}}
+@media(prefers-reduced-motion:no-preference){.lead-iso-tile{opacity:0;transform-origin:center;animation:lead-engine-stack 8s cubic-bezier(.2,.7,.2,1) var(--tile-delay,0s) infinite both}.lead-engine-signal{animation:lead-engine-flow 3.5s linear var(--wire-delay,0s) infinite}.lead-engine-wave i{animation:lead-hero-voice .9s ease-in-out var(--delay) infinite alternate}}
 @keyframes lead-engine-flow{to{stroke-dashoffset:0}}
-@keyframes lead-engine-enter{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes lead-engine-stack{
+  0%{opacity:0;transform:translateY(34px) scale(.94)}
+  7%{opacity:1;transform:translateY(0) scale(1)}
+  78%{opacity:1;transform:translateY(0) scale(1)}
+  90%{opacity:0;transform:translateY(-10px) scale(1.02)}
+  100%{opacity:0;transform:translateY(34px) scale(.94)}
+}
 @media(max-width:1000px){.lead-engine{max-width:620px}.lead-engine-title{font-size:27px}}
 @media(max-width:600px){.lead-engine-diagram{width:104%;margin:0 -2% -8px}.lead-engine-heading{font-size:9px;gap:8px}.lead-engine-heading>span:last-child{font-size:8px}.lead-engine-title{font-size:23px}.lead-engine-footer{font-size:10px;gap:12px}}
