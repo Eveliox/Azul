@@ -4,6 +4,7 @@ import App from './App.jsx'
 import { LanguageProvider } from './contexts/LanguageContext.jsx'
 import './index.css'
 import './agents.css'
+import './theme.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

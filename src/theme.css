@@ -1,0 +1,108 @@
+/* Shared art direction: cobalt light, lavender paper, charcoal instruments. */
+:root {
+  --blue: #3455f5;
+  --muted: #b1b0c2;
+  --line: #d9d8fa29;
+  --azul-paper: #dcdbe8;
+  --azul-charcoal: #222228;
+  --azul-bloom: radial-gradient(ellipse at 90% 5%, #6976f078, transparent 55%), linear-gradient(125deg, #171725, #182570 65%, #314bd2);
+}
+
+body { background: #111116; }
+.site-banner { background: linear-gradient(100deg, #232263, #304fe2 65%, #626ee2); }
+.site-header::before { background: #191922ed; border-color: #d9d8fa26; }
+.site-header { text-shadow: 0 1px 12px #10102660; }
+.site-header .languages button { color: #c2c0d3; }
+.site-header .languages button[aria-pressed=true] { color: #fff; }
+
+/* Keep the ocean film visible beneath the atmospheric color field. */
+.hero .hero-bg { background: #242c82; }
+.hero .hero-wave-poster, .hero .hero-film { filter: saturate(.35) brightness(.65); }
+.hero:has(.hero-wave-poster) .hero-shade {
+  background: radial-gradient(ellipse at 92% 0%, #111126ed, transparent 65%),
+    radial-gradient(ellipse at 72% 36%, #2448f5c9, transparent 65%),
+    linear-gradient(120deg, #bdb9da75, #676cd957 45%, #1b2b8066);
+}
+.hero-bg > .orbital-art {
+  inset: auto 3% 13% auto;
+  width: min(48vw, 650px);
+  height: auto;
+  color: #eceaff;
+  opacity: .45;
+  pointer-events: none;
+}
+.hero .hero-copy p, .hero .hero-meta { color: #efedff; }
+.hero .hero-curtain { background: #171724; }
+.hero .hero-film-control { background: #242446a6; color: #f2f0ff; }
+
+/* Atmospheric mastheads across the public pages. Texture stays decorative. */
+:is(.services-hero, .work-hero, .about-hero, .insights-hero, .service-detail-hero, .agent-hero) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--azul-bloom);
+  border-bottom: 1px solid #aaa9f23d;
+}
+:is(.services-hero, .work-hero, .about-hero, .insights-hero, .service-detail-hero, .agent-hero)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(#dcdcff88 .8px, transparent 1px);
+  background-size: 5px 5px;
+  mask-image: radial-gradient(ellipse at 100% 35%, #000, transparent 62%);
+}
+:is(.services-hero, .work-hero) > p, .work-hero .work-intro p,
+.about-hero .about-hero-intro, .insights-hero .insights-hero-bottom > p,
+.agent-hero .agent-hero-intro { color: #d6d5e8; }
+
+/* Lavender fields frame dark product panels, echoing the reference posters. */
+.service-feature-visual, .guide-preview, .dashboard-scene {
+  background: radial-gradient(ellipse at 85% 12%, #3454f5a6, transparent 58%),
+    linear-gradient(145deg, #e0deec, #a4a8d6);
+  border-radius: 24px;
+}
+.service-feature-visual { padding: clamp(16px, 2.4vw, 36px); }
+.service-feature-visual .service-demo {
+  background: linear-gradient(145deg, #2b2b35, #1c1c26);
+  border: 1px solid #eeeaff26;
+  border-radius: 22px;
+  box-shadow: 0 24px 45px -24px #14163899;
+}
+.guide-preview { position: relative; isolation: isolate; }
+.guide-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(#304ee2 .8px, transparent 1px) 0 0 / 5px 5px;
+  mask-image: linear-gradient(135deg, #000, transparent 65%);
+  pointer-events: none;
+}
+.guide-preview .guide-book {
+  background: linear-gradient(150deg, #777ee7, #3452ef 48%, #202137);
+  color: #fff;
+  border: 1px solid #f1edff70;
+}
+.work-image, .insight-art, .insights-feature-link { border-radius: 22px; }
+.dashboard-scene .dashboard { border-radius: 20px; }
+.modal, .cookie-banner { background: #25252e; border: 1px solid #d9d8fa33; border-radius: 22px; }
+.ai-pill { background: #3455f5; box-shadow: 0 6px 28px #263ac44d; }
+.button { border-radius: 8px; }
+
+.agents-feature { background: radial-gradient(ellipse at 90% 60%, #414aca55, transparent 60%), #1c1c25; }
+.work-cta, .insights-cta { background: var(--azul-bloom); }
+.site-footer {
+  position: relative;
+  background: radial-gradient(ellipse at 95% 100%, #35339c66, transparent 65%), #1b1b23;
+  border-top: 1px solid #c4bfff40;
+}
+.footer-top { border-color: #c4bfff40; }
+.stat-line { background: linear-gradient(90deg, #8c91f6, #3455f5); }
+
+@media (max-width: 700px) {
+  .hero-bg > .orbital-art { width: 88vw; right: -15%; bottom: 21%; opacity: .28; }
+  .service-feature-visual, .guide-preview, .dashboard-scene { border-radius: 18px; }
+  .service-feature-visual .service-demo { border-radius: 15px; }
+}
