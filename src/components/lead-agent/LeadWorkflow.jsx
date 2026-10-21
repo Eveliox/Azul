@@ -37,7 +37,7 @@ export function LeadWorkflow() {
     return () => clearTimeout(timer)
   }, [playing, stage, visible, reduced])
   return <div className={`lead-workflow ${playing && visible ? 'is-playing' : ''}`} ref={ref}>
-    <div className="lead-workflow-toolbar"><span><i />{v.example}</span><button type="button" onClick={() => { if (!playing && stage === 3) setStage(0); setPlaying(!playing) }} disabled={reduced}>{playing ? v.pause : v.play}<span aria-hidden="true">{playing ? 'Ⅱ' : '↻'}</span></button></div>
+    <div className="lead-workflow-toolbar"><span /><button type="button" onClick={() => { if (!playing && stage === 3) setStage(0); setPlaying(!playing) }} disabled={reduced}>{playing ? v.pause : v.play}<span aria-hidden="true">{playing ? 'Ⅱ' : '↻'}</span></button></div>
     <div className="lead-flow-track" aria-hidden="true">
       {v.stages.map((label, i) => <div key={label} className={`lead-flow-stop ${i === stage ? 'is-current' : i < stage ? 'is-done' : ''}`}>
         <div className="lead-flow-node"><LeadIcon kind={i}/>{i < stage && <b>✓</b>}</div>
@@ -48,9 +48,9 @@ export function LeadWorkflow() {
     <div className="lead-workflow-grid">
       <div className="lead-console">
         <div className={`lead-scene scene-${stage}`} key={`scene-${stage}`} aria-hidden="true">
-          <div className="lead-scene-top"><span>azul<span className="lead-scene-dot">.</span></span><span>{v.example}</span></div>
+          <div className="lead-scene-top"><span>azul<span className="lead-scene-dot">.</span></span></div>
           {stage === 0 && <div className="lead-scene-form"><span className="lead-scene-icon"><LeadIcon kind={0}/></span><strong>{v.form}</strong><div className="lead-form-lines"><i/><i/><i/></div><div className="lead-scene-confirm"><span>✓</span>{v.flowReceived}</div></div>}
-          {stage === 1 && <div className="lead-scene-call"><div className="lead-call-rings"><i/><i/><span><LeadIcon kind={1}/></span></div><strong>{v.flowCalling}</strong><div className="lead-signal">{Array.from({length:25}, (_,i) => <i key={i} style={{'--height':`${10 + (i * 17 % 38)}px`,'--delay':`${i * 0.045}s`}} />)}</div><span className="lead-scene-pill">{v.bilingual}</span></div>}
+          {stage === 1 && <div className="lead-scene-call"><div className="lead-call-rings"><i/><i/><span><LeadIcon kind={1}/></span></div><strong>{v.flowCalling}</strong><div className="lead-signal">{Array.from({length:25}, (_,i) => <i key={i} style={{'--height':`${10 + (i * 17 % 38)}px`,'--delay':`${i * 0.045}s`}} />)}</div></div>}
           {stage === 2 && <div className="lead-scene-calendar"><strong>{v.flowCalendar}</strong><div className="lead-calendar-cells">{Array.from({length:14},(_,i)=><span key={i} className={i === 9 ? 'is-booked' : ''}>{i === 9 ? '✓' : String(i + 1).padStart(2,'0')}</span>)}</div><div className="lead-scene-confirm"><span>✓</span>{v.confirmation}</div></div>}
           {stage === 3 && <div className="lead-scene-message"><span className="lead-scene-icon"><LeadIcon kind={3}/></span><strong>{v.flowSummary}</strong><div className="lead-summary-lines"><span><i>✓</i>{v.flowQualified}</span><span><i>✓</i>{v.stages[2]}</span><span><i>✓</i>{v.flowConfirmed}</span></div><span className="lead-scene-pill">{v.human}</span></div>}
         </div>
@@ -58,7 +58,7 @@ export function LeadWorkflow() {
           <span className="lead-console-label">{v.stages[stage]}</span>
           <h3>{v.headlines[stage]}</h3>
           <p>{v.details[stage]}</p>
-          <div className="lead-console-tags"><span>{v.bilingual}</span><span>{v.human}</span></div>
+          <div className="lead-console-tags"><span>{v.human}</span></div>
         </div>
       </div>
       <ol className="lead-workflow-steps" aria-label={d.how}>
