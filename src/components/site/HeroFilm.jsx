@@ -28,8 +28,8 @@ export function HeroFilm() {
 
   return <>
     <div className="hero-bg" aria-hidden="true">
-      <img className="hero-image hero-wave-poster" src="/images/hero-waves.jpg" alt="" fetchPriority="high" />
-      {!failed && <video ref={video} className={`hero-film ${ready ? 'is-ready' : ''}`} src={!reduced || requested ? '/videos/hero-waves.mp4' : undefined} poster="/images/hero-waves.jpg" muted loop playsInline preload={reduced ? 'none' : 'metadata'} onPlaying={() => { setReady(true); setPlaying(true) }} onPause={() => setPlaying(false)} onError={() => { setFailed(true); setPlaying(false) }} />}
+      <img className="hero-image hero-wave-poster" src="/images/azul-ocean-hero.jpg" alt="" fetchPriority="high" />
+      {!failed && <video ref={video} className={`hero-film ${ready ? 'is-ready' : ''}`} src={!reduced || requested ? '/videos/hero-waves.mp4' : undefined} poster="/images/azul-ocean-hero.jpg" muted autoPlay={!reduced && requested} loop playsInline preload={reduced ? 'none' : 'metadata'} onPlaying={() => { setReady(true); setPlaying(true) }} onPause={() => setPlaying(false)} onError={() => { setFailed(true); setPlaying(false) }} />}
       <div className="hero-shade" />
       <div className="hero-darken" />
       <div className="hero-curtain" />

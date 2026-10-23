@@ -1,18 +1,12 @@
-import { useRef, useState } from 'react'
+import { Hero } from '../components/site/Hero'
+import { LogoIntro } from '../components/site/LogoIntro'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
-import { gsap, groupLines, useGSAP } from '../lib/gsap'
-import { useReducedMotion } from '../hooks/useMediaQuery'
-import { useReveal } from '../hooks/useReveal'
-import { CountUp } from '../components/motion/CountUp'
-import { DotGrid } from '../components/motion/DotGrid'
 import { SectionEyebrow } from '../components/motion/Eyebrow'
 import { ImageReveal } from '../components/motion/ImageReveal'
 import { MagneticButton } from '../components/motion/MagneticButton'
-import { Marquee } from '../components/motion/Marquee'
 import { SplitText } from '../components/motion/SplitText'
-import { Wordmark } from '../components/motion/Wordmark'
-import { HeroFilm } from '../components/site/HeroFilm'
 import { WebsiteTransformation } from '../components/site/WebsiteTransformation'
 import { AgentOrbit } from '../components/agents/AgentOrbit'
 import { HoursComparison } from '../components/agents/HoursComparison'
@@ -20,59 +14,9 @@ import { JobPostingButton } from '../components/agents/JobPostingDrawer'
 import { ServiceList } from '../components/site/ServiceList'
 import { Arrow, DownloadModal } from '../components/site/UI'
 import { content } from '../data/content'
-import { bookingUrl } from '../components/site/Layout'
 
 import { serviceSlugs } from '../data/services'
 import { ServicePrice } from '../components/site/ServicePrice'
-// The intro plays once per page load, not on every return to Home.
-let introPlayed = false
-
-function Hero() {
-  const { c } = useLanguage()
-  const ref = useRef(null)
-  const reduced = useReducedMotion()
-
-  // Intro: black screen, letters rise one by one, headline lines slide up,
-  // then the photo, nav, floating controls and dot grid fade in.
-  useGSAP(() => {
-    if (reduced || introPlayed) return
-    const q = gsap.utils.selector(ref)
-    const chrome = document.querySelectorAll('[data-intro-fade]')
-    gsap.set(q('.hero-curtain'), { autoAlpha: 1 })
-    gsap.set([...chrome, ...q('.dot-grid')], { autoAlpha: 0 })
-    const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, onComplete: () => { introPlayed = true } })
-    tl.from(q('.wordmark-letter'), { yPercent: 118, duration: 1.2, stagger: 0.12 }, 0.2)
-    groupLines(q('.hero-copy .split-word')).forEach((line, i) => tl.from(line, { yPercent: 115, duration: 1.1 }, 0.8 + i * 0.12))
-    tl.from(q('.hero-copy p, .hero-meta > *, .hero-bottom > *'), { autoAlpha: 0, y: 14, duration: 0.9, stagger: 0.05 }, 1.15)
-      .to(q('.hero-curtain'), { autoAlpha: 0, duration: 1.3, ease: 'power2.inOut' }, 1.05)
-      .to(chrome, { autoAlpha: 1, duration: 0.8, ease: 'power2.out' }, 1.7)
-      .to(q('.dot-grid'), { autoAlpha: 1, duration: 1.2, ease: 'power2.out' }, 1.8)
-    // Failsafe: never leave the hero hidden, even if frames are throttled.
-    const timer = setTimeout(() => tl.progress(1), 5000)
-    return () => clearTimeout(timer)
-  }, { scope: ref, dependencies: [reduced] })
-
-  // Scroll: the wordmark scales down and rises, the photo darkens, the copy fades.
-  useGSAP(() => {
-    if (reduced) return
-    const q = gsap.utils.selector(ref)
-    gsap.timeline({ scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom top', scrub: true } })
-      .to(q('.wordmark-wrap'), { yPercent: -5, transformOrigin: '50% 100%', ease: 'none' }, 0)
-      .to(q('.hero-darken'), { opacity: 0.45, ease: 'none' }, 0)
-      .to(q('.hero-meta, .hero-copy, .hero-bottom'), { opacity: 0.25, ease: 'none', duration: 1 }, 0)
-  }, { scope: ref, dependencies: [reduced] })
-
-  return (
-    <section className="hero" ref={ref}>
-      <HeroFilm />
-      <DotGrid avoid=".hero-meta > *, .hero-copy h1, .hero-copy p, .hero-bottom > *, [data-dot-avoid]" rows={7} />
-      <div className="hero-meta"><span>{c.hero.location}</span><span>{c.hero.index}</span></div>
-      <div className="hero-copy"><SplitText as="h1" reveal={false}>{c.hero.title}</SplitText><p>{c.hero.sub}</p></div>
-      <Wordmark text={c.brand} />
-      <div className="hero-bottom"><a href="#who">{c.hero.scroll}<span aria-hidden="true">↓</span></a><span>{c.hero.note}</span></div>
-    </section>
-  )
-}
 
 function Purpose() {
   const { c } = useLanguage()
@@ -93,46 +37,16 @@ function Purpose() {
   )
 }
 
-function Stats() {
-  const { c } = useLanguage()
-  const ref = useRef(null)
-  // A thin line draws under each number as the row comes into view.
-  useReveal(ref, el => gsap.timeline({ paused: true }).from(el.querySelectorAll('.stat-line'), { scaleX: 0, transformOrigin: '0% 50%', duration: 1.4, ease: 'expo.inOut', stagger: 0.12 }))
-  return (
-    <div className="proof">
-      <SectionEyebrow>{c.proof.eyebrow}</SectionEyebrow>
-      <div className="stats" ref={ref}>
-        {c.proof.values.map((stat, i) => (
-          <div className="stat" key={i}>
-            <strong>{stat.text ? <CountUp text={stat.text} /> : <CountUp to={stat.to} decimals={stat.decimals} suffix={stat.suffix} />}</strong>
-            <span className="stat-line" aria-hidden="true" />
-            <p>{c.proof.labels[i]}</p>
-          </div>
-        ))}
-      </div>
-      <p className="sample-note">{c.proof.sample}</p>
-    </div>
-  )
-}
-
 function Clients() {
   const { c } = useLanguage()
-  const logos = c.clients.logos.map((logo, i) => ({ logo, name: c.clients.names[i] }))
   return (
     <section className="section clients" id="clients">
-      <SectionEyebrow>{c.clients.eyebrow}</SectionEyebrow>
+      <SectionEyebrow>{c.work.clients}</SectionEyebrow>
       <div className="section-intro">
         <SplitText>{c.clients.title}</SplitText>
-        <div><p>{c.clients.body}</p><MagneticButton as="a" href={bookingUrl} className="text-link" target="_blank" rel="noreferrer">{c.clients.cta}<Arrow /></MagneticButton></div>
+        <div><p>{c.clients.body}</p><Link className="text-link" to="/work">{c.purpose.cta}<Arrow /></Link></div>
       </div>
-      <Marquee className="client-logos" items={logos} renderItem={({ logo, name }, i, hidden) => (
-        <figure className={`client-logo client-logo-${i + 1}`} tabIndex={hidden ? -1 : 0} aria-hidden={hidden || undefined}>
-          <strong>{logo}</strong>
-          <figcaption>{name}</figcaption>
-        </figure>
-      )} />
-      <p className="sample-note">{c.clients.sample}</p>
-      <Stats />
+      <div className="home-client-list">{['aspire', 'hello', 'caley', 'sanos'].map((key, i) => <Link to="/work" key={key}><span>0{i + 1}</span><strong>{c.work.projects[key].title}</strong><Arrow /></Link>)}</div>
     </section>
   )
 }
@@ -174,10 +88,12 @@ function Dashboard() {
 }
 
 export default function Home() {
+  const [introReady, setIntroReady] = useState(false)
   const { c, lang } = useLanguage()
   const industries = content[lang].industries
-  return <>
-    <Hero />
+  return <div className="home-studio">
+    <LogoIntro onComplete={() => setIntroReady(true)} />
+    <Hero introReady={introReady} />
     <WebsiteTransformation />
     <section className="section who" id="who">
       <SectionEyebrow>{c.who.eyebrow}</SectionEyebrow>
@@ -207,5 +123,5 @@ export default function Home() {
     <Clients />
     <section className="section audit" id="audit"><div><SectionEyebrow>{c.audit.eyebrow}</SectionEyebrow><SplitText>{c.audit.title}</SplitText><p>{c.audit.body}</p><ul>{c.audit.benefits.map(benefit => <li key={benefit}><span aria-hidden="true">+</span>{benefit}</li>)}</ul><Link className="button" to="/free-report">{c.audit.cta}<Arrow /></Link><small>{c.audit.foot}</small></div><Dashboard /></section>
     <Guides />
-  </>
+  </div>
 }

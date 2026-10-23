@@ -5,6 +5,9 @@ import { LanguageProvider } from './contexts/LanguageContext.jsx'
 import './index.css'
 import './agents.css'
 import './theme.css'
+import './brand.css'
+import './hero.css'
+import './home.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -14,3 +17,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>,
 )
 
+
+import './site.css'
+import './service-visuals.css'
