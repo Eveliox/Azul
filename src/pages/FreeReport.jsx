@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 import { DotGrid } from '../components/motion/DotGrid'
-import { SectionEyebrow } from '../components/motion/Eyebrow'
 import { SplitText } from '../components/motion/SplitText'
 import { useLenis } from '../components/motion/SmoothScroll'
 import { bookingUrl } from '../components/site/Layout'
@@ -98,7 +97,6 @@ function Preview({ preview, onUnlock, busy, error }) {
       <div className="fr-preview-head">
         <ScoreRing score={preview.score} label={t.scoreLabel(preview.score)} />
         <div>
-          <SectionEyebrow>{t.preview.eyebrow}</SectionEyebrow>
           <h2>{preview.business}</h2>
           <p>{preview.total ? t.preview.found(preview.total) : t.preview.none}</p>
         </div>
@@ -133,7 +131,6 @@ function Report({ report, onRestart }) {
       <div className="fr-preview-head">
         <ScoreRing score={report.score} label={t.scoreLabel(report.score)} />
         <div>
-          <SectionEyebrow>{r.eyebrow}</SectionEyebrow>
           <p className="fr-for">{r.for}</p>
           <h2>{report.business}</h2>
           {report.google?.address && <p>{report.google.address}</p>}
@@ -267,7 +264,6 @@ export default function FreeReport() {
       <DotGrid />
       <div className="fr-intro">
         <div>
-          <SectionEyebrow>{t.eyebrow}</SectionEyebrow>
           <SplitText as="h1">{t.title}</SplitText>
           <p>{t.intro}</p>
           <ul className="fr-checks">{t.checks.map(check => <li key={check}><span aria-hidden="true">+</span>{check}</li>)}</ul>

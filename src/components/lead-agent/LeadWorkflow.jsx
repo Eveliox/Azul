@@ -44,13 +44,15 @@ export function LeadWorkflow() {
     if (!playing || !visible || reduced) return
     let frame
     let previous = performance.now()
+    const meter = ref.current.querySelector('.is-current .workflow-node-meter > i')
     const tick = now => {
-      elapsed.current = Math.min(5200, elapsed.current + Math.min(now - previous, 100))
+      if (!document.hidden) elapsed.current = Math.min(5200, elapsed.current + Math.min(now - previous, 100))
       previous = now
-      setProgress(elapsed.current / 5200)
+      if (document.hidden) { previous = now; frame = requestAnimationFrame(tick); return }
+      if (meter) meter.style.transform = `scaleX(${elapsed.current / 5200})`
       if (elapsed.current >= 5200) {
         elapsed.current = 0
-        if (stage === 3) setPlaying(false)
+        if (stage === 3) { setProgress(1); setPlaying(false) }
         else { setStage(value => value + 1); setProgress(0) }
         return
       }
@@ -60,6 +62,9 @@ export function LeadWorkflow() {
     return () => cancelAnimationFrame(frame)
   }, [playing, stage, visible, reduced])
   const selectStage = index => {
+    // React does not rewrite an unchanged inline style after an imperative frame.
+    const meter = ref.current.querySelector('.is-current .workflow-node-meter > i')
+    if (meter) meter.style.transform = 'scaleX(0)'
     setPlaying(false)
     elapsed.current = 0
     setProgress(0)

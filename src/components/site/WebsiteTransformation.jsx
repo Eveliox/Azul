@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
-import { SectionEyebrow } from '../motion/Eyebrow'
 import './WebsiteTransformation.css'
 
 const projects = {
@@ -139,7 +138,7 @@ export function WebsiteTransformation({ initialMode = 'watch' }) {
   const reset = () => { setPhase('ready'); setPosition(50) }
   const play = () => { autoPlayed.current = true; setPhase(reduced ? 'done' : 'playing') }
   return <section className={`section transformation transformation--${mode}`} aria-labelledby={`${id}-title`}>
-    <div className="transformation-heading"><div><SectionEyebrow>{t.eyebrow}</SectionEyebrow><h2 id={`${id}-title`}>{t.title}</h2></div><p>{t.body}</p></div>
+    <div className="transformation-heading"><div><h2 id={`${id}-title`}>{t.title}</h2></div><p>{t.body}</p></div>
     <div className="transformation-toolbar">
       <div className="transformation-projects" role="group" aria-label={t.project}>{Object.entries(projects).map(([key, item], index) => <button key={key} type="button" aria-pressed={project === key} onClick={() => { setProject(key); reset() }}><span>0{index + 1}</span>{item.name}</button>)}</div>
       <div className="transformation-modes" role="group" aria-label={t.mode}>{['watch', 'compare'].map(value => <button type="button" key={value} aria-pressed={mode === value} onClick={() => { setMode(value); reset() }}>{t[value]}</button>)}</div>

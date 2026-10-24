@@ -5,7 +5,6 @@ import { useLanguage } from '../contexts/LanguageContext'
 import { gsap } from '../lib/gsap'
 import { useReveal } from '../hooks/useReveal'
 import { DotGrid } from '../components/motion/DotGrid'
-import { SectionEyebrow } from '../components/motion/Eyebrow'
 import { MagneticButton } from '../components/motion/MagneticButton'
 import { SplitText } from '../components/motion/SplitText'
 import { ServiceVisual } from '../components/site/ServiceVisual'
@@ -50,7 +49,6 @@ export default function Services() {
   return <>
     <section className="services-hero section">
       <DotGrid />
-      <SectionEyebrow>{p.eyebrow}</SectionEyebrow>
       <SplitText as="h1">{p.title}</SplitText>
       <p>{p.body}</p>
     </section>
@@ -58,7 +56,6 @@ export default function Services() {
       {visibleIndices.map((i, position) => <ServiceFeature key={slugs[i]} index={i} position={position} name={names[i]} description={descriptions[i]} chips={i === NEW_INDEX ? c.agents.row.chips : null} />)}
     </section>
     <section className="work-cta section">
-      <SectionEyebrow>{c.contact}</SectionEyebrow>
       <SplitText>{p.ctaTitle}</SplitText>
       <a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{p.cta}<Arrow /></a>
     </section>

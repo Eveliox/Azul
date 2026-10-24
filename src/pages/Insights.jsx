@@ -1,7 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 import { insightArticles, filterInsights, readingMinutes } from '../data/insights'
-import { SectionEyebrow } from '../components/motion/Eyebrow'
 import { SplitText } from '../components/motion/SplitText'
 import { DotGrid } from '../components/motion/DotGrid'
 import { FilterChips, Arrow } from '../components/site/UI'
@@ -12,7 +11,7 @@ import { bookingUrl } from '../components/site/Layout'
 export function InsightsCTA() {
   const { c } = useLanguage()
   const p = c.insights
-  return <section className="section insights-cta"><SectionEyebrow>{p.ctaEyebrow}</SectionEyebrow><SplitText>{p.ctaTitle}</SplitText><p>{p.ctaBody}</p><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{p.cta}<Arrow /></a></section>
+  return <section className="section insights-cta"><SplitText>{p.ctaTitle}</SplitText><p>{p.ctaBody}</p><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{p.cta}<Arrow /></a></section>
 }
 
 export default function Insights() {
@@ -31,7 +30,6 @@ export default function Insights() {
   return <div className="insights-page">
     <section className="section insights-hero">
       <DotGrid />
-      <SectionEyebrow>{p.eyebrow}</SectionEyebrow>
       <SplitText as="h1">{p.title}</SplitText>
       <div className="insights-hero-bottom"><p>{p.intro}</p><a className="text-link" href="#reading-room">{p.library}<span aria-hidden="true">↓</span></a></div>
     </section>
@@ -42,7 +40,6 @@ export default function Insights() {
       </Link>
     </section>
     <section className="section insights-library" id="reading-room" aria-labelledby="library-title">
-      <SectionEyebrow>{p.library}</SectionEyebrow>
       <div className="insights-library-heading"><SplitText id="library-title">{p.libraryTitle}</SplitText><label className="insights-search"><span className="sr-only">{p.search}</span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg><input type="search" value={query} onChange={e => update('q', e.target.value)} placeholder={p.searchPlaceholder}/></label></div>
       <div className="insights-filters"><FilterChips options={p.filters} value={category} onChange={value => update('topic', value)} label={p.filterLabel}/><span role="status" aria-live="polite">{articles.length} {p.results}</span></div>
       <div className="insights-grid">{articles.map(article => <InsightCard key={article.slug} article={article} />)}</div>

@@ -4,7 +4,6 @@ import { useLanguage } from '../contexts/LanguageContext'
 import { insightArticles, readingMinutes } from '../data/insights'
 import { InsightArt } from '../components/insights/InsightArt'
 import { InsightCard } from '../components/insights/InsightCard'
-import { SectionEyebrow } from '../components/motion/Eyebrow'
 import { SplitText } from '../components/motion/SplitText'
 import { Arrow } from '../components/site/UI'
 import { InsightsCTA } from './Insights'
@@ -56,7 +55,6 @@ export default function InsightArticle({ article }) {
     <div className="reading-progress" aria-hidden="true"><span ref={progress}/></div>
     <header className="section insight-article-header">
       <Link className="text-link insight-back" to="/insights">← {p.back}</Link>
-      <SectionEyebrow>{p.filters.find(f => f.value === article.category).label}</SectionEyebrow>
       <SplitText as="h1">{text.title}</SplitText>
       <p className="insight-dek">{text.dek}</p>
       <div className="insight-byline"><span>{p.byline}</span><span>{readingMinutes(text)} {p.minute}</span><span>EN / ES</span></div>
@@ -72,7 +70,7 @@ export default function InsightArticle({ article }) {
         <Link className="text-link insight-service-link" to={`/services/${article.service}`}>{p.service}<Arrow /></Link>
       </article>
     </div>
-    <section className="section insight-related"><SectionEyebrow>{p.related}</SectionEyebrow><SplitText>{p.relatedTitle}</SplitText><div className="insights-grid">{related.map(item => <InsightCard key={item.slug} article={item}/>)}</div></section>
+    <section className="section insight-related"><SplitText>{p.relatedTitle}</SplitText><div className="insights-grid">{related.map(item => <InsightCard key={item.slug} article={item}/>)}</div></section>
     <InsightsCTA />
   </div>
 }

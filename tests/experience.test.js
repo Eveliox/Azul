@@ -19,7 +19,7 @@ for (const lang of ['en', 'es']) {
     assert.equal(tiers.filter((t) => t.comingSoon).length, 2)
     const website = tiers.find((t) => t.stripeLinkKey === 'websiteSetup')
     assert.equal(website.price, '$50')
-    assert.match(website.priceNote, /499/)
+    assert.match(website.priceNote, /1,500/)
     assert.equal(content[lang].pricing.bundle.crossed, null)
     for (const tier of tiers.filter((t) => t.comingSoon)) assert.ok(!tier.stripeLinkKey)
   })

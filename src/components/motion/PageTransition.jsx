@@ -24,7 +24,7 @@ export function PageTransition({ children }) {
   const cover = useCallback(() => {
     covering.current = true
     gsap.fromTo(panel.current, { xPercent: -100, autoAlpha: 1 }, {
-      xPercent: 0, duration: 0.55, ease: 'power3.inOut', overwrite: true,
+      xPercent: 0, duration: 0.18, ease: 'power3.inOut', overwrite: true,
       onComplete: () => setDisplay(latest.current),
     })
   }, [])
@@ -44,7 +44,8 @@ export function PageTransition({ children }) {
     shown.current = display
     const first = !mounted.current
     mounted.current = true
-    const target = display.hash ? document.getElementById(decodeURIComponent(display.hash.slice(1))) : null
+    let target = null
+    try { target = display.hash ? document.getElementById(decodeURIComponent(display.hash.slice(1))) : null } catch { /* Ignore malformed URL fragments. */ }
     const smooth = samePage && !first && !wasCovered
     if (target) {
       if (lenis?.current) lenis.current.scrollTo(target, { offset: -90, immediate: !smooth, force: true })
@@ -56,7 +57,7 @@ export function PageTransition({ children }) {
     if (!wasCovered) return
     ScrollTrigger.refresh()
     gsap.to(panel.current, {
-      xPercent: 100, duration: 0.6, delay: 0.05, ease: 'power3.inOut', overwrite: true,
+      xPercent: 100, duration: 0.22, delay: 0, ease: 'power3.inOut', overwrite: true,
       onComplete: () => {
         gsap.set(panel.current, { autoAlpha: 0, xPercent: -100 })
         covering.current = false

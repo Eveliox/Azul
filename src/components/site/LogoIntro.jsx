@@ -23,14 +23,10 @@ export function LogoIntro({ onComplete }) {
     let cancelled = false
     let exitTimer
     let minimumTimer
-    const controller = new AbortController()
+
     const image = new Image()
     image.src = '/Azul%20Gradient%20Ribbon%20Logo.png'
-    const minimum = new Promise(resolve => { minimumTimer = setTimeout(resolve, 850) })
-    const loaded = new Promise(resolve => {
-      if (document.readyState === 'complete') resolve()
-      else window.addEventListener('load', resolve, { once: true, signal: controller.signal })
-    })
+    const minimum = new Promise(resolve => { minimumTimer = setTimeout(resolve, 250) })
     function finish() {
       if (cancelled || exitTimer) return
       shown = true
@@ -38,11 +34,11 @@ export function LogoIntro({ onComplete }) {
       complete.current()
       exitTimer = setTimeout(() => setVisible(false), 400)
     }
-    const fallback = setTimeout(finish, 2500)
-    Promise.all([minimum, loaded, image.decode().catch(() => {})]).then(finish)
+    const fallback = setTimeout(finish, 650)
+    Promise.all([minimum, image.decode().catch(() => {})]).then(finish)
     return () => {
       cancelled = true
-      controller.abort()
+
       clearTimeout(minimumTimer)
       clearTimeout(fallback)
       clearTimeout(exitTimer)

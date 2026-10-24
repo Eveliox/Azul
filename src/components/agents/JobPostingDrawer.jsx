@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useEffect, useId, useRef, useSt
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
 import { SubmissionUnavailableError, submitJobPosting } from '../../lib/submitJobPosting'
-import { SectionEyebrow } from '../motion/Eyebrow'
 import { MagneticButton } from '../motion/MagneticButton'
 import { useScrollLock } from '../motion/SmoothScroll'
 import { Arrow } from '../site/UI'
@@ -169,7 +168,6 @@ export function JobPostingDrawer({ onClose }) {
     >
       <div className="drawer-inner">
         <button type="button" className="modal-close" onClick={requestClose} aria-label={t.close}>×</button>
-        <SectionEyebrow>{t.eyebrow}</SectionEyebrow>
         <h2 id={titleId}>{t.title}</h2>
         {phase === 'form' && <p className="drawer-intro">{t.body}</p>}
 

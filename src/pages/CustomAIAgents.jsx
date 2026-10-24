@@ -8,7 +8,6 @@ import { JobPostingButton } from '../components/agents/JobPostingDrawer'
 import { StepTimeline } from '../components/agents/StepTimeline'
 import { CountUp } from '../components/motion/CountUp'
 import { DotGrid } from '../components/motion/DotGrid'
-import { SectionEyebrow } from '../components/motion/Eyebrow'
 import { MagneticButton } from '../components/motion/MagneticButton'
 import { SplitText } from '../components/motion/SplitText'
 import { Arrow, FAQAccordion } from '../components/site/UI'
@@ -24,7 +23,6 @@ function Hero() {
   return (
     <section className="agent-hero section">
       <DotGrid />
-      <SectionEyebrow>{d.eyebrow}</SectionEyebrow>
       <div className="agent-hero-grid">
         <div>
           <SplitText as="h1">{d.title}</SplitText>
@@ -51,7 +49,6 @@ function WhatItIs() {
   useStagger(ref, '.agent-needs li', { y: 14, stagger: 0.04 })
   return (
     <section className="section agent-what">
-      <SectionEyebrow>{d.whatEyebrow}</SectionEyebrow>
       <div className="section-intro"><SplitText>{d.whatTitle}</SplitText><p>{d.whatBody}</p></div>
       <div className="agent-needs-wrap" ref={ref}>
         <h3>{d.needsLabel}</h3>
@@ -68,7 +65,6 @@ function Stats() {
   useReveal(ref, el => gsap.timeline({ paused: true }).from(el.querySelectorAll('.stat-line'), { scaleX: 0, transformOrigin: '0% 50%', duration: 1.4, ease: 'expo.inOut', stagger: 0.12 }))
   return (
     <section className="section agent-stats">
-      <SectionEyebrow>{d.statsEyebrow}</SectionEyebrow>
       <div className="stats stats-3" ref={ref}>
         {d.stats.map((stat, i) => (
           <div className="stat" key={i}>
@@ -90,7 +86,6 @@ function Problems() {
   useStagger(ref, '.agent-problem')
   return (
     <section className="section agent-problems">
-      <SectionEyebrow>{d.problemEyebrow}</SectionEyebrow>
       <SplitText>{d.problemTitle}</SplitText>
       <div className="agent-problem-grid" ref={ref}>
         {d.problems.map((problem, i) => (
@@ -112,7 +107,6 @@ function Examples() {
   useStagger(ref, '.agent-card', { y: 48, stagger: 0.09 })
   return (
     <section className="section agent-examples" id="examples">
-      <SectionEyebrow>{d.examplesEyebrow}</SectionEyebrow>
       <div className="section-intro"><SplitText>{d.examplesTitle}</SplitText><p>{d.examplesHint}</p></div>
       <div className="agent-grid" ref={ref}>
         {d.agents.map((agent, i) => <AgentCard key={i} index={i} agent={agent} tools={d.tools[i]} />)}
@@ -129,7 +123,6 @@ function Comparison() {
   const [, employee, agent] = d.compareColumns
   return (
     <section className="section agent-compare">
-      <SectionEyebrow>{d.compareEyebrow}</SectionEyebrow>
       <SplitText>{d.compareTitle}</SplitText>
       <div className="compare-wrap" ref={ref}>
         <table className="compare-table">
@@ -153,7 +146,6 @@ function Pricing() {
   useStagger(ref, '.agent-tier')
   return (
     <section className="section agent-pricing" id="pricing">
-      <SectionEyebrow>{d.pricingEyebrow}</SectionEyebrow>
       <SplitText>{d.pricingTitle}</SplitText>
       <div className="agent-tier-grid" ref={ref}>
         {d.tiers.map((tier, i) => {
@@ -185,7 +177,6 @@ export default function CustomAIAgents() {
     <Stats />
     <Problems />
     <section className="section agent-how">
-      <SectionEyebrow>{d.howEyebrow}</SectionEyebrow>
       <SplitText>{d.howTitle}</SplitText>
       <StepTimeline steps={d.steps} />
     </section>
@@ -193,11 +184,9 @@ export default function CustomAIAgents() {
     <Comparison />
     <Pricing />
     <section className="section agent-faq">
-      <SectionEyebrow>{d.faqEyebrow}</SectionEyebrow>
       <div className="agent-faq-grid"><SplitText>{d.faqTitle}</SplitText><FAQAccordion items={d.faq} /></div>
     </section>
     <section className="section agent-cta">
-      <SectionEyebrow>{d.ctaEyebrow}</SectionEyebrow>
       <SplitText>{d.ctaTitle}</SplitText>
       <p>{d.ctaBody}</p>
       <JobPostingButton />
