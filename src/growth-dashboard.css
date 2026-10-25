@@ -1,0 +1,41 @@
+/* Screen-only styling: retain the photographed phone's dimensions and registration. */
+.growth-hero .growth-screen.revenue-dashboard {
+  grid-template-rows: 36px 50px 116px minmax(0,1fr) 84px 98px 51px 6px;
+  gap: 3px;
+  padding: 0 16px 18px;
+  background: linear-gradient(180deg,#fff 0%,#fff 52%,#f6f8fc 100%);
+  font-family: 'Inter',Arial,sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.revenue-dashboard .growth-status {font-size:11px;padding-inline:8px}
+.revenue-dashboard .growth-system-icons {width:42px;height:14px}
+.revenue-dashboard .growth-app-header {padding:4px 0 10px;border-bottom:1px solid #e9edf4}
+.revenue-dashboard .growth-brand {gap:8px;font-size:17px;font-weight:600;letter-spacing:-.055em}
+.growth-hero .revenue-dashboard .growth-brand img {width:33px;height:29px}
+.revenue-dashboard .growth-overview {gap:3px;padding:6px 8px;border:1px solid #e6ebf3;border-radius:8px;color:#536077;background:#fff;font-size:10px;font-weight:500}
+.revenue-dashboard .growth-overview svg {width:12px;height:12px;color:inherit}
+.revenue-dashboard .growth-metric {gap:9px;padding-top:5px}
+.revenue-dashboard .growth-metric>span {font-size:12px;font-weight:500;color:#647087;letter-spacing:-.015em}
+.growth-hero .revenue-dashboard .growth-metric strong {font-size:54px;font-weight:600;letter-spacing:-.065em;color:#151b2b;font-variant-numeric:tabular-nums}
+.revenue-dashboard .growth-metric small {border-radius:6px;font-size:10px;font-weight:500;letter-spacing:-.02em;padding:4px 7px;color:#187044;background:#eaf7ef}
+.revenue-dashboard .growth-chart {margin:7px 0 9px}
+.revenue-dashboard .growth-months {font-size:10px;font-weight:500;color:#66738a;padding-top:7px}
+.revenue-dashboard .growth-stats {gap:6px}
+.revenue-dashboard .growth-stats>div {padding:21px 8px 9px;border-radius:12px;background:#fff;border:1px solid #e4eaf4;box-shadow:0 2px 3px #172b4d03}
+.revenue-dashboard .growth-stats svg {width:12px;height:12px;top:8px;right:8px;color:#3b5bdb}
+.revenue-dashboard .growth-stats strong {font-size:28px;line-height:1.1;font-weight:600;letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.revenue-dashboard .growth-stats div>span {font-size:12px;line-height:1.3;letter-spacing:-.045em;font-weight:500;color:#5b6478;white-space:nowrap;margin-top:5px}
+.revenue-dashboard .growth-notification-slot {padding:9px 0 6px}
+.revenue-dashboard .growth-notification {grid-template-columns:29px minmax(0,1fr) 64px;gap:8px;padding:10px 9px;border-radius:13px;border:1px solid #e6ebf3;box-shadow:0 5px 12px #23375b05;background:#fff}
+.revenue-dashboard .growth-check {position:relative;width:29px;height:32px;border-radius:10px;background:#edf1ff;color:#3b5bdb;font-weight:600;font-size:14px}
+.revenue-dashboard .growth-check i {position:absolute;right:-3px;bottom:-3px;display:grid;place-items:center;width:12px;height:12px;border:2px solid #fff;border-radius:50%;background:#248654;color:#fff;font-size:7px;font-style:normal}
+.revenue-dashboard .growth-lead-label {display:block;margin-bottom:2px;font-size:9px;font-weight:500;line-height:1.2;color:#6a768c}
+.revenue-dashboard .growth-notification strong {font-size:15px;line-height:1.25;font-weight:600;letter-spacing:-.04em;color:#192338}
+.revenue-dashboard .growth-notification p {margin:4px 0 0;font-size:9px;line-height:1.3;letter-spacing:-.025em;color:#5b6478}
+.revenue-dashboard .growth-notification>small {padding:0;background:none;font-size:9px;line-height:1.5;color:#5b6478;text-align:right;white-space:nowrap}
+.revenue-dashboard .growth-notification>small>span {display:block;color:#187044;font-weight:600;margin-bottom:3px}
+.revenue-dashboard .growth-tabs {align-self:stretch;width:100%;max-width:100%;padding:5px 0 0;border:0;border-top:1px solid #e5eaf3;background:none;border-radius:0;gap:3px}
+.revenue-dashboard .growth-tabs>span {display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 2px;color:#657087;font-size:9px;font-weight:500;border-radius:10px;line-height:1.15}
+.revenue-dashboard .growth-tabs>span.active {background:#17223b;color:#fff;border-radius:10px}
+.revenue-dashboard .growth-tabs svg {height:16px;width:16px}
+.revenue-dashboard .growth-home-indicator {width:82px;height:3px;background:#192338;margin:3px auto 0}

@@ -1,0 +1,55 @@
+
+/* Repaired cutout registered to the existing phone's four screen corners. */
+.growth-hand-photo,.growth-hand-foreground{width:1122px;height:1402px;transform-origin:0 0;transform:matrix3d(0.801876338,-0.001086592,0,-0.000012446,0.000415513,0.851909792,0,0.000034626,0,0,1,0,66.524282674,161.887925266,0,1);filter:none}
+.growth-hand-foreground{clip-path:path('M 752 396 C 720 394 705 420 695 449 C 680 476 679 510 686 544 C 692 580 696 643 691 700 C 687 739 660 773 635 810 C 618 836 605 863 593 893 L 1122 1402 L 1122 390 Z')}
+/* Azul's regular headline with tight, deliberate spacing. */
+.growth-hero,.growth-hero .growth-screen.revenue-dashboard{font-family:'Inter',Arial,sans-serif}
+.growth-hero .studio-copy h1{font-family:'Inter',Arial,sans-serif;font-size:clamp(62px,9.2vw,176px);font-weight:400;letter-spacing:-.065em;line-height:1.08}
+.growth-hero .studio-copy h1>span{font-weight:400}
+.growth-hero .studio-body{letter-spacing:-.02em;font-weight:400}
+.growth-hero .studio-actions>a{font-weight:600;letter-spacing:-.03em}
+.growth-hero[data-language=es] .studio-copy h1{font-size:clamp(54px,7.8vw,150px)}
+@media(max-width:600px){.growth-hero .studio-copy h1,.growth-hero[data-language=es] .studio-copy h1{font-size:clamp(42px,11vw,66px);letter-spacing:-.055em}}
+
+
+/* Payy-style silk abstract: a long-exposure blue blur photograph as the backdrop. */
+.growth-hero{background:#050815;color:#fff}
+.growth-hero::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:url('/images/hero-blue-blur-background.webp') center / cover no-repeat,#050815}
+/* Dark vignette + top/bottom fades keep the headline and CTAs legible on top of the photo. */
+.growth-hero::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(ellipse 70vw 60% at 50% 50%,transparent 30%,#050815a6 85%),
+  linear-gradient(180deg,#050815cc 0%,#05081533 25%,#05081500 50%,#05081566 85%,#050815e6 100%),
+  linear-gradient(90deg,#05081599 0%,#05081500 15%,#05081500 85%,#05081599 100%)}
+.growth-hero .studio-copy::before{content:none}
+.growth-hero .studio-copy h1{color:#fff;font-weight:500;letter-spacing:-.075em;text-shadow:0 2px 60px #4a6bff40}
+.growth-hero .studio-copy h1>span{color:#b8c6ff}
+.growth-hero .studio-body{color:rgba(255,255,255,.78)}
+.growth-hero .hero-film-grain{opacity:.28;mix-blend-mode:overlay}
+.growth-hero .growth-hand-scene>.growth-glow{width:1000px;height:1200px;background:radial-gradient(ellipse,#a5b8ffe6 0%,#7a94ffb3 25%,#4a6bff80 50%,#3b5bdb33 72%,transparent 85%);opacity:1}
+.growth-hero .growth-hand-scene{will-change:transform;contain:layout paint}
+.growth-hero .growth-hand-photo,.growth-hero .growth-hand-foreground{transform:translateZ(0)}
+/* Reflected blue light on the hand only, leaving the dashboard untouched. */
+.growth-hand-scene::after{content:'';position:absolute;inset:0 auto auto 0;width:1122px;height:1402px;pointer-events:none;transform-origin:0 0;transform:matrix3d(0.801876338,-0.001086592,0,-0.000012446,0.000415513,0.851909792,0,0.000034626,0,0,1,0,66.524282674,161.887925266,0,1);background:radial-gradient(ellipse at 50% 45%,#9fb3ffd9 0%,#7a94ff80 40%,transparent 75%);mask:url('/images/phone-hand-repaired.webp') center / contain no-repeat;-webkit-mask:url('/images/phone-hand-repaired.webp') center / contain no-repeat;clip-path:path('M 752 396 C 720 394 705 420 695 449 C 680 476 679 510 686 544 C 692 580 696 643 691 700 C 687 739 660 773 635 810 C 618 836 605 863 593 893 L 1122 1402 L 1122 390 Z');mix-blend-mode:screen;opacity:.55}
+.growth-hero>.ribbon-motion{background:transparent;border:1px solid #ffffff4d;color:#fff}
+.growth-hero>.ribbon-motion:hover{background:#ffffff0d;border-color:#ffffff80}
+.growth-hero .studio-primary{background:#4a6bff;color:#fff;border:1px solid #4a6bff;box-shadow:0 -8px 40px #4a6bff40,inset 0 1px 0 #ffffff30}
+.growth-hero .studio-primary:hover{background:#5c7cff;border-color:#5c7cff}
+.growth-hero .studio-secondary{background:#0a0f22;color:#fff;border:1px solid #ffffff1a;box-shadow:none}
+.growth-hero .studio-secondary:hover{background:#141b36;border-color:#ffffff40}
+.growth-hero :is(a,button):focus-visible{outline-color:#9db0ff}
+.growth-hero .studio-primary:focus-visible{outline-color:#b8c6ff}
+
+/* Transparent navigation only while the dark hero is in view. Banner untouched. */
+body.home-hero-visible:has(.growth-hero) .site-header{background:transparent;color:#ffffffd9;border-bottom:0}
+body.home-hero-visible:has(.growth-hero) .site-header::before{background:#0e1630e6;border:0}
+body.home-hero-visible:has(.growth-hero) .site-header .brand-logo{filter:brightness(0) invert(1);opacity:.85}
+body.home-hero-visible:has(.growth-hero) .site-header .desktop-nav>a{color:#ffffffd9}
+body.home-hero-visible:has(.growth-hero) .site-header .desktop-nav>a:is(.active,:hover){color:#fff}
+body.home-hero-visible:has(.growth-hero) .site-header .desktop-nav>a.active::after{background:#fff}
+body.home-hero-visible:has(.growth-hero) .site-header .languages button{color:#ffffffd9}
+body.home-hero-visible:has(.growth-hero) .site-header .languages button[aria-pressed=true]{color:#fff}
+body.home-hero-visible:has(.growth-hero) .site-header .languages button:first-child{border-color:#ffffff26}
+body.home-hero-visible:has(.growth-hero) .site-header .nav-right>a{background:#fff;color:#11182b}
+body.home-hero-visible:has(.growth-hero) .site-header .nav-new{background:#9db0ff;color:#11182b}
+body.home-hero-visible:has(.growth-hero) .site-header :is(a,button):focus-visible{outline-color:#9db0ff}

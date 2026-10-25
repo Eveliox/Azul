@@ -17,6 +17,30 @@ const slugs = [...serviceSlugs, 'custom-ai-agents', 'ai-lead-agent']
 const visibleIndices = slugs.map((_, index) => index).filter(index => !['social-media-ai', 'ai-facebook-ads'].includes(slugs[index]))
 const NEW_INDEX = 6
 
+const LEAD_STEP_ICONS = [
+  <svg key="call" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M7 3 4 4c-3 6 10 19 16 16l1-3-5-3-2 2c-3-1-5-3-6-6l2-2-3-5Z"/></svg>,
+  <svg key="chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/></svg>,
+  <svg key="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-13 5 3 3 5-5"/></svg>,
+  <svg key="hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>,
+]
+
+function LeadAgentPreview({ lang }) {
+  const copy = leadAgentCopy[lang]
+  return <div className="lead-service-preview">
+    <div className="lead-preview-head">
+      <span className="lead-badge">{copy.pilot}</span>
+      <span className="lead-preview-signal" aria-hidden="true"><i/><i/><i/></span>
+    </div>
+    <h3 className="lead-preview-title">{copy.title}</h3>
+    <ol className="lead-preview-steps">
+      {copy.steps.map((step, i) => <li key={step.title}>
+        <span className="lead-step-icon" aria-hidden="true">{LEAD_STEP_ICONS[i]}</span>
+        <span className="lead-step-copy"><strong>{step.title}</strong><span>{step.body}</span></span>
+      </li>)}
+    </ol>
+  </div>
+}
+
 // One service per row, copy and preview swapping sides every other row.
 // The copy rises in; the preview wipes up like ImageReveal.
 function ServiceFeature({ index, position, name, description, chips }) {
@@ -36,7 +60,7 @@ function ServiceFeature({ index, position, name, description, chips }) {
         <ServicePrice slug={slugs[index]} />
         <MagneticButton as={Link} className="text-link" to={`/services/${slugs[index]}`}>{p.learn}<Arrow /></MagneticButton>
       </div>
-      <div className="service-feature-visual" aria-hidden="true">{slugs[index] === 'ai-lead-agent' ? <div className="lead-service-preview"><span className="lead-badge">{leadAgentCopy[lang].pilot}</span><h3>{leadAgentCopy[lang].title}</h3><ol>{leadAgentCopy[lang].steps.map(step => <li key={step.title}>{step.title}</li>)}</ol></div> : <ServiceVisual index={index} position={position} total={visibleIndices.length} />}</div>
+      <div className="service-feature-visual" aria-hidden="true">{slugs[index] === 'ai-lead-agent' ? <LeadAgentPreview lang={lang} /> : <ServiceVisual index={index} position={position} total={visibleIndices.length} />}</div>
     </article>
   )
 }

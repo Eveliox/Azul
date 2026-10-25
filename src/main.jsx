@@ -7,6 +7,9 @@ import './agents.css'
 import './theme.css'
 import './brand.css'
 import './hero.css'
+import './hero-refinements.css'
+import './hero-reference.css'
+import './growth-dashboard.css'
 import './home.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
