@@ -39,7 +39,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 |---|---|---|---|---|
 | 1 | Review Booster | $79/mo | Free review audit | Live |
 | 2 | Social Media AI | $149/mo | 5 free posts | Live |
-| 3 | Website Build | $199/mo + $499 setup | Free mockup | Live |
+| 3 | Website Build | $120/mo + $2,500 setup | Free mockup | Live |
 | 4 | Found Everywhere | $599/mo | Free Google + AI visibility audit | Live |
 | 5 | AI Answering Service | $349/mo | 7-day free trial | Beta (first 5 clients only) |
 | 6 | AI Facebook Ads | TBD | Join waitlist | Coming Soon |
@@ -175,7 +175,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 
 ---
 
-### 3.5 Website Build ($199/mo + $499 setup)
+### 3.5 Website Build ($120/mo + $2,500 setup)
 
 **Purpose:** Modern, conversion-focused websites that connect into the rest of the growth system.
 
@@ -190,7 +190,7 @@ Six services offered à la carte or as a discounted bundle. Every service has a 
 2. Client owns the domain; you help register if needed.
 3. Every website includes: hero with CTA, services grid, service area map, contact form, chat widget, mobile-optimized.
 4. Bilingual toggle for clients who serve mixed-language markets.
-5. **Ongoing $199/mo covers:** hosting, SSL, uptime monitoring, up to 2 small edits/month (change phone number, add service, swap photo).
+5. **Ongoing $120/mo covers:** hosting, SSL, uptime monitoring, up to 2 small edits/month (change phone number, add service, swap photo).
 
 **Effort per client:** 30-40 hours upfront (drops to 10-15 with templates), 1-2 hours/month after launch.
 **Why the setup fee matters:** without it you lose money on the upfront build. The recurring covers hosting + maintenance only.

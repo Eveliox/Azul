@@ -127,7 +127,7 @@ export const content = {
           bullets: ['24/7 bilingual AI call answering', 'Customer capture & call summaries', 'After-hours coverage'],
         },
         {
-          price: '$50/mo + $1,500 one-time',
+          price: '$120/mo + $2,500 one-time',
           title: 'Website Build',
           badge: 'Free website mockup',
           description:
@@ -202,8 +202,8 @@ export const content = {
         },
         {
           title: 'Website Build',
-          price: '$50',
-          priceNote: '+ $1,500 one-time',
+          price: '$120',
+          priceNote: '+ $2,500 one-time',
           badge: 'Free mockup',
           stripeLinkKey: 'websiteSetup',
           features: [
@@ -524,7 +524,7 @@ export const content = {
           bullets: ['Contestación bilingüe AI 24/7', 'Captura de cliente & resúmenes', 'Cobertura fuera de horario'],
         },
         {
-          price: '$50/mes + $1,500 pago único',
+          price: '$120/mes + $2,500 pago único',
           title: 'Sitio Web',
           badge: 'Mockup gratis',
           description:
@@ -599,8 +599,8 @@ export const content = {
         },
         {
           title: 'Sitio Web',
-          price: '$50',
-          priceNote: '+ $1,500 pago único',
+          price: '$120',
+          priceNote: '+ $2,500 pago único',
           badge: 'Mockup gratis',
           stripeLinkKey: 'websiteSetup',
           features: [

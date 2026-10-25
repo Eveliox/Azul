@@ -12,7 +12,7 @@ export const stripeLinks = {
   // Growth Suite — Standard ($999.99/mo). TODO: regenerate this link in the Stripe dashboard at the current price before linking it from any page.
   growthSuite: 'https://buy.stripe.com/00wfZjeyd5Vyg2S8Axc7u01',
 
-  // Website Build — one-time setup fee ($499)
+  // Website Build — one-time setup fee ($2,500). TODO: regenerate this link in the Stripe dashboard at the current price before linking it from any page.
   websiteSetup: 'https://buy.stripe.com/cNi6oJdu96ZC8AqaIFc7u03',
 
   // Social Media AI ($149/mo)
