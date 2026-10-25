@@ -64,10 +64,5 @@ export default function About() {
     <section className="section about-section" aria-labelledby="about-principles">
       <div className="about-split"><SplitText id="about-principles">{a.principles.title}</SplitText><ul className="about-principles">{a.principles.items.map(item => <li key={item}><span aria-hidden="true">+</span>{item}</li>)}</ul></div>
     </section>
-
-    <section className="section about-section about-founding" aria-labelledby="about-founding">
-      <div><h2 id="about-founding">{a.founding.title}</h2><p>{a.founding.body}</p><p className="about-founding-note">{a.founding.note}</p></div>
-      <div className="about-founding-action"><p><strong>{a.founding.price}</strong><span>{a.founding.period}</span></p><Link className="text-link" to="/services">{a.founding.cta}<Arrow /></Link></div>
-    </section>
   </div>
 }

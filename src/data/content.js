@@ -3,13 +3,6 @@
 
 export const content = {
   en: {
-    announcement: {
-      long: '🎉 Founding Client Offer. First 10 Miami businesses get the Growth Suite at',
-      short: '🎉 Founding Offer:',
-      priceHighlight: '$399/mo locked for life',
-      trailingLong: 'Only a few spots left →',
-      trailingShort: '→',
-    },
     nav: {
       solutions: 'Solutions',
       pricing: 'Pricing',
@@ -407,13 +400,6 @@ export const content = {
   },
 
   es: {
-    announcement: {
-      long: '🎉 Oferta Cliente Fundador. Los primeros 10 negocios de Miami obtienen el Growth Suite por',
-      short: '🎉 Oferta Fundador:',
-      priceHighlight: '$399/mes de por vida',
-      trailingLong: 'Quedan pocos cupos →',
-      trailingShort: '→',
-    },
     nav: {
       solutions: 'Servicios',
       pricing: 'Precios',

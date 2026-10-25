@@ -6,10 +6,10 @@
 // links before you send them to real clients.
 
 export const stripeLinks = {
-  // Growth Suite — Founding Client ($399/mo locked for life, first 10 clients)
+  // Growth Suite — legacy Founding Client payment link. Not surfaced on the site anymore; kept so prior invoices resolve.
   foundingClient: 'https://buy.stripe.com/28EcN7cq5bfS7wm9EBc7u02',
 
-  // Growth Suite — Standard. This link still charges the old $549/mo; replace it with a $999.99/mo link.
+  // Growth Suite — Standard ($999.99/mo). TODO: regenerate this link in the Stripe dashboard at the current price before linking it from any page.
   growthSuite: 'https://buy.stripe.com/00wfZjeyd5Vyg2S8Axc7u01',
 
   // Website Build — one-time setup fee ($499)
