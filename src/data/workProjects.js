@@ -5,4 +5,5 @@ export const workProjects = [
   { id: 'caley', category: 'insurance', image: '/images/work/caley.jpg', url: 'https://www.caleyinsurance.com/' },
   { id: 'sanos', category: 'medical', image: '/images/work/sanos.jpg', url: 'https://sanosmedical.com/en' },
   { id: 'portfolio', category: 'studio', image: '/images/work/portfolio.jpg', url: 'https://web-portfolio-alpha-six.vercel.app/' },
+  { id: 'coatings', category: 'studio', image: '/110.png', url: 'https://110-bay.vercel.app/' },
 ]
