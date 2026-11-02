@@ -167,7 +167,6 @@ export const content = {
           title: 'Review Booster',
           price: '$79',
           badge: 'Free review audit',
-          stripeLinkKey: 'reviewBooster',
           features: [
             'Scheduled email review requests',
             'Customer feedback collection',
@@ -205,7 +204,6 @@ export const content = {
           price: '$120',
           priceNote: '+ $2,500 one-time',
           badge: 'Free mockup',
-          stripeLinkKey: 'websiteSetup',
           features: [
             'Company site, 8–15 pages',
             'Custom design',
@@ -220,7 +218,6 @@ export const content = {
           title: 'AI Answering',
           price: '$349',
           badge: '7-day free trial',
-          stripeLinkKey: 'aiAnswering',
           features: [
             '24/7 AI call answering (EN/ES)',
             'Customer capture & call summaries',
@@ -564,7 +561,6 @@ export const content = {
           title: 'Review Booster',
           price: '$79',
           badge: 'Auditoría gratis',
-          stripeLinkKey: 'reviewBooster',
           features: [
             'Solicitudes de reseña por email',
             'Recopilación de opiniones',
@@ -602,7 +598,6 @@ export const content = {
           price: '$120',
           priceNote: '+ $2,500 pago único',
           badge: 'Mockup gratis',
-          stripeLinkKey: 'websiteSetup',
           features: [
             'Sitio de empresa, 8–15 páginas',
             'Diseño a la medida',
@@ -617,7 +612,6 @@ export const content = {
           title: 'Contestación AI',
           price: '$349',
           badge: 'Prueba gratis 7 días',
-          stripeLinkKey: 'aiAnswering',
           features: [
             'Contestación AI 24/7 (EN/ES)',
             'Captura de cliente & resúmenes',

@@ -17,11 +17,10 @@ for (const lang of ['en', 'es']) {
     const tiers = content[lang].pricing.tiers
     assert.equal(tiers.filter((t) => !t.comingSoon).length, 4)
     assert.equal(tiers.filter((t) => t.comingSoon).length, 2)
-    const website = tiers.find((t) => t.stripeLinkKey === 'websiteSetup')
+    const website = tiers[3]
     assert.equal(website.price, '$120')
     assert.match(website.priceNote, /2,500/)
     assert.equal(content[lang].pricing.bundle.crossed, null)
-    for (const tier of tiers.filter((t) => t.comingSoon)) assert.ok(!tier.stripeLinkKey)
   })
 }
 test('all experience translations have matching keys', () => {
