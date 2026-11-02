@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
 import { workProjects } from '../data/workProjects'
-import { SplitText } from '../components/motion/SplitText'
-import { DotGrid } from '../components/motion/DotGrid'
+import { StudioTitle, StudioLabel } from '../components/site/StartupKit'
+import { WindowBar } from '../components/site/ServicesVisuals'
 import { FilterChips, Modal, Arrow } from '../components/site/UI'
 import { bookingUrl } from '../components/site/Layout'
 import { WebsiteTransformation } from '../components/site/WebsiteTransformation'
@@ -15,8 +15,8 @@ export default function Work() {
   const copy = selected ? c.work.projects[selected.id] : null
   return <>
     <section className="work-hero section">
-      <DotGrid />
-      <SplitText as="h1">{c.work.title}</SplitText>
+      <StudioLabel>{c.work.eyebrow}</StudioLabel>
+      <StudioTitle as="h1">{c.work.title}</StudioTitle>
       <div className="work-intro"><p>{c.work.subtitle}</p><span>{String(workProjects.length).padStart(2, '0')} / {c.work.countLabel}</span></div>
     </section>
     <section className="work-gallery section" aria-label={c.work.eyebrow}>
@@ -26,7 +26,7 @@ export default function Work() {
           const text = c.work.projects[project.id]
           return <article className={`work-card work-${project.id}`} key={project.id}>
             <button className="work-card-button" onClick={() => setSelected(project)} aria-label={`${c.work.view}: ${text.title}`}>
-              <div className="work-image"><div className="work-browser-bar" aria-hidden="true"><i/><i/><i/></div><img src={project.image} alt={text.imageAlt} loading="lazy"/><span className="work-image-link" aria-hidden="true">↗</span></div>
+              <div className="work-image"><WindowBar title={`// ${text.title} //`}/><img src={project.image} alt={text.imageAlt} loading="lazy"/><span className="work-image-link" aria-hidden="true">↗</span></div>
               <div className="work-card-heading"><h2>{text.title}</h2><Arrow /></div>
               <div className="work-tags">{text.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
             </button>
@@ -37,7 +37,7 @@ export default function Work() {
     </section>
     <WebsiteTransformation initialMode="compare" />
     <section className="work-clients section"><div>{workProjects.filter(p=>p.category!=='studio').map(p=><span key={p.id}>{c.work.projects[p.id].title}</span>)}</div></section>
-    <section className="work-cta section"><SplitText>{c.work.ctaTitle}</SplitText><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.work.cta}<Arrow /></a></section>
+    <section className="work-cta section"><StudioTitle>{c.work.ctaTitle}</StudioTitle><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.work.cta}<Arrow /></a></section>
     {selected && <Modal title={copy.title} onClose={() => setSelected(null)}><img className="work-modal-image" src={selected.image} alt={copy.imageAlt}/><p>{copy.description}</p><h3 className="work-modal-label">{c.work.scope}</h3><div className="work-tags">{copy.tags.map(tag=><span key={tag}>{tag}</span>)}</div><a className="button" href={selected.url} target="_blank" rel="noreferrer">{c.work.visit}<Arrow /></a></Modal>}
   </>
 }

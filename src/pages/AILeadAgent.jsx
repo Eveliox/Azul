@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 import { leadAgentCopy, leadTrades, leadVisualCopy } from '../data/leadAgent'
 import { LanguageButtons } from '../components/CallExperience'
-import { LeadWorkflow, LeadHeroVisual, LeadIcon } from '../components/lead-agent/LeadWorkflow'
-import { SplitText } from '../components/motion/SplitText'
+import { LeadWorkflow, LeadIcon } from '../components/lead-agent/LeadWorkflow'
+import { StudioTitle, StudioLabel } from '../components/site/StartupKit'
+import { ServicePreview } from '../components/site/ServicesVisuals'
+import { servicesPage } from '../data/servicesPage'
 import { MagneticButton } from '../components/motion/MagneticButton'
-import { DotGrid } from '../components/motion/DotGrid'
 import { Arrow, FAQAccordion } from '../components/site/UI'
 import { bookingUrl } from '../components/site/Layout'
 import { useReveal } from '../hooks/useReveal'
@@ -71,18 +72,18 @@ export default function AILeadAgent() {
   useReveal(metrics, el => gsap.timeline({ paused: true }).from(el.querySelectorAll('article'), { y: 24, autoAlpha: 0, duration: 0.7, stagger: 0.08 }))
   return <div className="lead-agent">
     <section className="section lead-hero">
-      <DotGrid />
+      <StudioLabel>{lang === 'en' ? 'Speed-to-lead / EN + ES' : 'Respuesta inmediata / EN + ES'}</StudioLabel>
       <div className="lead-hero-layout"><div className="lead-hero-copy">
-      <SplitText as="h1">{d.title}</SplitText>
+      <StudioTitle as="h1">{d.title}</StudioTitle>
       <p className="lead-intro">{d.intro}</p><p className="lead-note">{d.availability}</p>
-      <div className="lead-ctas"><BookingLink>{d.cta}</BookingLink><MagneticButton as="a" className="text-link" href="#lead-trades">{d.explore}<Arrow /></MagneticButton></div></div><LeadHeroVisual /></div>
+      <div className="lead-ctas"><BookingLink>{d.cta}</BookingLink><MagneticButton as="a" className="text-link" href="#lead-trades">{d.explore}<Arrow /></MagneticButton></div></div><ServicePreview t={servicesPage[lang]} index={1}/></div>
     </section>
-    <section className="section lead-section"><SplitText>{d.howTitle}</SplitText><LeadWorkflow /></section>
-    <section className="section lead-section" id="lead-trades"><SplitText>{d.tradeTitle}</SplitText><TradeTabs lang={lang} d={d} /></section>
-    <section className="section lead-section"><SplitText>{d.retryTitle}</SplitText><ul className="lead-rules">{d.retryRules.map(rule => <li key={rule}>{rule}</li>)}</ul></section>
-    <section className="section lead-section"><SplitText>{d.dashboardTitle}</SplitText><div className="lead-dashboard"><div className="lead-dashboard-top"><span>{v.dashboard}</span><span className="lead-badge">{v.sampleLabel}</span></div><p className="lead-note">{v.dashboardNote}</p><div className="lead-metrics" ref={metrics}>{d.metrics.map(([title, body], i) => <article key={title}><LeadIcon kind={i}/><span className="lead-metric-value">{v.samples[i]}</span><h3>{title}</h3><p>{body}</p></article>)}</div><div className="lead-funnel"><h3>{v.activity}</h3>{v.activitySteps.map((label,i) => <div key={label}><span>{label}</span><div className="lead-funnel-track"><i style={{'--fill':`${[100,67,42][i]}%`}} /></div><b>{[12,8,5][i]}</b></div>)}</div></div></section>
-    <section className="section lead-section"><SplitText>{d.safetyTitle}</SplitText><ul className="lead-rules">{d.safetyRules.map(rule => <li key={rule}>{rule}</li>)}</ul></section>
-    <section className="section lead-section lead-start"><SplitText>{d.startTitle}</SplitText><p className="lead-intro">{d.pricing}</p><p className="lead-note">{d.availability}</p><BookingLink>{d.cta}</BookingLink></section>
-    <section className="section lead-section"><div className="agent-faq-grid"><SplitText>{d.faqTitle}</SplitText><FAQAccordion items={d.faqs.map(([question, answer]) => ({ question, answer }))} /></div></section>
+    <section className="section lead-section"><StudioTitle>{d.howTitle}</StudioTitle><LeadWorkflow /></section>
+    <section className="section lead-section" id="lead-trades"><StudioTitle>{d.tradeTitle}</StudioTitle><TradeTabs lang={lang} d={d} /></section>
+    <section className="section lead-section"><StudioTitle>{d.retryTitle}</StudioTitle><ul className="lead-rules">{d.retryRules.map(rule => <li key={rule}>{rule}</li>)}</ul></section>
+    <section className="section lead-section"><StudioTitle>{d.dashboardTitle}</StudioTitle><div className="lead-dashboard"><div className="lead-dashboard-top"><span>{v.dashboard}</span><span className="lead-badge">{v.sampleLabel}</span></div><p className="lead-note">{v.dashboardNote}</p><div className="lead-metrics" ref={metrics}>{d.metrics.map(([title, body], i) => <article key={title}><LeadIcon kind={i}/><span className="lead-metric-value">{v.samples[i]}</span><h3>{title}</h3><p>{body}</p></article>)}</div><div className="lead-funnel"><h3>{v.activity}</h3>{v.activitySteps.map((label,i) => <div key={label}><span>{label}</span><div className="lead-funnel-track"><i style={{'--fill':`${[100,67,42][i]}%`}} /></div><b>{[12,8,5][i]}</b></div>)}</div></div></section>
+    <section className="section lead-section"><StudioTitle>{d.safetyTitle}</StudioTitle><ul className="lead-rules">{d.safetyRules.map(rule => <li key={rule}>{rule}</li>)}</ul></section>
+    <section className="section lead-section lead-start"><StudioTitle>{d.startTitle}</StudioTitle><p className="lead-intro">{d.pricing}</p><p className="lead-note">{d.availability}</p><BookingLink>{d.cta}</BookingLink></section>
+    <section className="section lead-section"><div className="agent-faq-grid"><StudioTitle>{d.faqTitle}</StudioTitle><FAQAccordion items={d.faqs.map(([question, answer]) => ({ question, answer }))} /></div></section>
   </div>
 }

@@ -2,7 +2,52 @@
   "redirects": [
     {
       "source": "/services/local-proof-seo",
-      "destination": "/services/found-everywhere",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/review-booster",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/social-media-ai",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/website-build",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/found-everywhere",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/ai-answering-service",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/ai-facebook-ads",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/custom-ai-agents",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/insights",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/insights/:slug*",
+      "destination": "/",
       "permanent": true
     }
   ],

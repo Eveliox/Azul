@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 import { DotGrid } from '../components/motion/DotGrid'
-import { SplitText } from '../components/motion/SplitText'
+import { StudioTitle as SplitText, StudioLabel } from '../components/site/StartupKit'
 import { useLenis } from '../components/motion/SmoothScroll'
 import { bookingUrl } from '../components/site/Layout'
 import { Arrow } from '../components/site/UI'
-import { getService } from '../data/services'
+import { PackageCard } from '../components/site/Offer'
 import { describeFinding, describePass, freeReportCopy } from '../data/freeReport'
 import '../free-report.css'
 
@@ -42,13 +41,11 @@ function Finding({ finding }) {
   const { lang } = useLanguage()
   const t = freeReportCopy[lang]
   const { title, body } = describeFinding(finding, lang)
-  const service = getService(finding.service, lang)
   return (
     <li className={`fr-finding is-${finding.severity}`}>
       <span className="fr-severity">{t.severity[finding.severity]}</span>
       <h3>{title}</h3>
       <p>{body}</p>
-      {service && <Link className="fr-service-tag" to={`/services/${finding.service}`}>{service.title}<Arrow /></Link>}
     </li>
   )
 }
@@ -125,7 +122,6 @@ function Report({ report, onRestart }) {
   const t = freeReportCopy[lang]
   const r = t.report
   const date = new Date(report.checkedAt).toLocaleDateString(lang === 'es' ? 'es-US' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-  const priced = price => /^\$/.test(price || '') ? `${r.from} ${price}${r.month}` : price || r.soon
   return (
     <div className="fr-report">
       <div className="fr-preview-head">
@@ -175,25 +171,11 @@ function Report({ report, onRestart }) {
         </section>
       )}
 
-      {report.services.length > 0 && (
+      {report.findings.length > 0 && (
         <section className="fr-block" aria-labelledby="fr-help">
           <h3 id="fr-help" className="fr-subhead">{r.help}</h3>
           <p className="fr-note">{r.helpBody}</p>
-          <ul className="fr-services">
-            {report.services.map(slug => {
-              const service = getService(slug, lang)
-              if (!service) return null
-              const count = report.findings.filter(f => f.service === slug).length
-              return (
-                <li key={slug}>
-                  <span>{r.fixes(count)}</span>
-                  <h4>{service.title}</h4>
-                  <p>{priced(service.price)}</p>
-                  <Link className="text-link" to={`/services/${slug}`}>{r.learn}<Arrow /></Link>
-                </li>
-              )
-            })}
-          </ul>
+          <PackageCard servicesLink />
         </section>
       )}
 
@@ -264,7 +246,7 @@ export default function FreeReport() {
       <DotGrid />
       <div className="fr-intro">
         <div>
-          <SplitText as="h1">{t.title}</SplitText>
+          <StudioLabel>{lang === 'en' ? 'Website diagnostic / Free' : 'Diagnóstico web / Gratis'}</StudioLabel><SplitText as="h1">{t.title}</SplitText>
           <p>{t.intro}</p>
           <ul className="fr-checks">{t.checks.map(check => <li key={check}><span aria-hidden="true">+</span>{check}</li>)}</ul>
         </div>

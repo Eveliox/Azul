@@ -1,21 +1,19 @@
+import { StudioFooter } from './StartupKit'
 import { BrandLogo } from './BrandLogo'
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
-import { MagneticButton } from '../motion/MagneticButton'
 import { PageMetadata } from './PageMetadata'
-import { JobPostingProvider } from '../agents/JobPostingDrawer'
-import { Arrow, Modal, Newsletter, PhoneIcon } from './UI'
-import { stripeLinks } from '../../data/stripeLinks'
-export const paths = ['/', '/work', '/services', '/about', '/insights', '/free-report']
+import { Arrow, Modal } from './UI'
+import { offerPrices } from '../../data/offer'
+export const paths = ['/', '/work', '/services', '/about', '/free-report']
+// TODO: confirm this is the "Book a call" link you want (it's the existing Calendly link).
 export const bookingUrl = 'https://calendly.com/purplexmythzz/30min'
-// Temporary "New" badge beside Services while Custom AI Agents launches. Set to null to remove it.
-const NEW_BADGE_PATH = '/services'
-const NavBadge = ({ path }) => { const { c } = useLanguage(); return path === NEW_BADGE_PATH ? <span className="nav-new">{c.agents.newLabel}</span> : null }
 
 function AnnouncementBanner() {
   const { c } = useLanguage()
+  const t = c.offer.banner
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem('azul-banner-dismissed') === '1' } catch { return false }
   })
@@ -28,15 +26,15 @@ function AnnouncementBanner() {
     try { sessionStorage.setItem('azul-banner-dismissed', '1') } catch { /* no-op */ }
   }
   return (
-    <aside className="site-banner" aria-label={c.banner.headline} data-intro-fade>
-      <a className="site-banner-link" href={stripeLinks.aiLeadAgentWebsite} target="_blank" rel="noopener noreferrer">
-        <span className="site-banner-badge">{c.banner.badge}</span>
-        <span className="site-banner-headline">{c.banner.headline}</span>
-        <span className="site-banner-price">{c.banner.price}</span>
-        <span className="site-banner-spots">{c.banner.spots}</span>
-        <span className="site-banner-cta">{c.banner.cta}<Arrow /></span>
+    <aside className="site-banner" aria-label={t.headline} data-intro-fade>
+      <a className="site-banner-link" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+        <span className="site-banner-badge">{t.badge}</span>
+        <span className="site-banner-headline">{t.headline}</span>
+        <span className="site-banner-price">{t.price(offerPrices.packageSetup, offerPrices.packageMonthly)}</span>
+        <span className="site-banner-spots">{t.spots}</span>
+        <span className="site-banner-cta">{t.cta}<Arrow /></span>
       </a>
-      <button className="site-banner-close" onClick={dismiss} aria-label={c.banner.close}>×</button>
+      <button className="site-banner-close" onClick={dismiss} aria-label={t.close}>×</button>
     </aside>
   )
 }
@@ -72,7 +70,7 @@ function Navigation() {
   const [open, setOpen] = useState(false)
   const header = useRef(null)
   useHeaderScroll(header, open)
-  return <><header className="site-header" ref={header} data-intro-fade><Link className="site-brand" to="/" aria-label="Azul"><BrandLogo /></Link><nav className="desktop-nav" aria-label={c.footer.navigation}>{paths.map((path, i) => <NavLink to={path} end={path === '/'} key={path}>{c.nav[i]}<NavBadge path={path} /></NavLink>)}</nav><div className="nav-right"><Link to="/contact">{c.contact}<Arrow /></Link><div className="languages" role="group" aria-label={c.language}>{c.languages.map((label, i) => <button key={label} onClick={() => setLang(i ? 'es' : 'en')} aria-pressed={lang === (i ? 'es' : 'en')}>{label}</button>)}</div><button className="menu-toggle" aria-label={c.menu} aria-expanded={open} onClick={() => setOpen(true)}><span /><span /></button></div></header>{open && <Modal title={c.brand} onClose={() => setOpen(false)}><nav className="mobile-nav">{[...paths, '/contact'].map((path, i) => <NavLink key={path} to={path} end={path === '/'} onClick={() => setOpen(false)}><span>{[...c.nav, c.contact][i]}<NavBadge path={path} /></span><Arrow /></NavLink>)}</nav></Modal>}</>
+  return <><header className="site-header" ref={header} data-intro-fade><Link className="site-brand" to="/" aria-label="Azul"><BrandLogo /></Link><nav className="desktop-nav" aria-label={c.footer.navigation}>{paths.map((path, i) => <NavLink to={path} end={path === '/'} key={path}>{c.nav[i]}</NavLink>)}</nav><div className="nav-right"><Link to="/contact">{c.contact}<Arrow /></Link><div className="languages" role="group" aria-label={c.language}>{c.languages.map((label, i) => <button key={label} onClick={() => setLang(i ? 'es' : 'en')} aria-pressed={lang === (i ? 'es' : 'en')}>{label}</button>)}</div><button className="menu-toggle" aria-label={c.menu} aria-expanded={open} onClick={() => setOpen(true)}><span /><span /></button></div></header>{open && <Modal title={c.brand} onClose={() => setOpen(false)}><nav className="mobile-nav">{[...paths, '/contact'].map((path, i) => <NavLink key={path} to={path} end={path === '/'} onClick={() => setOpen(false)}><span>{[...c.nav, c.contact][i]}</span><Arrow /></NavLink>)}</nav></Modal>}</>
 }
 function CookieControls() {
   const { c } = useLanguage()
@@ -90,6 +88,5 @@ function CookieControls() {
 }
 export default function Layout() {
   const { c } = useLanguage()
-  const [ai, setAi] = useState(false)
-  return <JobPostingProvider><div className="site-studio"><PageMetadata /><a className="skip-link" href="#main">{c.skip}</a><AnnouncementBanner /><Navigation /><main id="main" tabIndex={-1}><Outlet context={{ openAi: () => setAi(true) }} /></main><footer className="site-footer" id="contact"><Link className="footer-brand" to="/" aria-label="Azul"><BrandLogo /></Link><div className="footer-top"><h2>{c.footer.title}</h2><a href={`mailto:${c.email}`}>{c.email}<Arrow /></a></div><div className="footer-columns"><div><h3>{c.footer.navigation}</h3>{paths.map((path, i) => <Fragment key={path}><Link to={path}>{c.nav[i]}</Link>{path === '/services' && <Link className="footer-sublink" to="/services/custom-ai-agents">{c.agents.footerLink}</Link>}</Fragment>)}<Link to="/contact">{c.contact}</Link></div><div><h3>{c.footer.social}</h3>{c.socials.map(s => <a href={s.href} target="_blank" rel="noreferrer" key={s.label}>{s.label}<Arrow /></a>)}</div><div><h3>{c.footer.areas}</h3>{c.areas.map(area => <p key={area}>{area}</p>)}</div><Newsletter /></div><div className="footer-bottom"><span>© {new Date().getFullYear()} {c.footer.copyright}</span><div>{c.footer.legal.map((label, i) => <Link key={label} to={['/privacy', '/terms', '/cookies'][i]}>{label}</Link>)}</div><span>{c.footer.bottom}</span></div></footer><MagneticButton className="ai-pill" data-intro-fade onClick={() => setAi(true)} strength={0.25}><PhoneIcon />{c.ai.label}<span aria-hidden="true">↗</span></MagneticButton><CookieControls />{ai && <Modal title={c.ai.title} onClose={() => setAi(false)}><p>{c.ai.body}</p><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.ai.cta}<Arrow /></a></Modal>}</div></JobPostingProvider>
+  return <div className="site-studio startup-site"><PageMetadata /><a className="skip-link" href="#main">{c.skip}</a><AnnouncementBanner /><Navigation /><main id="main" tabIndex={-1}><Outlet /></main><StudioFooter /><CookieControls /></div>
 }

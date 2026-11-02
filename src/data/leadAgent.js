@@ -1,3 +1,5 @@
+import { offerPrices } from './offer.js'
+
 // One entry per trade; status controls whether details or a coming-soon panel render.
 export const leadTrades = [
   {
@@ -40,13 +42,13 @@ export const leadTrades = [
     },
   },
   {
-    id: 'roofing', status: 'next',
+    id: 'roofing', status: 'pilot',
     en: {
       name: 'Roofing',
       asks: ['Active leak, storm damage, a full replacement, or a new roof?', 'Is there an insurance claim?', 'What roof type, if known?', 'What is the address, and is it in the service area?', 'What time works best?'],
       books: 'A roof inspection.',
       handoff: ['An active leak during rain.', 'A tarp needed after a storm.', 'Insurance adjuster questions or an upset customer.'],
-      scenario: 'Fictional example: a homeowner in Kendall after a storm. Planned Roofing workflow.',
+      scenario: 'Fictional example: a homeowner in Kendall after a storm.',
       transcript: [
         ['agent', 'Hello, I’m the virtual AI assistant for your roofing company. You requested a callback through our form. This call is recorded. Is now a good time?'],
         ['customer', 'Yes. My roof leaked after the storm in Kendall.'],
@@ -64,7 +66,7 @@ export const leadTrades = [
       asks: ['¿Filtración activa, daño por tormenta, reemplazo completo o techo nuevo?', '¿Hay un reclamo al seguro?', '¿Qué tipo de techo tiene, si lo sabe?', '¿Cuál es la dirección y está dentro del área de servicio?', '¿Qué horario le conviene?'],
       books: 'Una inspección del techo.',
       handoff: ['Una filtración activa mientras llueve.', 'Necesidad de una lona después de una tormenta.', 'Preguntas para el ajustador de seguros o un cliente molesto.'],
-      scenario: 'Ejemplo ficticio: una persona en Kendall después de una tormenta. Flujo previsto para techos.',
+      scenario: 'Ejemplo ficticio: una persona en Kendall después de una tormenta.',
       transcript: [
         ['agent', 'Hola. Soy el asistente virtual de AI de su compañía de techos. Usted solicitó una llamada en nuestro formulario. Esta llamada se graba. ¿Puede hablar ahora?'],
         ['customer', 'Sí. Mi techo tuvo una filtración después de la tormenta en Kendall.'],
@@ -78,27 +80,25 @@ export const leadTrades = [
       ],
     },
   },
-  { id: 'plumbing', status: 'soon', en: { name: 'Plumbing' }, es: { name: 'Plomería' } },
-  { id: 'property-management', status: 'soon', en: { name: 'Property Management' }, es: { name: 'Administración de propiedades' } },
 ]
 
 export const leadAgentCopy = {
   en: {
-    name: 'AI Lead Agent', pilot: 'Pilot', quote: 'Quoted after a call',
-    meta: { title: 'AI Lead Agent — Bilingual lead callbacks | Azul', description: 'Bilingual callbacks, qualification and appointment booking for new home-service leads. HVAC pilot spots open; Roofing is next.' },
-    title: 'A new lead.\nA real conversation.\nIn about a minute.',
-    intro: 'In English or Spanish, AI Lead Agent calls your new website and ad leads, asks the right questions, and books the next visit.',
-    availability: 'In pilot, not generally available. HVAC pilot spots are open. Roofing is next.',
+    name: 'Speed-to-lead agent', pilot: 'Pilot', quote: 'Quoted after a call',
+    meta: { title: 'Speed-to-lead agent — AI lead calls for roofing and HVAC | Azul', description: 'An AI voice agent that calls every new lead within seconds, in English or Spanish, and books the estimate on your calendar. For roofing and HVAC companies in South Florida.' },
+    title: 'A new lead.\nA real conversation.\nIn seconds.',
+    intro: 'In English or Spanish, the speed-to-lead agent calls your new website and ad leads, asks the right questions, and books the next visit.',
+    availability: 'For roofing and HVAC companies in Miami-Dade, Broward, and Palm Beach.',
     cta: 'Book a call', explore: 'Find your trade', row: 'From a new lead to a booked visit, in English or Spanish.',
     how: 'How it works', howTitle: 'A clear next step for every new lead.',
     steps: [
-      { title: 'Call and introduce', body: 'Calls within about a minute during calling hours. Says it is your business’s virtual AI assistant and that the call is recorded.' },
+      { title: 'Call and introduce', body: 'Calls within seconds during calling hours. Says it is your business’s virtual AI assistant and that the call is recorded.' },
       { title: 'Ask and qualify', body: 'Asks the questions for your trade, confirms the address is in your service area, and finds a suitable time.' },
       { title: 'Book and confirm', body: 'Books on your calendar, texts and emails the lead a confirmation, and texts you a booking summary.' },
       { title: 'Follow up or hand off', body: 'If there is no answer, leaves a short voicemail, texts a booking link, and tries later within the limits below. Emergencies, upset customers, unapproved price questions, and requests for a human go to a person.' },
     ],
     trades: 'Built for your trade', tradeTitle: 'The right questions. The right appointment.',
-    statuses: { pilot: 'HVAC pilot spots open', next: 'Next — pilot list open', soon: 'Coming soon' },
+    statuses: { pilot: 'Available now', next: 'Coming next', soon: 'Coming soon' },
     asks: 'What it asks', books: 'What it books', handoff: 'When it brings in a person',
     human: 'Anyone who asks for a human is handed off. Emergencies and unapproved price questions also go to a person.',
     soon: 'Coming soon — ask about availability.', askCta: 'Ask about availability',
@@ -109,32 +109,32 @@ export const leadAgentCopy = {
     metrics: [ ['Leads received', 'How many new leads came in.'], ['Average time to first call', 'How long leads waited for the first call.'], ['Leads reached', 'How many leads answered.'], ['Appointments booked', 'How many leads scheduled a visit.'] ],
     safety: 'Safety and consent', safetyTitle: 'Your business stays in control.',
     safetyRules: ['Only contacts people who asked to be contacted.', 'Identifies itself as an AI and says the call is recorded.', 'Calls only 8am–8pm in the lead’s local time, at most 3 times a day.', 'One STOP ends calls and texts. Anyone who declines calls is never called again.', 'You can pause the agent anytime.'],
-    start: 'Getting started', startTitle: 'Start with the HVAC pilot.', pricing: 'Setup plus a monthly fee, quoted after a short call.',
+    start: 'Getting started', startTitle: 'Start with the Azul package.', pricing: `${offerPrices.agentSetup} setup on its own, or included in the Azul package with a bilingual website and automatic review requests: ${offerPrices.packageSetup} setup + ${offerPrices.packageMonthly}/month. No long-term contracts.`,
     faq: 'FAQ', faqTitle: 'Before your first callback.',
     faqs: [
       ['Does it replace my team?', 'No. It handles first contact and booking, and hands off the rest to your team.'],
-      ['What calendar does it use?', 'Google Calendar during the pilot. Other scheduling tools are available on request, subject to review.'],
+      ['What calendar does it use?', 'Google Calendar. Other scheduling tools are available on request, subject to review.'],
       ['Does it speak Spanish?', 'Yes. It speaks English and Spanish and can switch mid-call.'],
       ['What if a lead doesn’t want to be called?', 'They are never called again. One STOP covers both calls and texts.'],
-      ['How is this different from AI Answering Service?', 'AI Answering Service picks up incoming calls. AI Lead Agent calls new leads back first, books them, and follows up.'],
+      ['Do I need a new website?', 'No. The agent can connect to the lead form you already have. If you want a new site too, the Azul package includes one.'],
     ],
   },
   es: {
-    name: 'Agente AI de prospectos', pilot: 'Piloto', quote: 'Cotización después de una llamada',
-    meta: { title: 'Agente AI de prospectos — Llamadas bilingües | Azul', description: 'Llamadas, evaluación y citas en inglés y español para nuevos prospectos de servicios del hogar. Piloto de HVAC abierto; techos será el próximo.' },
-    title: 'Un nuevo prospecto.\nUna conversación.\nEn cerca de un minuto.',
-    intro: 'En inglés o español, el agente AI llama a sus nuevos prospectos de formularios web y anuncios, hace las preguntas adecuadas y agenda la próxima visita.',
-    availability: 'En fase piloto, aún no disponible al público general. Hay cupos para HVAC. Techos será el próximo.',
+    name: 'Agente de respuesta inmediata', pilot: 'Piloto', quote: 'Cotización después de una llamada',
+    meta: { title: 'Agente de respuesta inmediata — Llamadas con IA para techos y aire acondicionado | Azul', description: 'Un agente de voz con IA que llama a cada nuevo prospecto en segundos, en inglés o en español, y agenda el estimado en su calendario. Para compañías de techos y aire acondicionado del sur de Florida.' },
+    title: 'Un nuevo prospecto.\nUna conversación.\nEn segundos.',
+    intro: 'En inglés o español, el agente de respuesta inmediata llama a sus nuevos prospectos de formularios web y anuncios, hace las preguntas adecuadas y agenda la próxima visita.',
+    availability: 'Para compañías de techos y aire acondicionado en Miami-Dade, Broward y Palm Beach.',
     cta: 'Agende una llamada', explore: 'Encuentre su oficio', row: 'De un nuevo prospecto a una visita agendada, en inglés o español.',
     how: 'Cómo funciona', howTitle: 'Un próximo paso claro para cada prospecto.',
     steps: [
-      { title: 'Llama y se presenta', body: 'Llama en aproximadamente un minuto dentro del horario permitido. Se identifica como el asistente virtual de AI de su negocio y avisa que la llamada se graba.' },
+      { title: 'Llama y se presenta', body: 'Llama en segundos dentro del horario permitido. Se identifica como el asistente virtual de AI de su negocio y avisa que la llamada se graba.' },
       { title: 'Pregunta y evalúa', body: 'Hace las preguntas de su oficio, confirma que la dirección esté dentro del área de servicio y busca un horario adecuado.' },
       { title: 'Agenda y confirma', body: 'Agenda en su calendario, envía la confirmación al prospecto por texto y correo, y le manda a usted un resumen por texto.' },
       { title: 'Da seguimiento o transfiere', body: 'Si no contestan, deja un mensaje de voz breve, envía un enlace para agendar por texto e intenta más tarde dentro de los límites indicados. Pasa a una persona las emergencias, clientes molestos, preguntas de precios no aprobados y solicitudes de atención humana.' },
     ],
     trades: 'Hecho para su oficio', tradeTitle: 'Las preguntas correctas. La cita adecuada.',
-    statuses: { pilot: 'Cupos abiertos para el piloto de HVAC', next: 'Próximo — lista del piloto abierta', soon: 'Próximamente' },
+    statuses: { pilot: 'Disponible', next: 'Próximamente', soon: 'Próximamente' },
     asks: 'Qué pregunta', books: 'Qué agenda', handoff: 'Cuándo pasa a una persona',
     human: 'Si alguien pide hablar con una persona, se transfiere. Las emergencias y preguntas de precios no aprobados también pasan a una persona.',
     soon: 'Próximamente — consulte la disponibilidad.', askCta: 'Consulte la disponibilidad',
@@ -145,21 +145,21 @@ export const leadAgentCopy = {
     metrics: [ ['Prospectos recibidos', 'Cuántos prospectos nuevos llegaron.'], ['Tiempo promedio hasta la primera llamada', 'Cuánto esperaron los prospectos antes de la primera llamada.'], ['Prospectos contactados', 'Cuántos prospectos contestaron.'], ['Citas agendadas', 'Cuántos prospectos programaron una visita.'] ],
     safety: 'Seguridad y consentimiento', safetyTitle: 'Usted mantiene el control de su negocio.',
     safetyRules: ['Solo contacta a personas que pidieron ser contactadas.', 'Se identifica como AI y avisa que la llamada se graba.', 'Llama solo de 8 a. m. a 8 p. m., según la hora local del prospecto, como máximo 3 veces al día.', 'Un solo STOP detiene llamadas y textos. Si alguien rechaza las llamadas, no se le vuelve a llamar.', 'Usted puede pausar el agente en cualquier momento.'],
-    start: 'Para comenzar', startTitle: 'Comience con el piloto de HVAC.', pricing: 'Configuración inicial más una cuota mensual, cotizadas después de una breve llamada.',
+    start: 'Para comenzar', startTitle: 'Comience con el paquete Azul.', pricing: `${offerPrices.agentSetup} de configuración inicial por separado, o incluido en el paquete Azul con sitio web bilingüe y solicitudes automáticas de reseñas: ${offerPrices.packageSetup} de configuración inicial + ${offerPrices.packageMonthly} al mes. Sin contratos a largo plazo.`,
     faq: 'Preguntas frecuentes', faqTitle: 'Antes de la primera llamada.',
     faqs: [
       ['¿Reemplaza a mi equipo?', 'No. Se encarga del primer contacto y de agendar, y deja el resto en manos de su equipo.'],
-      ['¿Qué calendario usa?', 'Google Calendar durante el piloto. Puede solicitar otras herramientas de agenda, sujetas a revisión.'],
+      ['¿Qué calendario usa?', 'Google Calendar. Puede solicitar otras herramientas de agenda, sujetas a revisión.'],
       ['¿Habla español?', 'Sí. Habla inglés y español, y puede cambiar de idioma durante la llamada.'],
       ['¿Qué pasa si un prospecto no quiere recibir llamadas?', 'No se le vuelve a llamar. Un solo STOP detiene tanto las llamadas como los textos.'],
-      ['¿En qué se diferencia del servicio de contestación AI?', 'El servicio de contestación AI atiende llamadas entrantes. El agente AI de prospectos toma la iniciativa: llama a los nuevos prospectos, agenda sus citas y da seguimiento.'],
+      ['¿Necesito un sitio web nuevo?', 'No. El agente se puede conectar al formulario que ya tiene. Si también quiere un sitio nuevo, el paquete Azul lo incluye.'],
     ],
   },
 }
 
 export const leadVisualCopy = {
   en: {
-    heroLabel: 'From interest to appointment', heroAgent: 'Your AI Lead Agent', heroReady: 'Ready for the next conversation', heroTime: 'About a minute', heroPilot: 'HVAC pilot · Open for applications', flowReceived: 'Request received', flowCalling: 'A conversation begins', flowCalendar: 'An opening becomes a visit', flowSummary: 'Your booking summary', flowQualified: 'Service area confirmed', flowConfirmed: 'Confirmation sent',
+    heroLabel: 'From interest to appointment', heroAgent: 'Your speed-to-lead agent', heroReady: 'Ready for the next conversation', heroTime: 'Within seconds', heroPilot: 'Roofing + HVAC · South Florida', flowReceived: 'Request received', flowCalling: 'A conversation begins', flowCalendar: 'An opening becomes a visit', flowSummary: 'Your booking summary', flowQualified: 'Service area confirmed', flowConfirmed: 'Confirmation sent',
     example: 'Illustrative workflow', play: 'Play workflow', pause: 'Pause',
     stages: ['New lead', 'First conversation', 'Visit booked', 'Owner notified'],
     headlines: ['A request comes in.', 'A real next step starts.', 'Make room on the calendar.', 'Keep your team in the loop.'],
@@ -172,7 +172,7 @@ export const leadVisualCopy = {
     controlBody: 'Calling hours, consent, and a person when it matters.',
   },
   es: {
-    heroLabel: 'Del interés a la cita', heroAgent: 'Su agente AI de prospectos', heroReady: 'Listo para la próxima conversación', heroTime: 'Cerca de un minuto', heroPilot: 'Piloto de HVAC · Solicitudes abiertas', flowReceived: 'Solicitud recibida', flowCalling: 'Comienza una conversación', flowCalendar: 'Un espacio se convierte en visita', flowSummary: 'El resumen de su cita', flowQualified: 'Área de servicio confirmada', flowConfirmed: 'Confirmación enviada',
+    heroLabel: 'Del interés a la cita', heroAgent: 'Su agente de respuesta inmediata', heroReady: 'Listo para la próxima conversación', heroTime: 'En segundos', heroPilot: 'Techos + aire acondicionado · Sur de Florida', flowReceived: 'Solicitud recibida', flowCalling: 'Comienza una conversación', flowCalendar: 'Un espacio se convierte en visita', flowSummary: 'El resumen de su cita', flowQualified: 'Área de servicio confirmada', flowConfirmed: 'Confirmación enviada',
     example: 'Flujo ilustrativo', play: 'Reproducir flujo', pause: 'Pausar',
     stages: ['Nuevo prospecto', 'Primera conversación', 'Visita agendada', 'Dueño notificado'],
     headlines: ['Llega una solicitud.', 'Comienza el próximo paso.', 'Un espacio en el calendario.', 'Su equipo se mantiene al tanto.'],

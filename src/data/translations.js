@@ -1,4 +1,5 @@
 import { insightsCopy } from './insights.js'
+import { offerCopy } from './offer.js'
 
 const shared = {
   brand: 'azul', email: 'hello@azulwebdev.com', languages: ['EN', 'ES'],
@@ -30,15 +31,16 @@ export const translations = {
   en: {
     ...shared,
     insights: insightsCopy.en,
+    offer: offerCopy.en,
     about: {
       "meta": {
             "title": "About Azul — Built for Miami. Fluent in both.",
-            "description": "Meet Azul and founder Evelio Gonzalez. Bilingual websites, reviews, local search, and AI answering for home service businesses in Miami-Dade, Broward, and Palm Beach."
+            "description": "Meet Azul and founder Evelio Gonzalez. Bilingual websites and a speed-to-lead AI agent for roofing and HVAC companies in Miami-Dade, Broward, and Palm Beach."
       },
       "hero": {
             "eyebrow": "About Azul",
             "title": "Built for Miami.\nFluent in both.",
-            "body": "We help South Florida home service businesses grow in English and Spanish.",
+            "body": "We help South Florida roofing and HVAC companies win more jobs, in English and Spanish.",
             "cta": "Talk to the team",
             "services": "See our services"
       },
@@ -47,7 +49,7 @@ export const translations = {
             "title": "Good work shouldn’t\nget lost in translation.",
             "paragraphs": [
                   "Across Miami, contractors serve customers who speak English and Spanish. But too often, their website, review requests, ads, and phone lines only speak one language. That makes it harder for a neighbor to become a customer.",
-                  "Azul brings the growth tools a small business needs into one flat monthly plan. A clear website. Honest review requests. Local search. A helpful voice on the phone. Set up in both languages, with one team to call.",
+                  "Azul brings it together in one package. A fast, bilingual website. An AI agent that calls every new lead within seconds and books the estimate. Automatic Google review requests after each job. Set up in both languages, with one team to call.",
                   "You focus on the work. We make it easier for people to find you, reach you, and share their experience."
             ]
       },
@@ -64,19 +66,19 @@ export const translations = {
                         "body": "A flat monthly plan, without a long-term contract. We agree on the scope, setup fees, and any usage costs before you start."
                   },
                   {
-                        "title": "Built around the trades.",
-                        "body": "Roofing, HVAC, plumbing, pools, landscaping, general contracting, and pressure washing. Practical tools for businesses that work at someone’s home."
+                        "title": "Built for roofing and HVAC.",
+                        "body": "Roof repairs, replacements, AC repairs, and new installs. We know the questions a homeowner needs answered before they book an estimate."
                   },
                   {
-                        "title": "AI that keeps working.",
-                        "body": "Phone answering around the clock, scheduled review requests, and custom AI agents for everyday tasks. Clear handoffs when a person needs to step in."
+                        "title": "The first call, every time.",
+                        "body": "Homeowners hire whoever answers first. Our AI agent calls every new lead within seconds, in English or Spanish, and books the estimate on your calendar."
                   }
             ]
       },
       "serve": {
             "eyebrow": "Who we serve",
             "title": "Your neighborhood\nis our focus.",
-            "body": "Roofing and HVAC first. Built for the trades that keep South Florida running.",
+            "body": "Roofing and HVAC companies. The trades that keep South Florida running.",
             "regionLabel": "Serving South Florida",
             "regions": [
                   "Miami-Dade",
@@ -86,12 +88,7 @@ export const translations = {
             "tradeLabel": "Home service trades",
             "trades": [
                   "Roofing",
-                  "HVAC",
-                  "Plumbing",
-                  "Pool services",
-                  "Landscaping",
-                  "General contractors",
-                  "Pressure washing"
+                  "HVAC"
             ]
       },
       "how": {
@@ -108,7 +105,7 @@ export const translations = {
                   },
                   {
                         "title": "Keep doing what you do best.",
-                        "body": "The system runs each month. You handle customer calls and follow-ups; we help you track requests, reviews, and local visibility."
+                        "body": "The agent calls every new lead and books estimates on your calendar. After each job, review requests go out automatically."
                   }
             ]
       },
@@ -128,7 +125,7 @@ export const translations = {
             "items": [
                   "Plain answers. No lock-in.",
                   "Speak the customer’s language.",
-                  "Measure what matters: calls, reviews, and rankings.",
+                  "Measure what matters: leads reached and estimates booked.",
                   "A small roster. Real attention."
             ]
       },
@@ -136,9 +133,9 @@ export const translations = {
     serviceSimulation: {"label": "Interactive simulation", "play": "Play", "pause": "Pause", "replay": "Replay", "next": "Next step", "now": "now", "messages": "Messages", "date": "Monday, October 26", "reviewSteps": ["Request arrives", "Message opened", "Write a review", "Feedback sent"], "callSteps": ["Incoming call", "AI answers", "Customer explains", "Request captured"], "incoming": "Incoming call", "answer": "Answer", "mobile": "Mobile", "write": "Share your experience", "sampleReview": "Friendly team, clear communication, and a job well done.", "post": "Send sample review", "thanks": "Thank you.", "sent": "Your feedback helps your neighbors.", "received": "Request captured", "summary": "AC not cooling", "handoff": "Callback details ready for your team.", "sample": "Demo only · no message or review is sent", "callSample": "Demo only · no real call is placed", "open": "Open message", "reviewOpen": "Open review", "captured": "Service request", "ready": "Ready for follow-up"},
     serviceVisuals: {"example": "Illustrative preview", "titles": ["A good job. An honest review.", "Your next week of content.", "A better first impression.", "Be found close to home.", "Every call is an opportunity.", "Your next customer, in reach.", "The shift that never ends."], "messages": "AFTER THE JOB", "reviewRequest": "Thanks for trusting us with your home. How did we do? Share your experience with a quick review.", "reviewTitle": "Your experience matters.", "reviewBody": "Help your neighbors choose with confidence.", "leaveReview": "Leave a review", "reviewNote": "An invitation to every customer. Honest feedback welcome.", "week": "Your content calendar", "days": ["M", "T", "W", "T", "F"], "scheduled": "READY TO PUBLISH", "socialTitle": "Another roof. Another happy home.", "socialBody": "Show the work. Tell your story. Stay top of mind.", "bilingual": "English + Español", "website": "Your business, online", "responsive": "Built for every screen", "search": "Roofing services near me", "localBusiness": "Your local business", "localDetails": "Roofing · Miami, FL", "serviceArea": "South Florida", "rankingNote": "Illustrative search layout. Rankings vary.", "callStatus": "AI ASSISTANT · LISTENING", "assistant": "AZUL ASSISTANT", "assistantText": "Thanks for calling! How can I help with your home today?", "caller": "HOMEOWNER", "callerText": "My AC stopped cooling. Can I schedule a visit?", "audience": "YOUR LOCAL AUDIENCE", "sponsored": "Sponsored · Example", "adTitle": "Your roof deserves a closer look.", "adAction": "Request an estimate", "agentLog": [["2:14 AM", "Call answered in Spanish. Estimate booked."], ["6:30 AM", "Crew texted the day’s route."], ["SUN 4:05 PM", "Review request sent."]], "agentStatus": "AGENT · ON SHIFT"},
     work: {"eyebrow": "Selected work", "title": "Good businesses.\nBuilt to be seen.", "subtitle": "A selection of websites we’ve built for local businesses and our own studio. Explore the details, then see the work live.", "filterLabel": "Filter by industry", "filters": [{"value": "all", "label": "All"}, {"value": "roofing", "label": "Roofing"}, {"value": "hvac", "label": "HVAC"}, {"value": "plumbing", "label": "Plumbing"}, {"value": "pool", "label": "Pool"}, {"value": "landscaping", "label": "Landscaping"}, {"value": "wellness", "label": "Wellness"}, {"value": "insurance", "label": "Insurance"}, {"value": "medical", "label": "Medical"}, {"value": "studio", "label": "Studio"}], "countLabel": "projects", "view": "Explore project", "visit": "Visit live website", "scope": "Project focus", "empty": "Your trade could be next.", "emptyBody": "We haven’t added a project in this category yet. Explore our other work or tell us what you’re building.", "reset": "View all projects", "clients": "Businesses we’ve built for", "ctaTitle": "Let’s put your business\non the map.", "cta": "Book a free discovery call", "projects": {"aspire": {"title": "Aspire Roofing Services", "description": "A website built around roofing services, local trust, and a clear path to requesting an estimate.", "tags": ["Website design", "Responsive build"], "imageAlt": "Website preview for Aspire Roofing Services"}, "hello": {"title": "Hello You Wellness Center", "description": "A digital home for a Miami wellness clinic, making treatments easier to explore and appointments easier to find.", "tags": ["Website design", "Responsive build"], "imageAlt": "Website preview for Hello You Wellness Center"}, "caley": {"title": "Caley Insurance", "description": "A clear, approachable website helping visitors explore coverage and start a quote request.", "tags": ["Website design", "Responsive build"], "imageAlt": "Website preview for Caley Insurance"}, "sanos": {"title": "Sanos Medical Group", "description": "A bilingual website connecting patients with primary care information and appointment options.", "tags": ["Bilingual website", "Patient experience"], "imageAlt": "Website preview for Sanos Medical Group"}, "portfolio": {"title": "Founder’s Portfolio", "description": "An in-house portfolio exploring expressive typography, smooth motion, and responsive web design.", "tags": ["Studio project", "Design & motion"], "imageAlt": "Website preview for Founder’s Portfolio"}, "coatings": {"title": "110% Coatings", "description": "A bold, immersive site for a residential and commercial floor coatings studio. Interactive floor finishes, 3D previews, and a hero that sets the tone for the surfaces it sells.", "tags": ["Studio project", "Design & motion"], "imageAlt": "Website preview for 110% Coatings"}}},
-    meta: 'Azul — Bilingual AI growth for South Florida home services',
+    meta: offerCopy.en.meta.title,
     banner: { badge: 'Limited offer', headline: 'AI Lead Agent + Website Build', price: '$3,500 one-time', spots: 'Only 5 spots left', cta: 'Claim your spot', close: 'Dismiss announcement' },
-    nav: ['Home', 'Work', 'Services', 'About', 'Insights', 'Free Report'], contact: 'Contact', menu: 'Open menu', close: 'Close', skip: 'Skip to content', language: 'Choose language',
+    nav: ['Home', 'Work', 'Services', 'About', 'Free Report'], contact: 'Contact', loading: 'Loading…', menu: 'Open menu', close: 'Close', skip: 'Skip to content', language: 'Choose language',
     hero: { pause: 'Pause background', play: 'Play background', location: 'MIAMI, FL · BUILT FOR YOUR NEIGHBORHOOD', title: 'The dream starts with you.\nWe make it known.', sub: 'Bilingual AI growth for South Florida home service businesses.', scroll: 'Scroll down', note: 'MORE LOCAL TRUST. MORE OPPORTUNITY.', index: '01 — A NEW WAY TO GROW', "studio": {"eyebrow": "INDEPENDENT DIGITAL STUDIO", "pauseMotion": "Pause motion", "resumeMotion": "Resume motion", "lineOne": "Built to be", "lineTwo": "chosen.", "body": "Websites with presence. AI with purpose. Built around your next move.", "primary": "Build your next chapter", "secondary": "Explore our work", "note": "Designed with purpose. Built around your business.", "selected": "SELECTED WORK", "explore": "Explore the project", "stamp": "DESIGNED & BUILT BY", "projectLabel": "Choose a featured project", "bottom": "Good design is just the beginning.", "values": ["Distinctive design", "Smarter systems", "English + Español"]} },
     who: { photoLabel: 'OUR NEIGHBORHOOD. YOUR NEXT CUSTOMER.', photoTitle: 'Good work starts here.', photoLocation: 'SOUTH FLORIDA / USA', eyebrow: 'Who we are', title: 'Big ambition. Local roots. A smarter way to grow your business.', body: 'You’re on the roof, fixing the AC, keeping South Florida running. We bring your reviews, website, local search, and customer calls together — so your next customer can find you and reach you. In English. En español.', caption: 'SOUTH FLORIDA IS HOME. YOUR GROWTH IS PERSONAL.', image: 'A South Florida home with palm trees and a landscaped front yard', link: 'Meet Azul' },
     build: { previewLabel: 'BUILT AROUND YOUR WORK', previewNote: 'Six ways to grow. One team that knows your neighborhood.', descriptions: ['Turn finished jobs into lasting trust.', 'Keep your business in the conversation.', 'Make a strong first impression. Win the next call.', 'Get found on Google and in AI answers.', 'Give your next customer a real response.', 'Reach more of the right homeowners.'], eyebrow: 'What we build', title: 'One connected system.\nMore room to do what you do best.', body: 'Start with what you need. Grow at your pace. Flat-rate monthly plans, without long-term contracts.', waitlist: 'Waitlist', all: 'Explore our services', services: ['Review Booster', 'Social Media AI', 'Website Build', 'Found Everywhere', 'AI Answering Service', 'AI Facebook Ads'] },
@@ -274,15 +271,16 @@ export const translations = {
   es: {
     ...shared,
     insights: insightsCopy.es,
+    offer: offerCopy.es,
     about: {
       "meta": {
             "title": "Sobre Azul — Hecho para Miami. En los dos idiomas.",
-            "description": "Conozca Azul y a su fundador, Evelio Gonzalez. Sitios web, reseñas, búsqueda local y atención con IA en inglés y español para negocios de servicios en el sur de Florida."
+            "description": "Conozca Azul y a su fundador, Evelio Gonzalez. Sitios web bilingües y un agente de IA de respuesta inmediata para compañías de techos y aire acondicionado en Miami-Dade, Broward y Palm Beach."
       },
       "hero": {
             "eyebrow": "Sobre Azul",
             "title": "Hecho para Miami.\nEn los dos idiomas.",
-            "body": "Ayudamos a los negocios de servicios para el hogar del sur de Florida a crecer en inglés y español.",
+            "body": "Ayudamos a las compañías de techos y aire acondicionado del sur de Florida a ganar más trabajos, en inglés y en español.",
             "cta": "Hable con el equipo",
             "services": "Vea nuestros servicios"
       },
@@ -291,7 +289,7 @@ export const translations = {
             "title": "El buen trabajo\nno debe perderse entre idiomas.",
             "paragraphs": [
                   "En Miami, los contratistas atienden a clientes que hablan inglés y español. Pero muchas veces su sitio web, sus solicitudes de reseña, sus anuncios y su línea telefónica solo funcionan en un idioma. Así se pierden oportunidades con la gente de su propia comunidad.",
-                  "Azul reúne las herramientas que necesita un negocio pequeño para crecer en un plan mensual de precio fijo. Un sitio claro. Solicitudes de reseñas honestas. Presencia en búsquedas locales. Una voz que atiende el teléfono. Todo en los dos idiomas, con un solo equipo a quien llamar.",
+                  "Azul lo reúne todo en un solo paquete. Un sitio web rápido y bilingüe. Un agente de IA que llama a cada nuevo cliente en segundos y agenda el estimado. Solicitudes automáticas de reseñas en Google después de cada trabajo. Todo en los dos idiomas, con un solo equipo a quien llamar.",
                   "Usted se dedica a su trabajo. Nosotros hacemos que sea más fácil encontrarlo, contactarlo y compartir la experiencia."
             ]
       },
@@ -308,19 +306,19 @@ export const translations = {
                         "body": "Un plan mensual sin contrato a largo plazo. Acordamos el alcance, la configuración inicial y cualquier costo de uso antes de comenzar."
                   },
                   {
-                        "title": "Hecho para su oficio.",
-                        "body": "Techos, aire acondicionado, plomería, piscinas, jardinería, construcción y limpieza a presión. Herramientas prácticas para quienes trabajan en los hogares de nuestra comunidad."
+                        "title": "Hecho para techos y aire acondicionado.",
+                        "body": "Reparación y reemplazo de techos, reparación e instalación de aire acondicionado. Conocemos las preguntas que un cliente necesita resolver antes de agendar un estimado."
                   },
                   {
-                        "title": "IA que sigue trabajando.",
-                        "body": "Atención telefónica las 24 horas, solicitudes de reseña programadas y agentes de IA para tareas diarias. Con una forma clara de pasar la atención a una persona cuando hace falta."
+                        "title": "La primera llamada, siempre.",
+                        "body": "Los dueños de casa contratan a quien contesta primero. Nuestro agente de IA llama a cada nuevo cliente en segundos, en inglés o en español, y agenda el estimado en su calendario."
                   }
             ]
       },
       "serve": {
             "eyebrow": "A quiénes ayudamos",
             "title": "Nos enfocamos\nen su comunidad.",
-            "body": "Empezamos con techos y aire acondicionado. Trabajamos para los oficios que mantienen en marcha al sur de Florida.",
+            "body": "Compañías de techos y aire acondicionado. Los oficios que mantienen en marcha al sur de Florida.",
             "regionLabel": "Al servicio del sur de Florida",
             "regions": [
                   "Miami-Dade",
@@ -330,12 +328,7 @@ export const translations = {
             "tradeLabel": "Servicios para el hogar",
             "trades": [
                   "Techos",
-                  "Aire acondicionado (HVAC)",
-                  "Plomería",
-                  "Servicios de piscinas",
-                  "Jardinería",
-                  "Contratistas generales",
-                  "Limpieza a presión"
+                  "Aire acondicionado"
             ]
       },
       "how": {
@@ -352,7 +345,7 @@ export const translations = {
                   },
                   {
                         "title": "Usted sigue haciendo lo suyo.",
-                        "body": "El sistema funciona mes a mes. Usted atiende a sus clientes; nosotros le ayudamos a dar seguimiento a las solicitudes, las reseñas y su presencia local."
+                        "body": "El agente llama a cada nuevo cliente y agenda los estimados en su calendario. Después de cada trabajo, las solicitudes de reseña salen solas."
                   }
             ]
       },
@@ -372,7 +365,7 @@ export const translations = {
             "items": [
                   "Respuestas claras. Sin ataduras.",
                   "Hablar el idioma del cliente.",
-                  "Medir lo que importa: llamadas, reseñas y posicionamiento.",
+                  "Medir lo que importa: clientes contactados y estimados agendados.",
                   "Pocos clientes. Atención de verdad."
             ]
       },
@@ -380,9 +373,9 @@ export const translations = {
     serviceSimulation: {"label": "Simulación interactiva", "play": "Reproducir", "pause": "Pausar", "replay": "Repetir", "next": "Siguiente paso", "now": "ahora", "messages": "Mensajes", "date": "Lunes, 26 de octubre", "reviewSteps": ["Llega la solicitud", "Mensaje abierto", "Escribe una reseña", "Opinión enviada"], "callSteps": ["Llamada entrante", "La IA contesta", "El cliente explica", "Solicitud registrada"], "incoming": "Llamada entrante", "answer": "Contestar", "mobile": "Celular", "write": "Comparte tu experiencia", "sampleReview": "Un equipo amable, buena comunicación y un trabajo bien hecho.", "post": "Enviar reseña de ejemplo", "thanks": "Gracias.", "sent": "Tu opinión ayuda a tus vecinos.", "received": "Solicitud registrada", "summary": "El aire no enfría", "handoff": "Los datos están listos para que tu equipo devuelva la llamada.", "sample": "Demo · no se envían mensajes ni reseñas", "callSample": "Demo · no se realiza ninguna llamada", "open": "Abrir mensaje", "reviewOpen": "Abrir reseña", "captured": "Solicitud de servicio", "ready": "Lista para seguimiento"},
     serviceVisuals: {"example": "Vista ilustrativa", "titles": ["Un buen trabajo. Una reseña honesta.", "Tu próxima semana de contenido.", "Una mejor primera impresión.", "Que te encuentren cerca de casa.", "Cada llamada es una oportunidad.", "Tu próximo cliente, a tu alcance.", "El turno que nunca termina."], "messages": "DESPUÉS DEL TRABAJO", "reviewRequest": "Gracias por confiar en nosotros. ¿Cómo te fue? Cuéntanos tu experiencia con una reseña rápida.", "reviewTitle": "Tu experiencia cuenta.", "reviewBody": "Ayuda a tus vecinos a elegir con confianza.", "leaveReview": "Dejar una reseña", "reviewNote": "Invitamos a cada cliente. Toda opinión honesta cuenta.", "week": "Tu calendario de contenido", "days": ["L", "M", "X", "J", "V"], "scheduled": "LISTO PARA PUBLICAR", "socialTitle": "Otro techo. Otro hogar feliz.", "socialBody": "Muestra tu trabajo. Cuenta tu historia. Mantente presente.", "bilingual": "Inglés + Español", "website": "Tu negocio, en línea", "responsive": "Para cualquier pantalla", "search": "Servicios de techos cerca de mí", "localBusiness": "Tu negocio local", "localDetails": "Techos · Miami, FL", "serviceArea": "Sur de Florida", "rankingNote": "Ejemplo de búsqueda. Las posiciones varían.", "callStatus": "ASISTENTE CON IA · ESCUCHANDO", "assistant": "ASISTENTE AZUL", "assistantText": "¡Gracias por llamar! ¿En qué te podemos ayudar hoy?", "caller": "CLIENTE", "callerText": "Mi aire dejó de enfriar. ¿Puedo agendar una visita?", "audience": "TU AUDIENCIA LOCAL", "sponsored": "Publicidad · Ejemplo", "adTitle": "Tu techo merece una revisión.", "adAction": "Pide un estimado", "agentLog": [["2:14 AM", "Llamada atendida en español. Estimado agendado."], ["6:30 AM", "Ruta del día enviada a la cuadrilla."], ["DOM 4:05 PM", "Solicitud de reseña enviada."]], "agentStatus": "AGENTE · EN TURNO"},
     work: {"eyebrow": "Proyectos seleccionados", "title": "Buenos negocios.\nHechos para destacar.", "subtitle": "Una selección de sitios que creamos para negocios locales y nuestro estudio. Conoce cada proyecto y visita la web.", "filterLabel": "Filtrar por industria", "filters": [{"value": "all", "label": "Todos"}, {"value": "roofing", "label": "Techos"}, {"value": "hvac", "label": "Aire acondicionado"}, {"value": "plumbing", "label": "Plomería"}, {"value": "pool", "label": "Piscinas"}, {"value": "landscaping", "label": "Jardinería"}, {"value": "wellness", "label": "Bienestar"}, {"value": "insurance", "label": "Seguros"}, {"value": "medical", "label": "Salud"}, {"value": "studio", "label": "Estudio"}], "countLabel": "proyectos", "view": "Ver proyecto", "visit": "Visitar sitio web", "scope": "Enfoque del proyecto", "empty": "Tu oficio puede ser el próximo.", "emptyBody": "Todavía no agregamos proyectos en esta categoría. Explora los demás o cuéntanos qué estás creando.", "reset": "Ver todos los proyectos", "clients": "Negocios para los que creamos", "ctaTitle": "Hagamos que tu negocio\nse dé a conocer.", "cta": "Agenda una llamada gratis", "projects": {"aspire": {"title": "Aspire Roofing Services", "description": "Una web enfocada en servicios de techos, confianza local y un camino claro para pedir un estimado.", "tags": ["Diseño web", "Diseño adaptable"], "imageAlt": "Vista previa del sitio de Aspire Roofing Services"}, "hello": {"title": "Hello You Wellness Center", "description": "Una web para una clínica de bienestar en Miami, con tratamientos fáciles de explorar y acceso a citas.", "tags": ["Diseño web", "Diseño adaptable"], "imageAlt": "Vista previa del sitio de Hello You Wellness Center"}, "caley": {"title": "Caley Insurance", "description": "Una web clara y accesible para conocer las coberturas y empezar una solicitud de cotización.", "tags": ["Diseño web", "Diseño adaptable"], "imageAlt": "Vista previa del sitio de Caley Insurance"}, "sanos": {"title": "Sanos Medical Group", "description": "Una web bilingüe que conecta a los pacientes con información de atención primaria y opciones para agendar citas.", "tags": ["Web bilingüe", "Experiencia del paciente"], "imageAlt": "Vista previa del sitio de Sanos Medical Group"}, "portfolio": {"title": "Portafolio del fundador", "description": "Un portafolio propio que combina tipografía expresiva, movimiento fluido y diseño adaptable.", "tags": ["Proyecto propio", "Diseño y movimiento"], "imageAlt": "Vista previa del sitio de Portafolio del fundador"}, "coatings": {"title": "110% Coatings", "description": "Un sitio audaz e inmersivo para un estudio de recubrimientos de piso residencial y comercial. Acabados interactivos, vistas 3D y un hero que marca el tono de las superficies que vende.", "tags": ["Proyecto propio", "Diseño y movimiento"], "imageAlt": "Vista previa del sitio de 110% Coatings"}}},
-    meta: 'Azul — Crecimiento con IA para negocios de servicios del sur de Florida',
+    meta: offerCopy.es.meta.title,
     banner: { badge: 'Oferta limitada', headline: 'Agente IA de clientes + Sitio web', price: '$3,500 pago único', spots: 'Solo quedan 5 cupos', cta: 'Reserve su cupo', close: 'Cerrar anuncio' },
-    nav: ['Inicio', 'Proyectos', 'Servicios', 'Nosotros', 'Ideas', 'Reporte gratis'], contact: 'Contacto', menu: 'Abrir menú', close: 'Cerrar', skip: 'Ir al contenido', language: 'Elegir idioma',
+    nav: ['Inicio', 'Proyectos', 'Servicios', 'Nosotros', 'Reporte gratis'], contact: 'Contacto', loading: 'Cargando…', menu: 'Abrir menú', close: 'Cerrar', skip: 'Ir al contenido', language: 'Elegir idioma',
     hero: { pause: 'Pausar fondo', play: 'Reproducir fondo', location: 'MIAMI, FL · CREADO PARA TU COMUNIDAD', title: 'El sueño empieza contigo.\nNosotros lo damos a conocer.', sub: 'Crecimiento con IA, en dos idiomas, para negocios de servicios del sur de Florida.', scroll: 'Sigue bajando', note: 'MÁS CONFIANZA LOCAL. MÁS OPORTUNIDADES.', index: '01 — OTRA FORMA DE CRECER', "studio": {"eyebrow": "ESTUDIO DIGITAL INDEPENDIENTE", "pauseMotion": "Pausar movimiento", "resumeMotion": "Reanudar movimiento", "lineOne": "Hecho para ser", "lineTwo": "elegido.", "body": "Sitios web con presencia. IA con propósito. Construidos para tu próximo paso.", "primary": "Construye tu próximo capítulo", "secondary": "Mira nuestro trabajo", "note": "Diseñado con intención. Creado para tu negocio.", "selected": "TRABAJOS DESTACADOS", "explore": "Explora el proyecto", "stamp": "DISEÑO Y DESARROLLO", "projectLabel": "Elige un proyecto destacado", "bottom": "El buen diseño es solo el comienzo.", "values": ["Diseño que destaca", "Sistemas más ágiles", "English + Español"]} },
     who: { photoLabel: 'NUESTRA COMUNIDAD. TU PRÓXIMO CLIENTE.', photoTitle: 'El buen trabajo empieza aquí.', photoLocation: 'SUR DE FLORIDA / EE. UU.', eyebrow: 'Quiénes somos', title: 'Grandes metas. Raíces locales. Una forma más inteligente de crecer.', body: 'Tú estás en el techo, arreglando el aire, manteniendo al sur de Florida en marcha. Nosotros conectamos tus reseñas, tu web, las búsquedas locales y tus llamadas para que tu próximo cliente te encuentre y te contacte. En inglés. En español.', caption: 'EL SUR DE FLORIDA ES NUESTRA CASA. TU CRECIMIENTO NOS IMPORTA.', image: 'Una casa del sur de Florida con palmeras y un jardín cuidado', link: 'Conoce Azul' },
     build: { previewLabel: 'PENSADO PARA TU TRABAJO', previewNote: 'Seis formas de crecer. Un equipo que conoce tu comunidad.', descriptions: ['Convierte cada trabajo en más confianza.', 'Mantén tu negocio presente en las redes.', 'Una buena primera impresión. Una llamada más.', 'Que te encuentren en Google y en la AI.', 'Dale una respuesta a tu próximo cliente.', 'Llega a los dueños de casa que te necesitan.'], eyebrow: 'Lo que creamos', title: 'Un sistema conectado.\nMás tiempo para hacer lo tuyo.', body: 'Empieza con lo que necesitas. Crece a tu ritmo. Planes mensuales de tarifa fija, sin contratos a largo plazo.', waitlist: 'Lista de espera', all: 'Explora nuestros servicios', services: ['Impulso de reseñas', 'Redes sociales con IA', 'Diseño de páginas web', 'Visible en Google y la AI', 'Atención de llamadas con IA', 'Anuncios de Facebook con IA'] },

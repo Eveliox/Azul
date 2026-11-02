@@ -67,7 +67,7 @@ export default function InsightArticle({ article }) {
         {text.sections.map(section => <section id={section.id} data-reading-section key={section.id}><h2>{section.title}</h2>{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</section>)}
         <section className="insight-checklist" id="article-checklist" data-reading-section><span className="insights-kicker">{p.checklist}</span><h2>{text.takeaway}</h2><p>{p.checklistHint}</p><div>{text.checklist.map((item, i) => <label key={i}><input type="checkbox" checked={checked.includes(i)} onChange={e => setChecked(previous => e.target.checked ? [...previous, i] : previous.filter(value => value !== i))}/><span>{item}</span></label>)}</div><p className="insight-checklist-count" role="status">{checked.length} / {text.checklist.length} {p.complete}</p></section>
         {article.sources.length > 0 && <section className="insight-sources"><h2>{p.sources}</h2><ul>{article.sources.map(source => <li key={source.url}><a href={lang === 'es' && source.url.includes('support.google.com') ? source.url.replace('hl=en', 'hl=es') : source.url} target="_blank" rel="noreferrer">{source[lang]}<Arrow /></a></li>)}</ul></section>}
-        <Link className="text-link insight-service-link" to={`/services/${article.service}`}>{p.service}<Arrow /></Link>
+        <Link className="text-link insight-service-link" to="/services">{p.service}<Arrow /></Link>
       </article>
     </div>
     <section className="section insight-related"><SplitText>{p.relatedTitle}</SplitText><div className="insights-grid">{related.map(item => <InsightCard key={item.slug} article={item}/>)}</div></section>

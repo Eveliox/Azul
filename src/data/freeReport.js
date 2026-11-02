@@ -18,12 +18,12 @@ export const freeReportCopy = {
     preview: {
       eyebrow: 'Your score', outOf: '/100', found: n => n === 1 ? 'We found 1 gap.' : `We found ${n} gaps.`, none: 'We didn’t find any major gaps.',
       top: 'Your biggest gaps', more: n => n === 1 ? '+ 1 more gap in your full report' : `+ ${n} more gaps in your full report`,
-      gateTitle: 'Get your full report', gateBody: 'See every gap, how you compare with each competitor, what’s already working, and exactly which Azul service fixes what.',
+      gateTitle: 'Get your full report', gateBody: 'See every gap, how you compare with each competitor, what’s already working, and how Azul can help.',
       name: 'Your name', email: 'Email', phone: 'Phone (optional)', consent: 'I agree that Azul may email me this report and contact me about it. I can unsubscribe anytime.', unlock: 'Unlock my full report', unlocking: 'Unlocking…',
     },
     report: {
       eyebrow: 'Full report', for: 'Prepared for', compare: 'You vs. the top 3 near you', compareNote: 'The first three businesses Google shows for your trade near you.', you: 'You', avg: 'Top 3 average', reviews: 'Reviews', rating: 'Rating',
-      gaps: 'Every gap we found', working: 'What’s already working', help: 'How Azul can help', helpBody: 'Each gap above maps to one of these services. Start with one, add more when you’re ready.', fixes: n => n === 1 ? 'Fixes 1 gap' : `Fixes ${n} gaps`, from: 'From', month: '/mo', soon: 'Coming soon', learn: 'Learn more',
+      gaps: 'Every gap we found', working: 'What’s already working', help: 'How Azul can help', helpBody: 'The Azul package gives you a bilingual website, an AI agent that calls every new lead within seconds, and automatic Google review requests.',
       ctaTitle: 'Want help closing these gaps?', ctaBody: 'Book a free 30-minute call. We’ll go through this report with you, in English or Spanish, and tell you what we’d fix first.', cta: 'Book a free call', again: 'Run another report',
       sources: date => `Data from Google Maps and your website, checked ${date}. Numbers change over time. Azul doesn’t guarantee rankings, ratings or review counts.`,
       notChecked: { google: 'We couldn’t check a Google listing for this business.', website: 'We couldn’t check a website for this business.' },
@@ -76,12 +76,12 @@ export const freeReportCopy = {
     preview: {
       eyebrow: 'Tu puntuación', outOf: '/100', found: n => n === 1 ? 'Encontramos 1 oportunidad de mejora.' : `Encontramos ${n} oportunidades de mejora.`, none: 'No encontramos problemas importantes.',
       top: 'Lo más importante', more: n => n === 1 ? '+ 1 punto más en tu reporte completo' : `+ ${n} puntos más en tu reporte completo`,
-      gateTitle: 'Recibe tu reporte completo', gateBody: 'Mira cada punto a mejorar, cómo te comparas con cada competidor, lo que ya funciona y qué servicio de Azul resuelve cada cosa.',
+      gateTitle: 'Recibe tu reporte completo', gateBody: 'Mira cada punto a mejorar, cómo te comparas con cada competidor, lo que ya funciona y cómo te puede ayudar Azul.',
       name: 'Tu nombre', email: 'Correo electrónico', phone: 'Teléfono (opcional)', consent: 'Acepto que Azul me envíe este reporte por correo y me contacte sobre él. Puedo cancelar cuando quiera.', unlock: 'Ver mi reporte completo', unlocking: 'Abriendo…',
     },
     report: {
       eyebrow: 'Reporte completo', for: 'Preparado para', compare: 'Tú vs. los 3 primeros cerca de ti', compareNote: 'Los tres primeros negocios que Google muestra para tu oficio cerca de ti.', you: 'Tú', avg: 'Promedio de los 3', reviews: 'Reseñas', rating: 'Calificación',
-      gaps: 'Todo lo que encontramos', working: 'Lo que ya funciona', help: 'Cómo te ayuda Azul', helpBody: 'Cada punto de arriba corresponde a uno de estos servicios. Empieza con uno y agrega más cuando quieras.', fixes: n => n === 1 ? 'Resuelve 1 punto' : `Resuelve ${n} puntos`, from: 'Desde', month: '/mes', soon: 'Próximamente', learn: 'Ver más',
+      gaps: 'Todo lo que encontramos', working: 'Lo que ya funciona', help: 'Cómo te ayuda Azul', helpBody: 'El paquete Azul te da un sitio web bilingüe, un agente de IA que llama a cada nuevo cliente en segundos y solicitudes automáticas de reseñas en Google.',
       ctaTitle: '¿Quieres ayuda para mejorar esto?', ctaBody: 'Reserva una llamada gratis de 30 minutos. Revisamos este reporte contigo, en español o inglés, y te decimos qué arreglaríamos primero.', cta: 'Reservar llamada gratis', again: 'Hacer otro reporte',
       sources: date => `Datos de Google Maps y de tu página web, revisados el ${date}. Los números cambian con el tiempo. Azul no garantiza posiciones, calificaciones ni cantidad de reseñas.`,
       notChecked: { google: 'No pudimos revisar un perfil de Google para este negocio.', website: 'No pudimos revisar una página web para este negocio.' },
