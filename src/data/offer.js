@@ -1,12 +1,13 @@
 // The Azul package for roofing and HVAC companies. Prices render exactly as written in both languages.
 export const offerPrices = {
-  packageSetup: '$2,500',
-  packageMonthly: '$120',
-  // TODO: set the standard monthly price (e.g. '$___') to show $120 as the founding price next to it. Hidden while null.
+  packageSetup: '$4,500',
+  packageMonthly: '$450',
+  // Set a standard monthly price (e.g. '$___') to show packageMonthly as the founding price next to it. Hidden while null.
   packageStandardMonthly: null,
-  // TODO: confirm whether either standalone service also has a monthly fee.
+  // The website alone is a one-time price; the agent alone has a setup fee and a monthly fee.
   websiteSetup: '$2,000',
-  agentSetup: '$1,500',
+  agentSetup: '$3,500',
+  agentMonthly: '$450',
 }
 
 // Copy for the homepage, services page, contact page and banner. Exposed as `c.offer`.
@@ -64,6 +65,7 @@ export const offerCopy = {
       body: 'Built for roofing and HVAC companies in Miami-Dade, Broward, and Palm Beach. Everything works in English and Spanish. No long-term contracts.',
       recommended: 'Best value',
       setup: 'setup',
+      oneTime: 'one-time',
       website: {
         name: 'Website build',
         body: 'A fast, bilingual site built to turn searches into estimate requests.',
@@ -158,6 +160,7 @@ export const offerCopy = {
       body: 'Hecho para compañías de techos y aire acondicionado en Miami-Dade, Broward y Palm Beach. Todo funciona en inglés y en español. Sin contratos a largo plazo.',
       recommended: 'Mejor valor',
       setup: 'configuración inicial',
+      oneTime: 'pago único',
       website: {
         name: 'Sitio web',
         body: 'Un sitio rápido y bilingüe, hecho para convertir búsquedas en solicitudes de estimado.',

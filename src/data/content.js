@@ -127,7 +127,7 @@ export const content = {
           bullets: ['24/7 bilingual AI call answering', 'Customer capture & call summaries', 'After-hours coverage'],
         },
         {
-          price: '$120/mo + $2,500 one-time',
+          price: '$2,000 one-time',
           title: 'Website Build',
           badge: 'Free website mockup',
           description:
@@ -201,8 +201,8 @@ export const content = {
         },
         {
           title: 'Website Build',
-          price: '$120',
-          priceNote: '+ $2,500 one-time',
+          price: '$2,000',
+          priceNote: 'one-time',
           badge: 'Free mockup',
           features: [
             'Company site, 8–15 pages',
@@ -521,7 +521,7 @@ export const content = {
           bullets: ['Contestación bilingüe AI 24/7', 'Captura de cliente & resúmenes', 'Cobertura fuera de horario'],
         },
         {
-          price: '$120/mes + $2,500 pago único',
+          price: '$2,000 pago único',
           title: 'Sitio Web',
           badge: 'Mockup gratis',
           description:
@@ -595,8 +595,8 @@ export const content = {
         },
         {
           title: 'Sitio Web',
-          price: '$120',
-          priceNote: '+ $2,500 pago único',
+          price: '$2,000',
+          priceNote: 'pago único',
           badge: 'Mockup gratis',
           features: [
             'Sitio de empresa, 8–15 páginas',

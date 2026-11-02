@@ -18,8 +18,8 @@ for (const lang of ['en', 'es']) {
     assert.equal(tiers.filter((t) => !t.comingSoon).length, 4)
     assert.equal(tiers.filter((t) => t.comingSoon).length, 2)
     const website = tiers[3]
-    assert.equal(website.price, '$120')
-    assert.match(website.priceNote, /2,500/)
+    assert.equal(website.price, '$2,000')
+    assert.match(website.priceNote, /one-time|pago único/)
     assert.equal(content[lang].pricing.bundle.crossed, null)
   })
 }

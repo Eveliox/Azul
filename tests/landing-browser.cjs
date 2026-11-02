@@ -31,8 +31,8 @@ async function checkToggle(page, selector, en, es) {
   assert.equal(await page.locator('.offer-steps > li').count(), 3)
   assert.equal(await page.locator('.offer-items > li').count(), 3)
   assert.equal(await page.locator('#pricing .offer-card').count(), 1)
-  assert.match(await page.locator('#pricing .offer-price').innerText(), /\$120/)
-  assert.match(await page.locator('#pricing .offer-setup').innerText(), /\$2,500/)
+  assert.match(await page.locator('#pricing .offer-price').innerText(), /\$450/)
+  assert.match(await page.locator('#pricing .offer-setup').innerText(), /\$4,500/)
   assert.equal(await page.locator('#faq .faq button').count(), 5)
   assert.ok(await page.locator('#how-it-works a', { hasText: 'Book a call' }).count())
   assert.equal(await page.locator('a[href="#demo"], a:has-text("Try the demo"), .ai-pill').count(), 0, 'no demo CTAs until a real demo exists')
@@ -65,12 +65,14 @@ async function checkToggle(page, selector, en, es) {
   assert.ok(await page.locator('.lab-call-window').isVisible())
   await page.keyboard.press('ArrowRight')
   assert.ok(await page.locator('.lab-review-window').isVisible())
-  for (const [index, price] of [[0, '$120'], [1, '$2,000'], [2, '$1,500']]) {
+  // [tab, big price, setup fee under it (null = one-time price, no monthly)]
+  for (const [index, price, setup] of [[0, '$450', '$4,500'], [1, '$2,000', null], [2, '$450', '$3,500']]) {
     await page.locator(`#plan-tab-${index}`).click()
     assert.equal(await page.locator('.lab-price-value strong').innerText(), price)
+    const note = await page.locator('.lab-price-note').innerText()
+    if (setup) assert.ok(note.includes(setup), `plan ${index} shows ${setup} setup`)
+    else assert.ok(!/\$/.test(note), `plan ${index} has no extra fee`)
   }
-  await page.locator('#plan-tab-0').click()
-  assert.match(await page.locator('.lab-price-note').innerText(), /2,500/)
   await page.locator('.lab-faq summary').first().click()
   assert.notEqual(await page.locator('.lab-faq details').first().getAttribute('open'), null)
 

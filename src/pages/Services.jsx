@@ -35,6 +35,7 @@ export default function Services(){
   const standalone=plan===1?c.offer.services.website:c.offer.services.agent
   const planName=plan===0?c.offer.pricing.name:standalone.name
   const includes=plan===0?c.offer.pricing.includes:standalone.items
+  const price=[{value:offerPrices.packageMonthly,unit:c.offer.pricing.month,setup:offerPrices.packageSetup},{value:offerPrices.websiteSetup,unit:c.offer.services.oneTime},{value:offerPrices.agentMonthly,unit:c.offer.pricing.month,setup:offerPrices.agentSetup}][plan]
   return <div className="services-lab">
     <section className="lab-hero lab-container">
       <h1>{t.title}<br/><span>{t.accent}</span></h1>
@@ -69,7 +70,7 @@ export default function Services(){
       <Tabs labels={t.plans} selected={plan} onSelect={setPlan} name="plan"/>
       <div className="lab-price-panel lab-window" role="tabpanel" tabIndex={0} id={`plan-panel-${plan}`} aria-labelledby={`plan-tab-${plan}`}>
         <div className="lab-price-summary"><span className="lab-micro">0{plan+1} / {t.plans[plan]}</span><h3>{planName}</h3><p>{plan===0?t.packageBody:standalone.body}</p>
-          <div className="lab-price-box"><div className="lab-price-heading"><span aria-hidden="true">$</span><span>{c.offer.pricing.eyebrow}</span></div><div className="lab-price-value"><strong>{plan===0?offerPrices.packageMonthly:plan===1?offerPrices.websiteSetup:offerPrices.agentSetup}</strong><span>{plan===0?c.offer.pricing.month:c.offer.services.setup}</span></div><div className="lab-price-note">{plan===0?<><span>{t.setup}</span><b>{offerPrices.packageSetup}</b></>:<span>{t.standaloneNote}</span>}</div></div>
+          <div className="lab-price-box"><div className="lab-price-heading"><span aria-hidden="true">$</span><span>{c.offer.pricing.eyebrow}</span></div><div className="lab-price-value"><strong>{price.value}</strong><span>{price.unit}</span></div><div className="lab-price-note">{price.setup?<><span>{t.setup}</span><b>{price.setup}</b></>:<span>{t.standaloneNote}</span>}</div></div>
         </div>
         <div className="lab-price-includes"><p className="lab-micro">{t.includes}</p><ul>{includes.map(item=><li key={item}><span aria-hidden="true">+</span>{item}</li>)}</ul>{plan===0&&<p className="lab-terms">{c.offer.pricing.terms}</p>}<BookButton label={c.offer.ctas.book}/></div>
       </div>
