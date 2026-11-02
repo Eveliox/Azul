@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/cookies",
+      "destination": "/privacy#cookies",
+      "permanent": true
+    },
+    {
       "source": "/services/local-proof-seo",
       "destination": "/services",
       "permanent": true

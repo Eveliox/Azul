@@ -1,4 +1,5 @@
 import { leadAgentCopy } from '../../data/leadAgent'
+import { legalCopy } from '../../data/legal'
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLanguage } from '../../contexts/LanguageContext'
@@ -9,7 +10,7 @@ export function PageMetadata() {
   const { c, lang } = useLanguage()
   useEffect(() => {
     const path = pathname.replace(/\/$/, '')
-    const routeMeta = { '/services': c.offer.servicesMeta, '/contact': c.offer.contactMeta }
+    const routeMeta = { '/services': c.offer.servicesMeta, '/contact': c.offer.contactMeta, '/privacy': legalCopy[lang].privacy.meta, '/terms': legalCopy[lang].terms.meta }
     const meta = routeMeta[path] || (path === '/services/ai-lead-agent' ? leadAgentCopy[lang].meta : path === '/about' ? c.about.meta : null)
     document.title = meta?.title || c.meta
     let description = document.querySelector('meta[name="description"]')

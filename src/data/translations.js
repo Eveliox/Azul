@@ -149,7 +149,6 @@ export const translations = {
     cookie: { title: 'A little about cookies.', body: 'We save your language and cookie preferences on this device. Optional analytics stay off unless you accept.', accept: 'Accept', deny: 'Deny', manage: 'Manage', save: 'Save preferences', necessary: 'Essential preferences (always on)', analytics: 'Allow optional analytics', reopen: 'Cookie preferences' },
     ai: { label: 'Talk to our AI', title: 'Your next conversation starts here.', body: 'Our bilingual voice assistant is coming soon. In the meantime, book a conversation with the Azul team.', cta: 'Talk to the team' },
     pending: { title: 'Good things are taking shape.', body: 'This page is coming next. Let’s talk about what your business needs today.', home: 'Back to home', label: 'Coming soon' },
-    legal: { title: 'Policy information', body: 'Full policies will be published before lead collection launches. This preview stores language and cookie preferences locally. No optional analytics are installed.' },
     servicesPage: {
       eyebrow: 'Services', title: 'Seven ways to grow.\nOne local team behind all of them.',
       body: 'Pick one or connect them all. Everything we build works in English and Spanish, on flat monthly plans without long-term contracts.',
@@ -389,7 +388,6 @@ export const translations = {
     cookie: { title: 'Hablemos de cookies.', body: 'Guardamos tus preferencias de idioma y cookies en este dispositivo. La analítica opcional permanece desactivada hasta que la aceptes.', accept: 'Aceptar', deny: 'Rechazar', manage: 'Configurar', save: 'Guardar preferencias', necessary: 'Preferencias esenciales (siempre activas)', analytics: 'Permitir analítica opcional', reopen: 'Preferencias de cookies' },
     ai: { label: 'Habla con nuestra IA', title: 'Tu próxima conversación empieza aquí.', body: 'Nuestro asistente de voz bilingüe estará disponible pronto. Mientras tanto, agenda una conversación con el equipo de Azul.', cta: 'Habla con el equipo' },
     pending: { title: 'Lo bueno viene en camino.', body: 'Esta página estará lista pronto. Hablemos de lo que tu negocio necesita hoy.', home: 'Volver al inicio', label: 'Próximamente' },
-    legal: { title: 'Información de políticas', body: 'Publicaremos las políticas completas antes de activar los formularios. Esta vista previa guarda tus preferencias de idioma y cookies en tu dispositivo. No hay analítica opcional instalada.' },
     servicesPage: {
       eyebrow: 'Servicios', title: 'Siete formas de crecer.\nUn mismo equipo local detrás.',
       body: 'Elige uno o conéctalos todos. Todo lo que creamos funciona en inglés y en español, con planes mensuales de tarifa fija y sin contratos a largo plazo.',
