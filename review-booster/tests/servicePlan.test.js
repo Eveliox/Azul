@@ -2,14 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { MONTHLY, MONTHLY_SEO, DELIVERY, SERVICES, SERVICE_IDS, SETUP, UPCOMING, monthId, planKey, readPlan, reviewEvents } from '../src/components/servicePlan.js'
 
-test('services match the API list; every service has setup + delivery copy; SEO and Social have eight posts each', () => {
+test('current services match the API list and have setup and delivery copy', () => {
   assert.deepEqual(SERVICES.map((s) => s.id), SERVICE_IDS)
   for (const id of SERVICE_IDS) if (id !== 'reviews') { assert.ok(SETUP[id]?.length, `${id} setup`); assert.ok(DELIVERY[id], `${id} delivery copy`) }
   assert.equal(MONTHLY.seo.filter((t) => t.id.startsWith('seo-post-')).length, 8)
   const tasks = [...Object.values(SETUP).flat(), ...Object.values(MONTHLY).flat()]
   assert.equal(new Set(tasks.map((t) => t.id)).size, tasks.length, 'task ids must be unique across all checklists')
   for (const u of UPCOMING) assert.ok(!SERVICE_IDS.includes(u.id), `${u.id} is coming soon and must not be subscribable`)
-  assert.deepEqual(UPCOMING.map((u) => u.id), ['social', 'ads'])
+  assert.deepEqual(UPCOMING.map((u) => u.id), [])
 })
 test('plans isolate business, demo/live, month, and setup', () => {
   assert.equal(monthId(new Date(2026, 0, 15)), '2026-01')

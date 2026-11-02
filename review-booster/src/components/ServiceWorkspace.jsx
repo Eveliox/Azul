@@ -4,8 +4,9 @@ import AgentStudio from './AgentStudio.jsx'
 import { Icon } from './DashboardVisuals.jsx'
 import { SERVICES, UPCOMING, SETUP, MONTHLY, DELIVERY, activeServices, monthId, planKey, readPlan, reviewEvents } from './servicePlan.js'
 import './service-workspace.css'
+import { WindowBar, PixelArrow } from './StudioVisuals.jsx'
 
-const ALL_SETUP = Object.values(SETUP).flat()
+const ALL_SETUP = SERVICES.flatMap(s => SETUP[s.id] || [])
 const ALL_MONTHLY = Object.entries(MONTHLY).flatMap(([service, tasks]) => tasks.map((t) => ({ ...t, service })))
 const months = Array.from({ length: 12 }, (_, i) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); return monthId(d) })
 
@@ -52,7 +53,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
   const isOverview = view === 'overview'
   const service = SERVICES.find((s) => s.id === view)
   const included = activeServices(client, isMaster)
-  const subscribed = client.services || []
+  const subscribed = activeServices(client, false)
   const visible = SERVICES.filter((s) => included.includes(s.id))
   const locked = SERVICES.filter((s) => !subscribed.includes(s.id))
   const selectedServices = filter === 'all' ? visible : visible.filter((s) => s.id === filter)
@@ -62,7 +63,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
     ...ALL_SETUP.filter((t) => setup.done[t.id]).map((t) => ({ ...t, date: setup.done[t.id], service: Object.keys(SETUP).find((s) => SETUP[s].some((x) => x.id === t.id)) })),
     ...ALL_MONTHLY.filter((t) => monthly.done[t.id]).map((t) => ({ ...t, date: monthly.done[t.id] })),
   ].map((t) => ({ ...t, state: 'completed', detail: demo ? 'Demo checkmark · saved in this browser' : 'Team planning update · not provider-verified' }))
-  const events = [...reviewEvents(requests), ...taskEvents]
+  const events = taskEvents.filter(e => included.includes(e.service))
     .filter((e) => (filter === 'all' || e.service === filter) && (activityFilter === 'all' || e.state === activityFilter))
     .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8)
   const nextTasks = visible.filter((s) => !['reviews','agents'].includes(s.id) && (filter === 'all' || s.id === filter)).flatMap((s) => {
@@ -85,20 +86,20 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
       <div className="service-section-heading"><div><h2>Your services</h2><p>One workspace. Choose where you want to work.</p></div><span className="workspace-label">{client.name}</span></div>
       <div className="service-filters" role="group" aria-label="Filter services">{[{ id: 'all', name: 'All services', icon: 'grid' }, ...visible].map((s) => <button key={s.id} onClick={() => setFilter(s.id)} aria-pressed={filter === s.id} className={filter === s.id ? 'selected' : ''}><Icon name={s.icon} size={15}/>{s.name}</button>)}</div>
       <div className="service-cards">{selectedServices.map((s) => { const [value, label] = metric(s); return <button key={s.id} className={`service-card service-${s.color}`} onClick={() => navigate(s.id)} aria-label={s.action}>
-        <div className="service-card-top"><span className={`icon-tile ${s.color}`}><Icon name={s.icon}/></span><span className={`service-status ${!subscribed.includes(s.id) ? 'not-included' : ''}`}>{!subscribed.includes(s.id) ? 'Not in plan' : s.id === 'reviews' && demo ? 'Demo data' : s.status}</span><Icon name="chevron" size={17}/></div>
+        <WindowBar title={`// ${s.name} //`}/><div className="service-card-top"><span className={`icon-tile ${s.color}`}><Icon name={s.icon}/></span><span className={`service-status ${!subscribed.includes(s.id) ? 'not-included' : ''}`}>{!subscribed.includes(s.id) ? 'Not in plan' : s.id === 'reviews' && demo ? 'Demo data' : s.status}</span><PixelArrow/></div>
         <span className="service-category">{s.category}</span><h3>{s.name}</h3><p>{s.description}</p>
         <div className="service-card-bottom"><span>{label}</span><strong>{value}</strong></div>
       </button> })}
-      {filter === 'all' && UPCOMING.map((s) => <div key={s.id} className="service-card service-upcoming" aria-label={`${s.name} — coming soon`}><div className="service-card-top"><span className={`icon-tile ${s.color}`}><Icon name={s.icon}/></span><span className="service-status upcoming">{s.status}</span></div><span className="service-category">{s.category}</span><h3>{s.name}</h3><p>{s.description}</p><div className="service-card-bottom"><span>{isMaster ? 'Not yet available to add to a plan' : 'Ask Azul to be first in line'}</span><strong>Soon</strong></div></div>)}
+      {filter === 'all' && UPCOMING.map((s) => <div key={s.id} className="service-card service-upcoming" aria-label={`${s.name} — coming soon`}><WindowBar title={`// ${s.name} //`}/><div className="service-card-top"><span className={`icon-tile ${s.color}`}><Icon name={s.icon}/></span><span className="service-status upcoming">{s.status}</span></div><span className="service-category">{s.category}</span><h3>{s.name}</h3><p>{s.description}</p><div className="service-card-bottom"><span>{isMaster ? 'Not yet available to add to a plan' : 'Ask Azul to be first in line'}</span><strong>Soon</strong></div></div>)}
       {!isMaster && locked.length > 0 && filter === 'all' && <div className="service-card service-locked"><div className="service-card-top"><span className="icon-tile blue"><Icon name="plus"/></span><span className="service-status">Available</span></div><span className="service-category">Grow with Azul</span><h3>Unlock more services</h3><p>Not yet in your plan: {locked.map((s) => s.name).join(', ')}. Message Azul to add a service to this workspace.</p></div>}
       </div>
       {isMaster && locked.length > 0 && <p className="plan-storage-note"><Icon name="key" size={15}/><span>{client.name} is subscribed to {subscribed.length ? subscribed.map((id) => SERVICES.find((s) => s.id === id).name).join(', ') : 'no services yet'}. Their key only shows those. Change the plan under Workspace access.</span></p>}
       {storageNote}
       <div className="service-home-grid">
-        <section className="panel service-activity"><div className="panel-heading"><div><h2>Recent activity</h2><p>Review request states + planning updates</p></div><select className="input" aria-label="Filter recent activity" value={activityFilter} onChange={(e) => setActivityFilter(e.target.value)}><option value="all">All activity</option><option value="attention">Needs attention</option><option value="completed">Completed</option></select></div>
+        <section className="panel service-activity"><div className="panel-heading"><div><h2>Recent activity</h2><p>Website and speed-to-lead planning updates</p></div><select className="input" aria-label="Filter recent activity" value={activityFilter} onChange={(e) => setActivityFilter(e.target.value)}><option value="all">All activity</option><option value="attention">Needs attention</option><option value="completed">Completed</option></select></div>
           {error && <div className="error-banner" role="alert">Review activity is unavailable: {error}</div>}
-          {loading ? <div className="empty-state" role="status">Loading review activity…</div> : !events.length ? <div className="empty-state"><Icon name="clock" size={25}/><h3>No activity for this filter</h3><p>{included.includes('reviews') ? 'Complete a planning step or use Review Booster to start.' : 'Complete a planning step to see it here.'}</p></div> : <ul className="activity-list">{events.map((event) => <li key={event.id}><span className={`activity-dot ${event.state}`}/><button onClick={() => navigate(event.service)}><strong>{event.title}</strong><small>{event.detail}</small></button><time dateTime={event.date}>{new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</time></li>)}</ul>}
-          <p className="chart-footnote">Website analytics, call logs, and Google rankings are not connected. No leads or revenue are inferred from this feed.</p>
+          {loading ? <div className="empty-state" role="status">Loading review activity…</div> : !events.length ? <div className="empty-state"><Icon name="clock" size={25}/><h3>No activity for this filter</h3><p>{'Complete a website or speed-to-lead planning step to see it here.'}</p></div> : <ul className="activity-list">{events.map((event) => <li key={event.id}><span className={`activity-dot ${event.state}`}/><button onClick={() => navigate(event.service)}><strong>{event.title}</strong><small>{event.detail}</small></button><time dateTime={event.date}>{new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</time></li>)}</ul>}
+          <p className="chart-footnote">Live website analytics, lead calls, and bookings are not connected. This feed shows planning updates.</p>
         </section>
         <aside className="panel next-actions"><div className="panel-heading"><div><h2>Up next</h2><p>Your next steps, not a live calendar</p></div><Icon name="clock" size={18}/></div>
           {included.includes('reviews') && (filter === 'all' || filter === 'reviews') && <button className="next-action" onClick={() => navigate('requests')}><span className="next-service">REVIEW BOOSTER</span><strong>{client.pending || 0} requests scheduled</strong><span>Open customer activity<Icon name="chevron" size={15}/></span></button>}
@@ -107,7 +108,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
         </aside>
       </div>
     </> : service && (() => { const d = DELIVERY[view]; return <>
-      <section className={`service-intro service-${service.color}`}><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{d.intro}</p></div></section>
+      <section className={`service-intro service-${service.color}`}><WindowBar title={`// ${service.name} / DELIVERY //`}/><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{d.intro}</p></div></section>
       {view === 'agents' && <AgentStudio/>}
       {storageNote}
       <div className="delivery-grid"><div className="delivery-main">

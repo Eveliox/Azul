@@ -1,0 +1,116 @@
+/* Match src/startup.css and the window/pixel primitives in src/services.css.
+   This is the final visual layer for both administrator and client workspaces. */
+.admin-app {
+  --lab-blue: #3154cf;
+  --lab-ink: #17202a;
+  --lab-paper: #f6f7f9;
+  --lab-line: #17202a22;
+  --lab-tint: #e7edff;
+  font-family: 'Inter Tight', Inter, Arial, sans-serif;
+  background: var(--lab-paper);
+}
+.admin-app *, .admin-app *::before, .admin-app *::after { box-sizing: border-box; }
+.admin-app :is(.eyebrow, .sidebar-label, .sidebar-version, .service-category, .service-status, .welcome-signoff, .workspace-label, .count-badge, .dashboard-footer, .wordmark small) {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 400;
+  letter-spacing: .06em;
+}
+.admin-app :is(.btn-primary, .btn-ghost) {
+  border: 1px solid var(--lab-ink);
+  border-bottom: 3px solid var(--lab-blue);
+  border-radius: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .025em;
+  padding: 13px 16px;
+  transition: box-shadow .2s, translate .2s;
+}
+.admin-app :is(.btn-primary, .btn-ghost):hover:not(:disabled) { box-shadow: 4px 4px 0 var(--lab-blue); translate: -2px -2px; }
+.admin-app .btn-primary > svg { background: var(--lab-blue); color: white; padding: 2px; }
+.admin-app :is(.input, .global-search, .filter-search, .service-filters button, .review-subnav button, .nav-item, .mobile-nav button, .workspace-label, .service-status, .count-badge, .avatar, .icon-tile, .demo-banner, .next-action, .agent-role, .agent-mode, .service-plan-editor label, .agent-estimate-facts, .integration-note) { border-radius: 0; }
+.admin-app .dashboard-sidebar { background: var(--lab-paper); border-right: 1px solid var(--lab-ink); padding: 0 0 16px; }
+.admin-app .sidebar-brand { padding: 25px 28px; border-bottom: 1px solid var(--lab-line); margin-bottom: 28px; }
+.admin-app .sidebar-label { padding-left: 24px; }
+.admin-app .nav-item { min-height: 48px; padding: 14px 24px; border-bottom: 1px solid var(--lab-line); font-family: 'JetBrains Mono', monospace; }
+.admin-app .nav-item > span { font-size: 10px; text-transform: uppercase; }
+.admin-app .nav-item.active { color: var(--lab-ink); background: #fff; box-shadow: inset 3px 0 var(--lab-blue); }
+.admin-app .nav-item.active > svg { color: var(--lab-blue); }
+.admin-app .sidebar-note { margin: 18px 16px; border: 1px solid var(--lab-ink); border-radius: 0; box-shadow: 4px 4px 0 var(--lab-ink); background: var(--lab-tint); }
+.admin-app .sidebar-version { margin-inline: 20px; }
+.admin-app .dashboard-topbar { border-bottom: 1px solid var(--lab-ink); background: var(--lab-paper); }
+.admin-app .dashboard-main { max-width: 1500px; margin-inline: auto; padding: 30px 36px 45px; border-inline: 1px solid var(--lab-line); }
+.admin-app .global-search { border-color: var(--lab-line); }
+.admin-app :is(.panel, .stat-card, .service-card, .agent-role, .workspace-dialog) { border: 1px solid var(--lab-ink); border-radius: 0; background: #fff; box-shadow: 4px 4px 0 var(--lab-ink); }
+.admin-app button.service-card:hover { transform: translate(-2px,-2px); border-color: var(--lab-blue); box-shadow: 6px 6px 0 var(--lab-blue); }
+.admin-app .service-cards { gap: 24px; }
+.admin-app .service-card { padding: 24px; overflow: hidden; }
+.admin-app :is(.service-upcoming, .service-locked) { background: var(--lab-paper); box-shadow: 3px 3px 0 #bcc5d3; }
+.admin-app .service-card h3 { font-size: 28px; font-weight: 400; letter-spacing: -.045em; }
+.admin-app .service-card .icon-tile { background: var(--lab-tint); border: 1px solid var(--lab-ink); }
+.admin-app .service-card-top > svg { transform: none; color: var(--lab-blue); }
+.admin-app .service-card-bottom { border-color: var(--lab-line); }
+.admin-app .service-section-heading { border-top: 1px solid var(--lab-line); padding-top: 28px; }
+.admin-app .service-section-heading h2 { font-size: 24px; font-weight: 400; letter-spacing: -.035em; }
+.admin-app .service-section-heading h2::before { content: none; }
+.admin-app :is(.service-filters button, .review-subnav button, .mobile-nav button) { font-family: 'JetBrains Mono', monospace; font-size: 10px; border: 1px solid var(--lab-line); }
+.admin-app .service-filters button.selected { background: var(--lab-tint); border-color: var(--lab-ink); color: var(--lab-ink); box-shadow: inset 0 -2px var(--lab-blue); }
+.admin-app .lab-window-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 38px; border-bottom: 1px solid var(--lab-ink); background: #f0f2f6; color: var(--lab-ink); font: 10px/1.5 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; text-align: center; }
+.admin-app .lab-window-bar > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; padding-block: 8px; }
+.admin-app .lab-window-controls { display: flex; align-self: stretch; flex-shrink: 0; }
+.admin-app .lab-window-controls i { display: grid; place-items: center; width: 28px; font: normal 17px Arial,sans-serif; border-right: 1px solid var(--lab-ink); }
+.admin-app .lab-window-light { width: 9px; height: 9px; border: 1px solid var(--lab-ink); background: var(--lab-tint); margin: 0 12px; flex-shrink: 0; }
+.admin-app .service-card > .lab-window-bar { margin: -24px -24px 24px; }
+.admin-app .stat-card > .lab-window-bar { margin: -22px -22px 22px; }
+.admin-app .stat-card { padding: 22px; overflow: hidden; }
+.admin-app .stat-card .lab-window-controls { display: none; }
+.admin-app .stat-card .lab-window-bar { padding-left: 16px; text-align: left; }
+.admin-app .stat-value { font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 34px; }
+.admin-app .page-heading { position: relative; display: flex; flex-wrap: wrap; gap: 24px; padding: 70px 30px 30px; border: 1px solid var(--lab-ink); background: var(--lab-paper); border-radius: 0; isolation: isolate; overflow: hidden; }
+.admin-app .page-heading > .lab-window-bar, .admin-app .service-intro > .lab-window-bar { position: absolute; inset: 0 0 auto; }
+.admin-app .page-heading > div:not(.lab-window-bar) { flex: 1; min-width: min(100%,240px); position: relative; z-index: 1; }
+.admin-app .page-heading h1 { font: 400 clamp(32px,3.6vw,52px)/1.1 'Inter Tight',sans-serif; letter-spacing: -.045em; }
+.admin-app .page-heading p:not(.eyebrow) { font-size: 15px; }
+.admin-app .workspace-welcome { padding-bottom: 65px; min-height: 280px; background: radial-gradient(#17202a20 .8px,transparent 1px) 0 0/16px 16px,#f6f7f9; }
+.admin-app .workspace-welcome::before, .admin-app .workspace-welcome::after { content: none; }
+.admin-app .workspace-welcome > .lab-pixels { position: absolute; inset: auto -10px 0 auto; width: 40%; height: calc(100% - 38px); opacity: .35; z-index: -1; pointer-events: none; mask-image: linear-gradient(90deg,transparent,#000); }
+.admin-app .welcome-signoff { left: 30px; right: 30px; }
+.admin-app .service-intro { position: relative; padding: 70px 28px 28px; border: 1px solid var(--lab-ink); border-radius: 0; background: var(--lab-tint); box-shadow: 4px 4px 0 var(--lab-ink); }
+.admin-app :is(.agent-ops-hero, .agent-studio-intro) { border-radius: 0; border-color: var(--lab-ink); background: radial-gradient(#17202a25 .8px,transparent 1px) 0 0/16px 16px,var(--lab-tint); box-shadow: 5px 5px 0 var(--lab-ink); }
+.admin-app .agent-orbit > div { border-radius: 0; box-shadow: 5px 5px 0 var(--lab-ink); }
+.admin-app .panel-heading { border-bottom: 1px solid var(--lab-line); padding-bottom: 18px; }
+.admin-app .panel-heading h2 { font-size: 18px; font-weight: 500; }
+.admin-app .requests-table th { background: var(--lab-tint); font-family: 'JetBrains Mono',monospace; font-size: 10px; text-transform: uppercase; }
+.admin-app .legend-dot.blue { background: var(--lab-blue); }
+.admin-app .plan-progress, .admin-app .plan-progress span { border-radius: 0; }
+.admin-app .dashboard-footer { padding-block: 25px; margin-top: 32px; border-top: 1px solid var(--lab-ink); }
+.admin-app .login-editorial { padding: 90px 8% 24px; background: radial-gradient(#17202a25 .8px,transparent 1px) 0 0/16px 16px,var(--lab-paper); border-right: 1px solid var(--lab-ink); }
+.admin-app .login-editorial > .lab-pixels { position: absolute; inset: auto 0 0; height: 40%; z-index: -1; opacity: .45; mask-image: linear-gradient(transparent,#000); }
+.admin-app .login-editorial h2 { font-family: 'Inter Tight',sans-serif; font-size: clamp(36px,4vw,64px); font-weight: 400; }
+.admin-app .studio-mono { font-family: 'IBM Plex Mono',monospace; letter-spacing: -.065em; }
+.admin-app .login-card { background: #fff; border: 1px solid var(--lab-ink); border-radius: 0; box-shadow: 6px 6px 0 var(--lab-ink); width: min(430px,90%); margin-block: 40px; }
+.admin-app .workspace-phone-preview { margin: 24px 0 0; }
+.admin-app .workspace-phone-preview .growth-hero { display: flex; justify-content: center; position: relative; overflow: hidden; height: 340px; background: transparent; padding: 0; }
+.admin-app .workspace-phone-preview .growth-phone-rise { --hand-scale: .4; width: 432px; min-height: 340px; height: 340px; flex-shrink: 0; }
+.admin-app .workspace-phone-preview figcaption { font: 9px/1.6 'JetBrains Mono',monospace; color: #606d7e; text-align: center; border-top: 1px solid var(--lab-line); padding-top: 12px; }
+@media (max-width: 1100px) {
+  .admin-app .dashboard-main { padding: 24px; }
+  .admin-app .lab-window-controls i { width: 23px; }
+  .admin-app .login-editorial { padding-inline: 7%; }
+}
+@media (max-width: 760px) {
+  .admin-app .dashboard-main { padding: 20px 16px 32px; border: 0; }
+  .admin-app .mobile-nav { border-bottom: 1px solid var(--lab-ink); background: var(--lab-paper); }
+  .admin-app .mobile-nav button.active { background: var(--lab-tint); color: var(--lab-ink); border-color: var(--lab-ink); box-shadow: inset 0 -2px var(--lab-blue); }
+  .admin-app .page-heading { padding: 70px 22px 26px; }
+  .admin-app .workspace-welcome { padding-bottom: 66px; }
+  .admin-app .welcome-signoff { left: 22px; right: 22px; font-size: 8px; }
+  .admin-app .page-heading h1 { font-size: 36px; }
+  .admin-app .page-heading .lab-window-controls { display: none; }
+  .admin-app .page-heading > .lab-window-bar { padding-left: 14px; text-align: left; }
+  .admin-app .service-cards { gap: 22px; }
+  .admin-app .login-card { width: min(430px,100%); padding: 28px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-app :is(.btn-primary, .btn-ghost):hover, .admin-app button.service-card:hover { translate: none; transform: none; }
+}

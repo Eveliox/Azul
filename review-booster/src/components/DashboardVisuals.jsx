@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { WindowBar } from './StudioVisuals.jsx'
 
 const paths = {
   agents: <><rect x="5" y="7" width="14" height="13" rx="4"/><path d="M12 3v4M2 12v4m20-4v4M9 16h6"/><circle cx="9" cy="11" r=".7"/><circle cx="15" cy="11" r=".7"/></>,
@@ -37,7 +38,7 @@ export function StatCards({ client: c }) {
     ['Responses received', c.rated ?? 0, 'Private feedback ratings', 'message', 'green'],
     ['Average feedback', c.avg_rating == null ? '—' : Number(c.avg_rating).toFixed(1), 'Out of 5 · not your Google rating', 'star', 'orange'],
   ]
-  return <div className="stats-grid">{items.map(([label, value, sub, icon, color]) => <section className="stat-card" key={label}>
+  return <div className="stats-grid">{items.map(([label, value, sub, icon, color]) => <section className="stat-card" key={label}><WindowBar title={label}/>
     <div className="stat-top"><p>{label}</p><span className={`icon-tile ${color}`}><Icon name={icon}/></span></div>
     <p className="stat-value">{value}</p><p className="stat-note">{sub}</p>
   </section>)}</div>
@@ -62,12 +63,12 @@ export function ActivityChart({ requests, days, onDaysChange }) {
     </div>
     <div className="chart-legend"><span><i className="legend-dot blue"/> Sent <strong>{totalSent}</strong></span><span><i className="legend-dot purple"/> Responses <strong>{totalRated}</strong></span></div>
     <svg viewBox="0 0 740 225" role="img" aria-label={`${totalSent} sends and ${totalRated} responses in the last ${days} days, from the latest ${requests.length} requests.`}>
-      <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4c7cfe" stopOpacity=".2"/><stop offset="100%" stopColor="#4c7cfe" stopOpacity=".01"/></linearGradient></defs>
-      {[0, 1, 2, 3, 4].map((i) => <g key={i}><line x1="40" x2="720" y1={y(i * ceiling / 4)} y2={y(i * ceiling / 4)} stroke="#edf0f5" strokeDasharray="4 5"/><text x="22" y={y(i * ceiling / 4) + 4} textAnchor="end" fill="#8b94a5" fontSize="10">{i * ceiling / 4}</text></g>)}
+      <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--brand)" stopOpacity=".2"/><stop offset="100%" stopColor="var(--brand)" stopOpacity=".01"/></linearGradient></defs>
+      {[0, 1, 2, 3, 4].map((i) => <g key={i}><line x1="40" x2="720" y1={y(i * ceiling / 4)} y2={y(i * ceiling / 4)} stroke="#edf0f5" strokeDasharray="4 5"/><text x="22" y={y(i * ceiling / 4) + 4} textAnchor="end" fill="#606d7e" fontSize="10">{i * ceiling / 4}</text></g>)}
       <polygon points={`40,190 ${points(sent)} 720,190`} fill={`url(#${id})`}/>
-      <polyline points={points(sent)} fill="none" stroke="#4c7cfe" strokeWidth="2.5" strokeLinejoin="round"/>
+      <polyline points={points(sent)} fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinejoin="round"/>
       <polyline points={points(rated)} fill="none" stroke="#a78bfa" strokeWidth="2.5" strokeLinejoin="round"/>
-      {dates.map((d, i) => <g key={i}><circle cx={x(i)} cy={y(sent[i])} r="3" fill="#4c7cfe"><title>{d.toLocaleDateString()}: {sent[i]} sent, {rated[i]} responses</title></circle>{(i === 0 || i === days - 1 || i % Math.ceil(days / 5) === 0) && <text x={x(i)} y="216" textAnchor="middle" fill="#8b94a5" fontSize="10">{d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</text>}</g>)}
+      {dates.map((d, i) => <g key={i}><circle cx={x(i)} cy={y(sent[i])} r="3" fill="var(--brand)"><title>{d.toLocaleDateString()}: {sent[i]} sent, {rated[i]} responses</title></circle>{(i === 0 || i === days - 1 || i % Math.ceil(days / 5) === 0) && <text x={x(i)} y="216" textAnchor="middle" fill="#606d7e" fontSize="10">{d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</text>}</g>)}
     </svg>
     <p className="chart-footnote">Based on the latest {requests.length} requests (up to 100). Summary cards are all-time totals.</p>
   </section>
@@ -76,7 +77,7 @@ export function ActivityChart({ requests, days, onDaysChange }) {
 export function ResponseCard({ client: c }) {
   const rate = Math.max(0, Math.min(100, percent(c.rated, c.sent)))
   return <section className="panel response-card"><h2>Customer engagement</h2><p className="muted">Every response is an opportunity.</p>
-    <div className="donut-wrap"><svg viewBox="0 0 160 160" aria-hidden="true"><circle cx="80" cy="80" r="64" fill="none" stroke="#edf1fc" strokeWidth="12"/><circle cx="80" cy="80" r="64" fill="none" stroke="#4c7cfe" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${rate * 4.0212} 402.12`} transform="rotate(-90 80 80)"/></svg><div><strong>{rate}%</strong><span>response rate</span></div></div>
+    <div className="donut-wrap"><svg viewBox="0 0 160 160" aria-hidden="true"><circle cx="80" cy="80" r="64" fill="none" stroke="#edf1fc" strokeWidth="12"/><circle cx="80" cy="80" r="64" fill="none" stroke="var(--brand)" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${rate * 4.0212} 402.12`} transform="rotate(-90 80 80)"/></svg><div><strong>{rate}%</strong><span>response rate</span></div></div>
     <div className="engagement-totals"><div><span className="legend-dot blue"/>Responded<strong>{c.rated ?? 0}</strong></div><div><span className="legend-dot pale"/>No response yet<strong>{Math.max(0, Number(c.sent || 0) - Number(c.rated || 0))}</strong></div></div>
     <p className="chart-footnote">Feedback ratings do not confirm a posted Google review.</p>
   </section>

@@ -2,13 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import MessagesPanel from '../components/MessagesPanel.jsx'
 import ServiceWorkspace from '../components/ServiceWorkspace.jsx'
 import { ActivityChart, Icon, ResponseCard, StatCards } from '../components/DashboardVisuals.jsx'
-import { SERVICES, SERVICE_IDS, activeServices, inviteMessage } from '../components/servicePlan.js'
+import { SERVICES, SERVICE_IDS, activeServices, inviteMessage, normalizeServices } from '../components/servicePlan.js'
 import { api, getAdminKey, setAdminKey, clearAdminKey } from '../api.js'
 import { authClient, signOutAccount } from '../auth.js'
 import AgentOperations from '../components/AgentOperations.jsx'
 import TeamAccess from '../components/TeamAccess.jsx'
 import './admin.css'
 import './workspace-brand.css'
+import { PixelField, WindowBar } from '../components/StudioVisuals.jsx'
+import { GrowthPhone } from '../components/GrowthPhone.jsx'
+import './workspace-phone.css'
+import './workspace-studio.css'
 
 export default function Admin() {
   const [authed, setAuthed] = useState(!!getAdminKey())
@@ -24,7 +28,7 @@ export default function Admin() {
 }
 
 function Wordmark() {
-  return <span className="wordmark">Azul<span>.</span><small>BUSINESS WORKSPACE</small></span>
+  return <span className="wordmark"><img src="/azul-logo.png" alt="Azul" width="1782" height="886"/><small>BUSINESS WORKSPACE</small></span>
 }
 
 function Login({ onOk }) {
@@ -49,7 +53,7 @@ function Login({ onOk }) {
     } finally { setBusy(false) }
   }
   return <div className="login-scene">
-    <div className="login-editorial"><span className="eyebrow">AZUL / BUSINESS WORKSPACE</span><h2>Good things.<br/>Working together.</h2><p>Your business has momentum.<br/>Let’s keep it moving.</p><span className="login-editorial-mark" aria-hidden="true">Azul.</span></div>
+    <div className="login-editorial"><PixelField/><span className="eyebrow">AZUL / BUSINESS WORKSPACE</span><h2>Good things.<br/><span className="studio-mono">Working together.</span></h2><p>Your business has momentum.<br/>Let’s keep it moving.</p><figure className="workspace-phone-preview"><div className="growth-hero"><GrowthPhone lang="en" still ready/></div><figcaption>AZUL GROWTH / ILLUSTRATIVE PREVIEW · SAMPLE DATA</figcaption></figure></div>
     <form onSubmit={submit} className="login-card">
       <Wordmark/><span className="login-icon"><Icon name="shield" size={28}/></span>
       <h1>Welcome back</h1><p>Your services. Your next steps.<br/>One place to bring it all together.</p>
@@ -66,13 +70,13 @@ function Login({ onOk }) {
   </div>
 }
 
-const NAV = [['overview', 'Dashboard', 'grid'], ['website', 'Website', 'globe'], ['calls', 'AI Answering', 'phone'], ['reviews', 'Reviews', 'star'], ['seo', 'Local SEO', 'pin'], ['agents', 'AI Agents', 'agents'], ['access', 'Workspace access', 'key']]
+const NAV = [['overview', 'Dashboard', 'grid'], ['website', 'Website Building', 'globe'], ['calls', 'Speed-to-Lead Agent', 'phone'], ['access', 'Workspace access', 'key']]
 const REVIEW_TABS = [['reviews', 'Overview'], ['requests', 'Requests'], ['messages', 'Messages']]
 const TITLES = {
   overview: ['Your business, connected.', 'Pick a service, see what’s happening, and take the next step.'],
   agents: ['Your next great teammate.', 'Give everyday work a clear process, with a person in control.'],
   website: ['Website workspace', 'From the first draft to a confident launch.'],
-  calls: ['AI Answering Service', 'Plan a better first conversation with your customers.'],
+  calls: ['Speed-to-Lead Agent', 'From a new enquiry to a qualified lead and a booked estimate.'],
   seo: ['Local SEO workspace', 'Turn real business updates into a consistent local presence.'],
   social: ['Social Media AI', 'Real jobs, real team, posted consistently in both languages.'],
   reviews: ['Review Booster', 'Your customer feedback, requests, and messages.'],
@@ -114,15 +118,8 @@ function Dashboard({ onLogout }) {
   }, [refresh])
 
   useEffect(() => {
-    let current = true
-    setRequests([]); setRequestError('')
-    if (!selected) return
-    setRequestLoading(true)
-    api(`/api/requests?client_id=${encodeURIComponent(selected)}`).then((d) => {
-      if (current) setRequests(d.requests)
-    }).catch((e) => { if (current) setRequestError(e.message) }).finally(() => { if (current) setRequestLoading(false) })
-    return () => { current = false }
-  }, [selected, refresh])
+    setRequests([]); setRequestError(''); setRequestLoading(false)
+  }, [selected])
 
   const client = clients.find((c) => c.client_id === selected)
   const isMaster = role === 'master'
@@ -131,7 +128,7 @@ function Dashboard({ onLogout }) {
   const activeTab = (tab === 'access' && !isMaster) || (SERVICE_IDS.includes(tabService) && !services.includes(tabService)) ? 'overview' : tab
   const nav = NAV.filter(([id]) => (id !== 'access' || isMaster) && (!SERVICE_IDS.includes(id) || services.includes(id)))
   const inReviews = REVIEW_TABS.some(([id]) => id === activeTab)
-  const hasReviews = (client?.services || []).includes('reviews')
+  const hasReviews = false
   const navActive = inReviews ? 'reviews' : activeTab
   const done = (message) => { setModal(null); reload(); notify(message) }
 
@@ -149,14 +146,14 @@ function Dashboard({ onLogout }) {
 
     <div className="dashboard-body">
       <header className="dashboard-topbar">
-        <form className="global-search" onSubmit={(e) => { e.preventDefault(); setTab('requests') }} role="search"><Icon name="search" size={18}/><input aria-label="Search customers" placeholder="Search customers…" value={query} onChange={(e) => { setQuery(e.target.value); if (e.target.value) setTab('requests') }}/>{query && <button type="button" aria-label="Clear search" onClick={() => setQuery('')}><Icon name="close" size={15}/></button>}</form>
+        <span className="eyebrow">AZUL / BUSINESS WORKSPACE</span>
         <div className="topbar-account"><span className="avatar">{isMaster ? 'AZ' : client?.name?.slice(0, 2).toUpperCase() || 'RB'}</span><div><strong>{isMaster ? 'Azul workspace' : 'Business workspace'}</strong><span>{isMaster ? 'Administrator' : 'Team access'}</span></div></div>
       </header>
       <nav className="mobile-nav" aria-label="Mobile workspace navigation">{nav.map(([id, label, icon]) => <button key={id} onClick={() => setTab(id)} aria-current={navActive === id ? 'page' : undefined} className={navActive === id ? 'active' : ''}><Icon name={icon} size={17}/>{label}</button>)}<button onClick={onLogout}><Icon name="logout" size={17}/>Sign out</button></nav>
       <main className="dashboard-main">
-        {demo && <div className="demo-banner"><span className="demo-dot"/>Demo workspace <span>Sample service data. No real messages. Demo requests reset on server restart; checklist marks stay in this browser.</span></div>}
+        {demo && <div className="demo-banner"><span className="demo-dot"/>Demo workspace <span>Sample workspace. Checklist marks stay in this browser. No live calls or messages.</span></div>}
         <div className="workspace-toolbar"><div className="workspace-picker"><Icon name="building" size={17}/>{isMaster ? <select aria-label="Select business" value={selected} onChange={(e) => { setSelected(e.target.value); setQuery(''); setModal(null) }}><option value="" disabled>Select a business</option>{clients.map((c) => <option key={c.client_id} value={c.client_id}>{c.name}</option>)}</select> : <span>{client?.name || 'Your business'}</span>}</div><div className="toolbar-actions">{isMaster && <button className="text-button" onClick={() => setModal('client')}><Icon name="plus" size={15}/>Add business</button>}<button className="text-button" onClick={reload} disabled={loading || requestLoading} aria-label="Refresh workspace"><Icon name="refresh" size={16}/><span>Refresh</span></button></div></div>
-        <div className={`page-heading ${activeTab === 'overview' ? 'workspace-welcome' : ''}`}><div><p className="eyebrow">{activeTab === 'overview' ? 'YOUR AZUL WORKSPACE' : 'YOUR SERVICES / ' + (inReviews ? 'REVIEWS' : activeTab.toUpperCase())}</p><h1>{TITLES[activeTab][0]}</h1><p>{TITLES[activeTab][1]}</p></div>{(inReviews || activeTab === 'overview') && hasReviews && <button className="btn-primary" onClick={() => setModal('request')} disabled={!client}><Icon name="plus" size={18}/>{activeTab === 'overview' ? 'New review request' : 'New request'}</button>}{activeTab === 'overview' && <span className="welcome-signoff" aria-hidden="true">BUILT FOR WHAT’S NEXT <span>↗</span></span>}</div>
+        <div className={`page-heading ${activeTab === 'overview' ? 'workspace-welcome' : ''}`}><WindowBar title={`// ${isMaster ? 'AZUL ADMIN' : 'CLIENT WORKSPACE'} / ${TITLES[activeTab][0]} //`}/>{activeTab === 'overview' && <PixelField/>}<div><p className="eyebrow">{activeTab === 'overview' ? 'YOUR AZUL WORKSPACE' : 'YOUR SERVICES / ' + (inReviews ? 'REVIEWS' : activeTab.toUpperCase())}</p><h1>{TITLES[activeTab][0]}</h1><p>{TITLES[activeTab][1]}</p></div>{(inReviews || activeTab === 'overview') && hasReviews && <button className="btn-primary" onClick={() => setModal('request')} disabled={!client}><Icon name="plus" size={18}/>{activeTab === 'overview' ? 'New review request' : 'New request'}</button>}{activeTab === 'overview' && <span className="welcome-signoff" aria-hidden="true">BUILT FOR WHAT’S NEXT <span>↗</span></span>}</div>
         {error && <div className="error-banner" role="alert">Could not load the workspace: {error}. <button onClick={reload}>Try again</button></div>}
         {loading && !client && <div className="panel empty-state" role="status">Loading your workspace…</div>}
         {!loading && !error && !client && <div className="panel empty-state"><span className="icon-tile blue"><Icon name="building"/></span><h2>Your workspace starts here</h2><p>{isMaster ? 'Add your first business to start collecting customer feedback.' : 'No business is available for this key.'}</p>{isMaster && <button className="btn-primary" onClick={() => setModal('client')}>Add your first business</button>}</div>}
@@ -176,7 +173,7 @@ function Dashboard({ onLogout }) {
           {activeTab === 'access' && isMaster && <section className="panel"><TeamAccess client={client} demo={demo}/><AccessKey key={selected} c={client} onRotated={() => { reload(); notify('New key issued. Share it securely with the team.') }} onPlanSaved={() => { reload(); notify('Plan updated. Their workspace now shows the new services.') }}/></section>}
         </>}
         {authClient && <AccountPassword/>}
-        <footer className="dashboard-footer"><span>Azul Business Workspace</span><span>Website · AI Answering · Reviews · Local SEO · AI Agents</span></footer>
+        <footer className="dashboard-footer"><span>Azul Business Workspace</span><span>Website Building · Speed-to-Lead Agent</span></footer>
       </main>
     </div>
     {toast && <div className="toast" role="status"><Icon name="check" size={18}/>{toast}<button aria-label="Dismiss notification" onClick={() => setToast('')}><Icon name="close" size={16}/></button></div>}
@@ -237,7 +234,7 @@ function AccessKey({ c, onRotated, onPlanSaved }) {
   const [visible, setVisible] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [plan, setPlan] = useState(() => c.services || [])
+  const [plan, setPlan] = useState(() => normalizeServices(c.services))
   const planChanged = JSON.stringify([...plan].sort()) !== JSON.stringify([...(c.services || [])].sort())
   async function copy() {
     try { await navigator.clipboard.writeText(c.access_key); setCopied(true) } catch { setError('Could not copy. Reveal the key and copy it manually.') }
@@ -284,7 +281,7 @@ function Field({ label, id, children, className = '' }) {
 }
 
 function NewClientForm({ onDone, onClose }) {
-  const [f, setF] = useState({ name: '', slug: '', google_review_url: '', owner_name: '', owner_email: '', owner_phone: '', default_language: 'en', tone: 'friendly', delay_hours: 3, followup_hours: 48, services: ['reviews'] })
+  const [f, setF] = useState({ name: '', slug: '', google_review_url: '', owner_name: '', owner_email: '', owner_phone: '', default_language: 'en', tone: 'friendly', delay_hours: 3, followup_hours: 48, services: ['website', 'calls'] })
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const [created, setCreated] = useState(null)

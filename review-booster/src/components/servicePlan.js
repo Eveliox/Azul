@@ -15,24 +15,15 @@ export function inviteMessage(client, origin) {
 // Local delivery planning metadata. This is NOT provider configuration or billing.
 // Names match the Services section on azulwebdev.com.
 export const SERVICES = [
-  { id: 'website', name: 'Website Build', icon: 'globe', color: 'blue', category: 'Your digital foundation', description: 'Launch, maintain, and improve your business website.', status: 'Manual checklist', action: 'Open website plan' },
-  { id: 'calls', name: 'AI Answering Service', icon: 'phone', color: 'green', category: 'Never miss the conversation', description: 'Plan your bilingual receptionist and its call handoff.', status: 'Vapi not connected', action: 'Open answering service plan' },
-  { id: 'reviews', name: 'Review Booster', icon: 'star', color: 'pink', category: 'Listen to your customers', description: 'Send requests, personalize messages, and collect feedback.', status: 'Workspace available', action: 'Open reviews' },
-  { id: 'seo', name: 'Local Proof SEO', icon: 'pin', color: 'purple', category: 'Show up locally', description: 'Organize approved content and monthly visibility reporting.', status: 'Manual delivery', action: 'Open SEO plan' },
-  { id: 'agents', name: 'Custom AI Agents', icon: 'agents', color: 'blue', category: 'A little less busywork', description: 'Draft estimate follow-ups, review approvals, and track agent work.', status: 'Approval-first workflow', action: 'Open AI agents plan' },
+  { id: 'website', name: 'Website Building', icon: 'globe', color: 'blue', category: 'Your digital foundation', description: 'Build a fast, bilingual website that turns visitors into leads.', status: 'Launch checklist', action: 'Open website plan' },
+  { id: 'calls', name: 'Speed-to-Lead Agent', icon: 'phone', color: 'green', category: 'From new lead to booked estimate', description: 'Connect new leads to an immediate bilingual call, qualification, and estimate booking.', status: 'Setup checklist', action: 'Open speed-to-lead plan' },
 ]
-// Services on the roadmap. Shown as "Coming soon" cards; cannot be added to a plan yet.
-// Social already has SETUP/MONTHLY_SOCIAL/DELIVERY config below; enabling it = move this entry to SERVICES,
-// add 'social' to SERVICE_IDS (api/_lib/services.js) + schema.sql, and add MONTHLY_SOCIAL to MONTHLY.
-export const UPCOMING = [
-  { id: 'social', name: 'Social Media AI', icon: 'share', color: 'orange', category: 'Show your real work', description: 'Turn job and team photos into bilingual Facebook & Instagram posts.', status: 'Coming soon', action: 'Open social media plan' },
-  { id: 'ads', name: 'AI Facebook Ads', icon: 'megaphone', color: 'orange', category: 'Reach new customers', description: 'AI-built Facebook & Instagram ad campaigns with local targeting, creative, and budget optimization.', status: 'Coming soon' },
-]
+export const UPCOMING = []
 // Per-service copy for the delivery view. Keeps ServiceWorkspace data-driven.
 export const DELIVERY = {
   agents: { intro: 'Choose a role below, then work through the launch plan. This workspace tracks preparation; agents are not running here yet.', setupTitle: 'From idea to first assignment', sideTitle: 'Start with one useful job', side: 'Pick a repeatable task with a clear input and result. Agree who reviews the output and when the agent should hand work back to your team.', noteTitle: 'Agent runtime not connected', note: 'These are planning checkmarks, not deployment controls. Live runs, tool connections, approvals, and performance reporting need a separate integration.', link: 'https://azulwebdev.com/services/custom-ai-agents', linkLabel: 'Explore the AI Agents service', linkNote: 'Opens Azul’s service page with examples and build options.' },
   website: { intro: 'Track the delivery work here. Hosting, deployment, and analytics stay in your existing tools.', setupTitle: 'Setup & launch checklist', sideTitle: 'Keep delivery focused', side: 'Agree on scope, collect approved content, test on mobile, and make sure enquiries reach the right person.', noteTitle: 'Website monitoring not connected', note: 'This is a launch checklist, not an uptime monitor or a website builder.', link: 'https://vercel.com/dashboard', linkLabel: 'Open Vercel' },
-  calls: { intro: 'Use this plan alongside Vapi. Checking a task does not configure a phone number or deploy an agent.', setupTitle: 'Setup & launch checklist', sideTitle: 'Before the first real call', side: 'Verify call routing, callbacks, human fallback, and privacy requirements. A good test call is not proof that every real call will work.', noteTitle: 'Vapi not connected to this dashboard', note: 'Call volume, captured leads, and recordings will appear only after a real integration is built.', link: 'https://dashboard.vapi.ai/', linkLabel: 'Open Vapi' },
+  calls: { intro: 'Prepare the flow from a new website enquiry to an outbound call, qualification, and a booked estimate. These checkmarks track setup, not live agent activity.', setupTitle: 'Speed-to-lead launch checklist', sideTitle: 'From enquiry to estimate', side: 'Connect the lead form, confirm service area and qualification questions, and route bookings to the right calendar. Test English and Spanish calls and the no-answer text follow-up.', noteTitle: 'Live lead activity not connected', note: 'Response times, calls, texts, and bookings appear only after the lead and calendar integrations are connected. Completing this checklist does not activate the agent.', link: 'https://dashboard.vapi.ai/', linkLabel: 'Open agent provider' },
   seo: { intro: 'Your manual workflow: collect → draft → approve → publish → measure.', setupTitle: 'One-time onboarding', monthlyTitle: 'Monthly delivery', monthlySub: '8 posts total · 1 website update · 1 visibility report', sideTitle: 'What the client sends you', side: 'Approved non-patient photos, a factual description, and approval of the final copy. Start with verified business information—not assumed services or locations.', noteTitle: 'GBP & ranking tools not connected', note: 'Publish in Google’s interface and run your ranking scans externally. This checklist does not auto-post, run AI, or track rankings.', link: 'https://business.google.com/', linkLabel: 'Open Google Business Profile' },
   social: { intro: 'Your manual workflow: collect photos → write EN/ES captions → approve → publish → report.', setupTitle: 'One-time onboarding', monthlyTitle: 'Monthly delivery', monthlySub: '8 posts total across Facebook & Instagram · 1 monthly summary', sideTitle: 'What the client sends you', side: 'Job photos, before-and-afters, or team photos they have the right to share. No customer faces, addresses, or patient details without written permission.', noteTitle: 'Meta not connected to this dashboard', note: 'Publish through Meta Business Suite. This checklist does not auto-post, generate captions, or pull reach and engagement numbers.', link: 'https://business.facebook.com/latest/', linkLabel: 'Open Meta Business Suite' },
 }
@@ -55,11 +46,11 @@ export const SETUP = {
     { id: 'web-launch', title: 'Verify launch & hand over access', detail: 'Check the deployed domain, SSL, basic indexing, and agreed maintenance process.' },
   ],
   calls: [
-    { id: 'call-scope', title: 'Approve the receptionist’s boundaries', detail: 'Confirm hours, service area, language, escalation, and callback expectations. No invented promises.' },
-    { id: 'call-number', title: 'Assign and test the phone number in Vapi', detail: 'Confirm routing with the actual carrier. Do not port the client’s main number for an untested pilot.' },
-    { id: 'call-tests', title: 'Test English, Spanish & failure scenarios', detail: 'Test interruptions, incomplete details, emergency instructions, and failed transfers.' },
-    { id: 'call-handoff', title: 'Verify lead handoff and privacy settings', detail: 'Test summaries and fallback handling. Confirm recording consent, retention, and any healthcare obligations.' },
-    { id: 'call-pilot', title: 'Get approval for a monitored pilot', detail: 'Start with a reversible routing setup and review real-world failures with the owner.' },
+    { id: 'call-scope', title: 'Approve qualification & booking rules', detail: 'Confirm services, service area, urgency questions, English and Spanish scripts, and when to hand off to a person.' },
+    { id: 'call-number', title: 'Connect the lead form & outbound number', detail: 'Verify a new enquiry triggers the correct agent with the customer’s details and contact permission.' },
+    { id: 'call-tests', title: 'Test response speed in English & Spanish', detail: 'Submit test leads, measure time to first call, and test incomplete details, duplicate submissions, and failures.' },
+    { id: 'call-handoff', title: 'Verify calendar booking & text follow-up', detail: 'Check real availability, time zones, booking confirmations, and the follow-up text when a lead does not answer.' },
+    { id: 'call-pilot', title: 'Approve a monitored launch', detail: 'Review the complete enquiry-to-estimate flow with the owner and agree on monitoring and a pause procedure.' },
   ],
   seo: SEO_SETUP,
   social: [

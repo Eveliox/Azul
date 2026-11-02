@@ -1,8 +1,6 @@
-// Services a business can be subscribed to. Shared by the API, the demo server, and the UI.
-// This is the source of truth for what a client key is allowed to see in the workspace.
-// Subscribable services. 'social' (Social Media AI) and 'ads' (AI Facebook Ads) are coming soon:
-// to enable one, add it here, to the DB check constraint in schema.sql, and move it from UPCOMING to SERVICES.
-export const SERVICE_IDS = ['website', 'calls', 'reviews', 'seo', 'agents']
+// Azul offers Website Building and Speed-to-Lead Agent only.
+// Keep the existing calls ID for compatibility with stored client plans.
+export const SERVICE_IDS = ['website', 'calls']
 
 // Returns a clean, de-duplicated list in canonical order; unknown ids are dropped.
 export function normalizeServices(input) {
