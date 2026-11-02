@@ -1,3 +1,6 @@
+// Prices are hidden on the site; visitors book a call to hear them. Set to true to show every price again.
+export const SHOW_PRICES = false
+
 // The Azul package for roofing and HVAC companies. Prices render exactly as written in both languages.
 export const offerPrices = {
   packageSetup: '$4,500',
@@ -86,7 +89,7 @@ export const offerCopy = {
         ['Does it speak Spanish?', 'Yes. The agent calls in English or Spanish, and your website is built in both languages from day one.'],
         ['What calendar does it book into?', 'Google Calendar. If you use a different scheduling tool, ask us and we’ll review it with you.'],
         ['What if the lead doesn’t answer?', 'A text follows up so the homeowner can still reply and book. Follow-up stops as soon as they book or text STOP.'],
-        ['Is there a contract?', 'No long-term contracts. You pay a one-time setup fee and a flat monthly price.'],
+        ['Is there a contract?', SHOW_PRICES ? 'No long-term contracts. You pay a one-time setup fee and a flat monthly price.' : 'No long-term contracts. Book a call and we’ll walk you through pricing for your business.'],
         ['Do I need a new website?', 'The package includes one, built to send every lead straight to the agent. Happy with the site you have? We also offer the speed-to-lead agent on its own and connect it to your current lead form.'],
       ],
     },
@@ -181,7 +184,7 @@ export const offerCopy = {
         ['¿Habla español?', 'Sí. El agente llama en inglés o en español, y tu sitio web está en los dos idiomas desde el primer día.'],
         ['¿En qué calendario agenda?', 'En Google Calendar. Si usas otra herramienta de agenda, pregúntanos y la revisamos contigo.'],
         ['¿Y si el cliente no contesta?', 'Le llega un mensaje de texto de seguimiento para que pueda responder y agendar. El seguimiento se detiene en cuanto agenda o responde STOP.'],
-        ['¿Hay contrato?', 'No hay contratos a largo plazo. Pagas una configuración inicial única y una tarifa mensual fija.'],
+        ['¿Hay contrato?', SHOW_PRICES ? 'No hay contratos a largo plazo. Pagas una configuración inicial única y una tarifa mensual fija.' : 'No hay contratos a largo plazo. Agenda una llamada y te explicamos los precios para tu negocio.'],
         ['¿Necesito un sitio web nuevo?', 'El paquete incluye uno, hecho para enviar cada cliente directamente al agente. ¿Ya estás contento con tu sitio? También ofrecemos el agente de respuesta inmediata por separado y lo conectamos a tu formulario actual.'],
       ],
     },

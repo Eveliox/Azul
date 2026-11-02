@@ -1,4 +1,4 @@
-import { offerPrices } from './offer.js'
+import { offerPrices, SHOW_PRICES } from './offer.js'
 
 // One entry per trade; status controls whether details or a coming-soon panel render.
 export const leadTrades = [
@@ -109,7 +109,7 @@ export const leadAgentCopy = {
     metrics: [ ['Leads received', 'How many new leads came in.'], ['Average time to first call', 'How long leads waited for the first call.'], ['Leads reached', 'How many leads answered.'], ['Appointments booked', 'How many leads scheduled a visit.'] ],
     safety: 'Safety and consent', safetyTitle: 'Your business stays in control.',
     safetyRules: ['Only contacts people who asked to be contacted.', 'Identifies itself as an AI and says the call is recorded.', 'Calls only 8am–8pm in the lead’s local time, at most 3 times a day.', 'One STOP ends calls and texts. Anyone who declines calls is never called again.', 'You can pause the agent anytime.'],
-    start: 'Getting started', startTitle: 'Start with the Azul package.', pricing: `${offerPrices.agentSetup} setup on its own, or included in the Azul package with a bilingual website and automatic review requests: ${offerPrices.packageSetup} setup + ${offerPrices.packageMonthly}/month. No long-term contracts.`,
+    start: 'Getting started', startTitle: 'Start with the Azul package.', pricing: SHOW_PRICES ? `${offerPrices.agentSetup} setup on its own, or included in the Azul package with a bilingual website and automatic review requests: ${offerPrices.packageSetup} setup + ${offerPrices.packageMonthly}/month. No long-term contracts.` : 'Available on its own, or included in the Azul package with a bilingual website and automatic review requests. No long-term contracts.',
     faq: 'FAQ', faqTitle: 'Before your first callback.',
     faqs: [
       ['Does it replace my team?', 'No. It handles first contact and booking, and hands off the rest to your team.'],
@@ -145,7 +145,7 @@ export const leadAgentCopy = {
     metrics: [ ['Prospectos recibidos', 'Cuántos prospectos nuevos llegaron.'], ['Tiempo promedio hasta la primera llamada', 'Cuánto esperaron los prospectos antes de la primera llamada.'], ['Prospectos contactados', 'Cuántos prospectos contestaron.'], ['Citas agendadas', 'Cuántos prospectos programaron una visita.'] ],
     safety: 'Seguridad y consentimiento', safetyTitle: 'Usted mantiene el control de su negocio.',
     safetyRules: ['Solo contacta a personas que pidieron ser contactadas.', 'Se identifica como AI y avisa que la llamada se graba.', 'Llama solo de 8 a. m. a 8 p. m., según la hora local del prospecto, como máximo 3 veces al día.', 'Un solo STOP detiene llamadas y textos. Si alguien rechaza las llamadas, no se le vuelve a llamar.', 'Usted puede pausar el agente en cualquier momento.'],
-    start: 'Para comenzar', startTitle: 'Comience con el paquete Azul.', pricing: `${offerPrices.agentSetup} de configuración inicial por separado, o incluido en el paquete Azul con sitio web bilingüe y solicitudes automáticas de reseñas: ${offerPrices.packageSetup} de configuración inicial + ${offerPrices.packageMonthly} al mes. Sin contratos a largo plazo.`,
+    start: 'Para comenzar', startTitle: 'Comience con el paquete Azul.', pricing: SHOW_PRICES ? `${offerPrices.agentSetup} de configuración inicial por separado, o incluido en el paquete Azul con sitio web bilingüe y solicitudes automáticas de reseñas: ${offerPrices.packageSetup} de configuración inicial + ${offerPrices.packageMonthly} al mes. Sin contratos a largo plazo.` : 'Disponible por separado, o incluido en el paquete Azul con sitio web bilingüe y solicitudes automáticas de reseñas. Sin contratos a largo plazo.',
     faq: 'Preguntas frecuentes', faqTitle: 'Antes de la primera llamada.',
     faqs: [
       ['¿Reemplaza a mi equipo?', 'No. Se encarga del primer contacto y de agendar, y deja el resto en manos de su equipo.'],

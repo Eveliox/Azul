@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext'
 import { FAQAccordion, Arrow } from '../components/site/UI'
 import { bookingUrl } from '../components/site/Layout'
 import { OfferCtas, PackageCard } from '../components/site/Offer'
+import { SHOW_PRICES } from '../data/offer'
 import '../offer.css'
 
 // Hidden until Azul has real client results. Add them to c.offer.caseStudies, then set this to true.
@@ -82,7 +83,7 @@ export default function Home() {
     </StudioHero>
     <HowItWorks />
     <Included />
-    <Pricing />
+    {SHOW_PRICES && <Pricing />}
     {SHOW_CASE_STUDIES && <CaseStudies />}
     <FAQ />
     <FinalCta />

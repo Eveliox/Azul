@@ -6,7 +6,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
 import { PageMetadata } from './PageMetadata'
 import { Arrow, Modal } from './UI'
-import { offerPrices } from '../../data/offer'
+import { offerPrices, SHOW_PRICES } from '../../data/offer'
 export const paths = ['/', '/work', '/services', '/about', '/free-report']
 // TODO: confirm this is the "Book a call" link you want (it's the existing Calendly link).
 export const bookingUrl = 'https://calendly.com/purplexmythzz/30min'
@@ -30,7 +30,7 @@ function AnnouncementBanner() {
       <a className="site-banner-link" href={bookingUrl} target="_blank" rel="noopener noreferrer">
         <span className="site-banner-badge">{t.badge}</span>
         <span className="site-banner-headline">{t.headline}</span>
-        <span className="site-banner-price">{t.price(offerPrices.packageSetup, offerPrices.packageMonthly)}</span>
+        {SHOW_PRICES && <span className="site-banner-price">{t.price(offerPrices.packageSetup, offerPrices.packageMonthly)}</span>}
         <span className="site-banner-spots">{t.spots}</span>
         <span className="site-banner-cta">{t.cta}<Arrow /></span>
       </a>

@@ -3,6 +3,8 @@
 // LANDING_URL=http://127.0.0.1:4173 node tests/landing-browser.cjs
 // Requires Playwright + Chromium in the test environment; optional CHROME_PATH.
 const { chromium } = require('playwright')
+const { pathToFileURL } = require('node:url')
+const path = require('node:path')
 const assert = require('node:assert/strict')
 
 const base = process.env.LANDING_URL || 'http://127.0.0.1:4173'
@@ -17,6 +19,8 @@ async function checkToggle(page, selector, en, es) {
 }
 
 ;(async () => {
+  const { offerPrices } = await import(pathToFileURL(path.resolve(__dirname, '../src/data/offer.js')))
+  const prices = Object.values(offerPrices).filter(Boolean)
   const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {})
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'en-US', reducedMotion: 'reduce' })
   const page = await context.newPage()
@@ -26,20 +30,17 @@ async function checkToggle(page, selector, en, es) {
   await page.goto(base)
   await page.getByRole('heading', { level: 1 }).waitFor()
   assert.equal(await page.getByRole('heading', { level: 1 }).count(), 1)
-  assert.deepEqual(await page.locator('.home-studio > section.section[id]').evaluateAll((els) => els.map((e) => e.id)), ['how-it-works', 'included', 'pricing', 'faq', 'get-started'])
+  assert.deepEqual(await page.locator('.home-studio > section.section[id]').evaluateAll((els) => els.map((e) => e.id)), ['how-it-works', 'included', 'faq', 'get-started'])
   assert.equal(await page.locator('#case-studies').count(), 0, 'case studies stay hidden')
   assert.equal(await page.locator('.offer-steps > li').count(), 3)
   assert.equal(await page.locator('.offer-items > li').count(), 3)
-  assert.equal(await page.locator('#pricing .offer-card').count(), 1)
-  assert.match(await page.locator('#pricing .offer-price').innerText(), /\$450/)
-  assert.match(await page.locator('#pricing .offer-setup').innerText(), /\$4,500/)
+  assert.equal(await page.locator('#pricing, .site-banner-price').count(), 0, 'prices stay hidden')
   assert.equal(await page.locator('#faq .faq button').count(), 5)
   assert.ok(await page.locator('#how-it-works a', { hasText: 'Book a call' }).count())
   assert.equal(await page.locator('a[href="#demo"], a:has-text("Try the demo"), .ai-pill').count(), 0, 'no demo CTAs until a real demo exists')
 
   await checkToggle(page, '#how-it-works h2', 'They hire the one that answers first', 'Contratan a la que contesta primero')
   await checkToggle(page, '#included h3', 'Speed-to-lead agent', 'Agente de respuesta inmediata')
-  await checkToggle(page, '#pricing h3', 'The Azul package', 'El paquete Azul')
   await checkToggle(page, '#faq button', 'Does it speak Spanish?', '¿Habla español?')
   await checkToggle(page, '#get-started h2', 'every homeowner gets', 'que recibe cada cliente')
   await checkToggle(page, '.site-banner-headline', 'speed-to-lead agent', 'agente de respuesta inmediata')
@@ -48,10 +49,15 @@ async function checkToggle(page, selector, en, es) {
   await page.locator('.site-header .languages button', { hasText: 'EN' }).click()
   await page.waitForFunction(() => document.title.includes('speed-to-lead'))
 
-  // No link anywhere on the main routes points at a removed service.
+  // No link anywhere on the main routes points at a removed service, and no page shows a price, in either language.
   for (const path of ['/', '/services', '/about', '/contact', '/services/ai-lead-agent', '/work', '/free-report']) {
     await page.goto(base + path)
     await page.getByRole('heading', { level: 1 }).first().waitFor()
+    for (const lang of ['ES', 'EN']) {
+      await page.locator('.site-header .languages button', { hasText: lang }).click()
+      const text = await page.locator('body').innerText()
+      for (const price of prices) assert.ok(!text.includes(price), `${path} (${lang}) shows the price ${price}`)
+    }
     const hrefs = await page.locator('a[href]').evaluateAll((els) => els.map((e) => e.getAttribute('href')))
     for (const slug of removed) assert.ok(!hrefs.some((h) => h.includes(`/services/${slug}`)), `${path} links to ${slug}`)
     assert.ok(!hrefs.some((h) => h.includes('buy.stripe.com')), `${path} links to an old Stripe checkout`)
@@ -65,14 +71,7 @@ async function checkToggle(page, selector, en, es) {
   assert.ok(await page.locator('.lab-call-window').isVisible())
   await page.keyboard.press('ArrowRight')
   assert.ok(await page.locator('.lab-review-window').isVisible())
-  // [tab, big price, setup fee under it (null = one-time price, no monthly)]
-  for (const [index, price, setup] of [[0, '$450', '$4,500'], [1, '$2,000', null], [2, '$450', '$3,500']]) {
-    await page.locator(`#plan-tab-${index}`).click()
-    assert.equal(await page.locator('.lab-price-value strong').innerText(), price)
-    const note = await page.locator('.lab-price-note').innerText()
-    if (setup) assert.ok(note.includes(setup), `plan ${index} shows ${setup} setup`)
-    else assert.ok(!/\$/.test(note), `plan ${index} has no extra fee`)
-  }
+  assert.equal(await page.locator('#plans').count(), 0, 'Services pricing stays hidden')
   await page.locator('.lab-faq summary').first().click()
   assert.notEqual(await page.locator('.lab-faq details').first().getAttribute('open'), null)
 

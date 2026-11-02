@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 import { bookingUrl } from '../components/site/Layout'
 import { servicesPage } from '../data/servicesPage'
-import { offerPrices } from '../data/offer'
+import { offerPrices, SHOW_PRICES } from '../data/offer'
 import { ComparisonVisual, PixelArrow, PixelField, ServicePreview, SystemIcon, WorkflowVisual } from '../components/site/ServicesVisuals'
 import '../services.css'
 
@@ -65,7 +65,7 @@ export default function Services(){
       </div>
     </section>
 
-    <section className="lab-pricing lab-section lab-container" id="plans">
+    {SHOW_PRICES && <section className="lab-pricing lab-section lab-container" id="plans">
       <div className="lab-section-heading"><Label>{t.priceLabel}</Label><Heading title={t.priceTitle} accent={t.priceAccent}/></div>
       <Tabs labels={t.plans} selected={plan} onSelect={setPlan} name="plan"/>
       <div className="lab-price-panel lab-window" role="tabpanel" tabIndex={0} id={`plan-panel-${plan}`} aria-labelledby={`plan-tab-${plan}`}>
@@ -74,7 +74,7 @@ export default function Services(){
         </div>
         <div className="lab-price-includes"><p className="lab-micro">{t.includes}</p><ul>{includes.map(item=><li key={item}><span aria-hidden="true">+</span>{item}</li>)}</ul>{plan===0&&<p className="lab-terms">{c.offer.pricing.terms}</p>}<BookButton label={c.offer.ctas.book}/></div>
       </div>
-    </section>
+    </section>}
 
     <section className="lab-faq lab-section lab-container" id="faq"><div className="lab-section-heading"><Label>{t.faqLabel}</Label><Heading title={t.faqTitle} accent={t.faqAccent}/></div><div className="lab-faq-list">{c.offer.faq.items.map(([question,answer],i)=><details key={i}><summary>{question}<span className="lab-faq-symbol" aria-hidden="true"/></summary><p>{answer}</p></details>)}</div></section>
 
