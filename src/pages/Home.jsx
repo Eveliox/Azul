@@ -1,11 +1,7 @@
-import { StudioHero, StudioTitle, StudioLabel } from '../components/site/StartupKit'
-import { GrowthPhone } from '../components/site/GrowthPhone'
-import { useState } from 'react'
-import { useReducedMotion } from '../hooks/useMediaQuery'
-import { servicesPage } from '../data/servicesPage'
+import { StudioTitle, StudioLabel } from '../components/site/StartupKit'
+import { Hero } from '../components/site/Hero'
 import { useLanguage } from '../contexts/LanguageContext'
-import { FAQAccordion, Arrow } from '../components/site/UI'
-import { bookingUrl } from '../components/site/Layout'
+import { FAQAccordion } from '../components/site/UI'
 import { OfferCtas, PackageCard } from '../components/site/Offer'
 import { SHOW_PRICES } from '../data/offer'
 import '../offer.css'
@@ -67,20 +63,8 @@ function FinalCta() {
 }
 
 export default function Home() {
-  const { c, lang } = useLanguage()
-  const t = servicesPage[lang]
-  const reduced = useReducedMotion()
-  const [paused, setPaused] = useState(false)
   return <div className="home-studio">
-    <StudioHero title={lang === 'en' ? 'More calls answered.\nMore estimates booked.' : 'Más llamadas atendidas.\nMás citas agendadas.'} body={t.intro} className="studio-home-hero">
-      <div className="offer-ctas"><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.offer.ctas.book}<Arrow /></a></div>
-      <div className={`growth-hero studio-phone-visual${paused || reduced ? ' is-still' : ''}`}>
-        <p className="sr-only">{lang === 'en' ? 'Illustrative Azul Growth dashboard displayed on a phone held in a hand. Demo data.' : 'Panel ilustrativo de Azul Growth en un teléfono sostenido en una mano. Datos de demostración.'}</p>
-        <GrowthPhone lang={lang} still={paused || reduced} ready />
-        {!reduced && <button className="studio-phone-motion" type="button" aria-pressed={paused} onClick={() => setPaused(value => !value)}>{lang === 'en' ? paused ? 'Resume animation' : 'Pause animation' : paused ? 'Reanudar animación' : 'Pausar animación'} <span aria-hidden="true">{paused ? '▷' : 'Ⅱ'}</span></button>}
-      </div>
-      <div className="lab-trust-strip">{t.strip.map(item=><span key={item}>{item}</span>)}</div>
-    </StudioHero>
+    <Hero introReady />
     <HowItWorks />
     <Included />
     {SHOW_PRICES && <Pricing />}
