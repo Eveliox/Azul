@@ -4,7 +4,7 @@ Written 2026-11-10. Replaces the Make.com scenarios (A new lead, B call ended, C
 
 Make keeps running Test AC Co. until step 5 passes. Nothing here touches a real client until then.
 
-**Status 2026-11-10:** steps 1–4 are built locally and pass all checks, but are not committed, migrated or deployed. Code: `supabase/migrations/20261110_speed_to_lead.sql`, `api/_lib/leads.js`, `api/_lib/lead-agent.js`, `api/leads/[action].js`, `.github/workflows/lead-retries.yml`. Tests: `tests/leads.test.js`, `tests/lead-agent.test.js`, `scripts/test-lead-database.mjs`. Next: step 5. Steps 6–7 not started.
+**Status 2026-11-10:** steps 1–5 done. Migration applied and verified; code live (commits ab5d10e…712590e). Test AC Co. runs on `/api/leads/*` in testing mode (test number +17864249866); Vapi Server URL → `/api/leads/call-ended` with an `x-vapi-secret` header; Make A and B are OFF. Passed: booking (calendar + owner/customer emails), don't call me, no answer → retry email. Still to confirm: the 2-hour retry call itself. Delete the Make scenarios and cancel Make after 2026-11-24 if nothing breaks. Steps 6–7 not started.
 
 ## What moves where
 
