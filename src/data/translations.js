@@ -2,7 +2,7 @@ import { insightsCopy } from './insights.js'
 import { offerCopy } from './offer.js'
 
 const shared = {
-  brand: 'azul', email: 'hello@azulwebdev.com', languages: ['EN', 'ES'],
+  brand: 'azul', email: 'azulagencyco@gmail.com', languages: ['EN', 'ES'],
   areas: ['Miami-Dade', 'Broward', 'Palm Beach'],
   socials: [{ label: 'Instagram', href: 'https://www.instagram.com/azuldevsmiami/' }, { label: 'LinkedIn', href: 'https://www.linkedin.com/in/evelio-gonzalez-77a3b5329/' }],
 }

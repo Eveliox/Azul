@@ -15,7 +15,7 @@ export const legalCopy = {
       sections: [
         { id: 'who-we-are', title: 'Who we are', body: [
           'Azul ("we", "us") builds bilingual websites and AI lead follow-up for contractors in South Florida. This policy covers azulwebdev.com, the calls and text messages we send, and the forms we run.',
-          'Questions about this policy: hello@azulwebdev.com.',
+          'Questions about this policy: azulagencyco@gmail.com.',
         ] },
         { id: 'what-we-collect', title: 'What we collect', body: [
           [
@@ -37,7 +37,7 @@ export const legalCopy = {
         { id: 'text-messages', title: 'Calls and text messages', body: [
           'We call or text a phone number only after its owner ticks an unchecked consent box on a form or otherwise agrees. Consent is not a condition of any purchase.',
           'Calls may be placed by an AI assistant and may be recorded and transcribed. You can ask for a person or ask us to stop calling at any time.',
-          'Message frequency varies with your request. Message and data rates may apply. Reply STOP (or PARAR) to opt out of texts. Reply HELP (or AYUDA) for help, or email hello@azulwebdev.com.',
+          'Message frequency varies with your request. Message and data rates may apply. Reply STOP (or PARAR) to opt out of texts. Reply HELP (or AYUDA) for help, or email azulagencyco@gmail.com.',
         ] },
         { id: 'sharing', title: 'Who we share it with', body: [
           'We do not sell personal information. We share it only with service providers that run our website and services for us, under their own security and privacy terms:',
@@ -68,7 +68,7 @@ export const legalCopy = {
             'Texts: reply STOP at any time.',
             'Calls: tell the assistant or the person calling, or email us.',
             'Emails: use the unsubscribe link or email us.',
-            'To see, correct or delete the information we hold about you, email hello@azulwebdev.com.',
+            'To see, correct or delete the information we hold about you, email azulagencyco@gmail.com.',
           ],
         ] },
         { id: 'security', title: 'Security', body: [
@@ -100,7 +100,7 @@ export const legalCopy = {
             'Message frequency varies with your request.',
             'Message and data rates may apply.',
             'Reply STOP (or PARAR) to cancel at any time. You will receive one message confirming you are opted out, and no more texts after that.',
-            'Reply HELP (or AYUDA) for help, or email hello@azulwebdev.com.',
+            'Reply HELP (or AYUDA) for help, or email azulagencyco@gmail.com.',
             'Carriers are not liable for delayed or undelivered messages.',
             'Consent to calls and texts is not a condition of any purchase.',
           ],
@@ -125,7 +125,7 @@ export const legalCopy = {
           'These terms are governed by the laws of the State of Florida.',
         ] },
         { id: 'contact', title: 'Contact', body: [
-          'Questions about these terms: hello@azulwebdev.com.',
+          'Questions about these terms: azulagencyco@gmail.com.',
         ] },
       ],
     },
@@ -139,7 +139,7 @@ export const legalCopy = {
       sections: [
         { id: 'who-we-are', title: 'Quiénes somos', body: [
           'Azul ("nosotros") crea sitios web bilingües y seguimiento de clientes potenciales con IA para contratistas del sur de Florida. Esta política cubre azulwebdev.com, las llamadas y mensajes de texto que enviamos y los formularios que gestionamos.',
-          'Preguntas sobre esta política: hello@azulwebdev.com.',
+          'Preguntas sobre esta política: azulagencyco@gmail.com.',
         ] },
         { id: 'what-we-collect', title: 'Qué recopilamos', body: [
           [
@@ -161,7 +161,7 @@ export const legalCopy = {
         { id: 'text-messages', title: 'Llamadas y mensajes de texto', body: [
           'Solo llamamos o enviamos mensajes a un número después de que su titular marque una casilla de consentimiento que aparece sin marcar en un formulario, o lo acepte de otra forma. El consentimiento no es condición para ninguna compra.',
           'Las llamadas pueden ser realizadas por un asistente de IA y pueden ser grabadas y transcritas. En cualquier momento puede pedir hablar con una persona o pedirnos que dejemos de llamar.',
-          'La frecuencia de los mensajes varía según su solicitud. Pueden aplicarse tarifas de mensajes y datos. Responda STOP (o PARAR) para dejar de recibir mensajes. Responda HELP (o AYUDA) para obtener ayuda, o escriba a hello@azulwebdev.com.',
+          'La frecuencia de los mensajes varía según su solicitud. Pueden aplicarse tarifas de mensajes y datos. Responda STOP (o PARAR) para dejar de recibir mensajes. Responda HELP (o AYUDA) para obtener ayuda, o escriba a azulagencyco@gmail.com.',
         ] },
         { id: 'sharing', title: 'Con quién la compartimos', body: [
           'No vendemos información personal. Solo la compartimos con proveedores que operan nuestro sitio y nuestros servicios por encargo nuestro, bajo sus propios términos de seguridad y privacidad:',
@@ -192,7 +192,7 @@ export const legalCopy = {
             'Mensajes de texto: responda STOP en cualquier momento.',
             'Llamadas: dígaselo al asistente o a la persona que llama, o escríbanos.',
             'Correos: use el enlace para cancelar la suscripción o escríbanos.',
-            'Para ver, corregir o eliminar la información que tenemos sobre usted, escriba a hello@azulwebdev.com.',
+            'Para ver, corregir o eliminar la información que tenemos sobre usted, escriba a azulagencyco@gmail.com.',
           ],
         ] },
         { id: 'security', title: 'Seguridad', body: [
@@ -224,7 +224,7 @@ export const legalCopy = {
             'La frecuencia de los mensajes varía según su solicitud.',
             'Pueden aplicarse tarifas de mensajes y datos.',
             'Responda STOP (o PARAR) para cancelar en cualquier momento. Recibirá un mensaje confirmando la baja y ningún mensaje más después.',
-            'Responda HELP (o AYUDA) para obtener ayuda, o escriba a hello@azulwebdev.com.',
+            'Responda HELP (o AYUDA) para obtener ayuda, o escriba a azulagencyco@gmail.com.',
             'Los operadores no son responsables de mensajes retrasados o no entregados.',
             'El consentimiento para llamadas y mensajes no es condición para ninguna compra.',
           ],
@@ -249,7 +249,7 @@ export const legalCopy = {
           'Estos términos se rigen por las leyes del estado de Florida.',
         ] },
         { id: 'contact', title: 'Contacto', body: [
-          'Preguntas sobre estos términos: hello@azulwebdev.com.',
+          'Preguntas sobre estos términos: azulagencyco@gmail.com.',
         ] },
       ],
     },
