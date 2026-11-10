@@ -133,8 +133,9 @@ export async function handleCallEnded({ secret, body, ...deps }) {
 
 // POST /api/leads/retry: scheduled. Flags stuck leads for the owner, then places due retry calls.
 export async function processLeadRetries({ limit = 5, ...deps } = {}) {
+  // Check the kill switch before connecting to anything.
+  if ((deps.env || process.env).LEAD_CALLS_ENABLED !== 'true') return { disabled: true, swept: 0, processed: 0 }
   const ctx = context(deps)
-  if (ctx.env.LEAD_CALLS_ENABLED !== 'true') return { disabled: true, swept: 0, processed: 0 }
   const swept = await rpcRows(ctx.database, 'rb_sweep_stuck_leads', {})
   const claimed = await rpcRows(ctx.database, 'rb_claim_lead_retries', { p_limit: limit })
   const agents = new Map()

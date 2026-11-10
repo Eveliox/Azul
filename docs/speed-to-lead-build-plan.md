@@ -87,7 +87,7 @@ Unit tests go in `tests/leads.test.js`. Base the fixtures on real Vapi reports f
 - Always answers 200 after authentication so Vapi doesn't retry over and over; failures go to the Vercel logs.
 
 **`POST /api/leads/retry`** (scheduled)
-- `requireCron` bearer auth (`CRON_SECRET`, header only).
+- Bearer auth with its own `LEAD_CRON_SECRET` (header only), separate from `CRON_SECRET`, which also guards `/api/send-due`.
 - Claims up to 5 due leads, checks the calling window and Do not contact again, places the Vapi call, finishes the attempt.
 - Also catches stuck calls: a lead still `calling` 30 minutes after its last attempt (no report arrived) → `needs_owner` plus an owner email.
 
@@ -107,7 +107,7 @@ Checks before pushing: the Review Booster set in CLAUDE.md (`npm test`, `npm run
 
 1. Apply the migration in Supabase (`/migrate`), then push the code.
 2. In the SQL Editor: add Test AC Co. to `rb_clients` (services `{calls}`) and `rb_lead_agents` (assistant `92a1a4d7-…`, phone number `90e9e838-…`, never `affa2e72-…`), mode `testing`, `test_numbers` = your two phones.
-3. Vercel: set the three env vars, `LEAD_CALLS_ENABLED=true`, redeploy. In GitHub, add the repo secret `CRON_SECRET` (same value as Vercel's) and set the repo variable `LEAD_RETRY_ENABLED=true` **at the same time**: after-hours and unanswered leads are only called again by that workflow.
+3. Vercel: set the three env vars, `LEAD_CALLS_ENABLED=true`, redeploy. Also set `LEAD_CRON_SECRET` in Vercel; in GitHub, add the repo secret `LEAD_CRON_SECRET` (same value) and set the repo variable `LEAD_RETRY_ENABLED=true` **at the same time**: after-hours and unanswered leads are only called again by that workflow.
 4. Vapi → the Test AC assistant → Server URL = `https://app.azulwebdev.com/api/leads/call-ended`, secret = `VAPI_LEAD_AGENT_SECRET`, server messages = end-of-call-report only.
 5. Switch Make scenarios A and B **off**, so both systems never call the same lead.
 6. Point `ai-agents/clients/test-ac/test-lead-form.html` at a small local relay that adds `x-lead-key` (or give the test form the key; it's local only).

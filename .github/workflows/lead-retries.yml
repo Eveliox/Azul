@@ -1,7 +1,7 @@
 name: Speed-to-lead retries
 # Places the agent's retry calls (no answer, after-hours leads) and flags stuck leads for the owner.
-# Off unless the repo variable LEAD_RETRY_ENABLED is 'true'. Needs the repo secret CRON_SECRET
-# (same value as CRON_SECRET in Vercel). This calls real phone numbers: don't run it by hand to "check" it.
+# Off unless the repo variable LEAD_RETRY_ENABLED is 'true'. Needs the repo secret LEAD_CRON_SECRET
+# (same value as LEAD_CRON_SECRET in Vercel). This calls real phone numbers: don't run it by hand to "check" it.
 on:
   workflow_dispatch:
   schedule:
@@ -18,12 +18,12 @@ jobs:
     steps:
       - name: Place due retry calls
         env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          CRON_SECRET: ${{ secrets.LEAD_CRON_SECRET }}
         shell: bash
         run: |
           set -euo pipefail
           if [[ -z "$CRON_SECRET" ]]; then
-            echo "Add the repo secret CRON_SECRET before enabling retries."
+            echo "Add the repo secret LEAD_CRON_SECRET before enabling retries."
             exit 1
           fi
           curl --fail --silent --show-error --max-time 70 \
