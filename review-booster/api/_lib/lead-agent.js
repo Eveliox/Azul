@@ -13,7 +13,8 @@ const safeEqual = (a, b) => {
   const y = Buffer.from(String(b ?? ''))
   return x.length > 0 && x.length === y.length && timingSafeEqual(x, y)
 }
-const context = (o = {}) => ({ database: o.database || db(), env: o.env || process.env, now: o.now || new Date(), send: o.send || sendEmail, fetchImpl: o.fetchImpl || fetch })
+// The database client is created on first use, so rejected requests never connect.
+const context = (o = {}) => ({ get database() { return o.database || db() }, env: o.env || process.env, now: o.now || new Date(), send: o.send || sendEmail, fetchImpl: o.fetchImpl || fetch })
 async function rpcRows(database, name, args) {
   const { data, error } = await database.rpc(name, args)
   if (error) throw error

@@ -4,7 +4,7 @@ import { handleNewLead, handleCallEnded, processLeadRetries } from '../_lib/lead
 
 // Speed-to-lead agent. One function for all routes (Vercel Hobby allows 12 functions per deployment).
 //   POST /api/leads/new         lead from a client's website server. Header x-lead-key = rb_lead_agents.form_key
-//   POST /api/leads/call-ended  Vapi Server URL. Header x-vapi-secret = VAPI_LEAD_AGENT_SECRET
+//   POST /api/leads/call-ended  Vapi Server URL. x-vapi-secret or Authorization: Bearer = VAPI_LEAD_AGENT_SECRET
 //   POST /api/leads/retry       scheduled worker. Authorization: Bearer LEAD_CRON_SECRET
 // Never call these as a health check: /new and /retry place real phone calls.
 // Env: VAPI_API_KEY, VAPI_LEAD_AGENT_SECRET, LEAD_CALLS_ENABLED=true, LEAD_CRON_SECRET, RESEND_API_KEY,
@@ -29,7 +29,9 @@ export default async function handler(req, res) {
       return res.status(r.status).json(r.body)
     }
     if (action === 'call-ended') {
-      const r = await handleCallEnded({ secret: req.headers['x-vapi-secret'], body: readJson(req) })
+      // Vapi sends the secret as x-vapi-secret (Server URL Secret) or as a Bearer token (Credential).
+      const secret = req.headers['x-vapi-secret'] || String(req.headers.authorization || '').match(/^Bearer (.+)$/)?.[1]
+      const r = await handleCallEnded({ secret, body: readJson(req) })
       return res.status(r.status).json(r.body)
     }
     // Secrets only in headers, never in query URLs or logs.
