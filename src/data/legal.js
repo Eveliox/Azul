@@ -3,7 +3,7 @@
 // (no sharing of mobile numbers or opt-in data, STOP, HELP, frequency, rates) are required; tests/legal.test.js checks them.
 // A section body item is a paragraph (string), a bullet list (array), or a highlighted clause ({ key }).
 
-export const legalUpdated = { en: 'Last updated November 2, 2026', es: 'Última actualización: 2 de noviembre de 2026' }
+export const legalUpdated = { en: 'Last updated November 10, 2026', es: 'Última actualización: 10 de noviembre de 2026' }
 
 export const legalCopy = {
   en: {
@@ -47,7 +47,6 @@ export const legalCopy = {
             'Email delivery: Resend',
             'Phone calls and text messages: Twilio',
             'AI calling: Vapi, and the speech and language AI providers it uses, such as OpenAI',
-            'Automation: Make.com',
             'Scheduling and calendars: Calendly and Google',
           ],
           { key: 'No mobile information will be shared with third parties or affiliates for marketing or promotional purposes. Text-message opt-in data and consent are excluded from every category of sharing in this policy and will not be shared with any third parties.' },
@@ -171,7 +170,6 @@ export const legalCopy = {
             'Envío de correos: Resend',
             'Llamadas y mensajes de texto: Twilio',
             'Llamadas con IA: Vapi y los proveedores de IA de voz y lenguaje que utiliza, como OpenAI',
-            'Automatización: Make.com',
             'Agenda y calendarios: Calendly y Google',
           ],
           { key: 'No compartiremos información móvil con terceros ni afiliados con fines de marketing o promocionales. Los datos de suscripción y el consentimiento para mensajes de texto quedan excluidos de todas las categorías de esta política y no se compartirán con ningún tercero.' },
