@@ -220,7 +220,8 @@ export function outcomeFromReport(report, lead, agent, now) {
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 const oneLine = (s) => String(s ?? '').replace(/[\r\n]+/g, ' ').trim()
 
-export const ownerRecipients = (agent) => String(agent?.owner_email || '').split(',').map((s) => s.trim()).filter(Boolean)
+// Invalid entries (e.g. a leftover placeholder) are dropped so they can't make Resend reject the whole email.
+export const ownerRecipients = (agent) => String(agent?.owner_email || '').split(',').map((s) => s.trim()).filter((s) => EMAIL.test(s))
 
 // "Test AC Co." <leads@azulwebdev.com>, using the address from LEAD_EMAIL_FROM or EMAIL_FROM.
 export function senderFor(displayName, env) {

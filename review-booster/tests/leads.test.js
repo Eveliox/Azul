@@ -139,4 +139,5 @@ test('sender uses the verified address with the business name', () => {
   assert.equal(senderFor('A "B" <c>', { LEAD_EMAIL_FROM: 'leads@azulwebdev.com', EMAIL_FROM: 'x <y@z.com>' }), '"A B c" <leads@azulwebdev.com>')
   assert.equal(senderFor('X', {}), undefined)
   assert.deepEqual(ownerRecipients(agent), ['owner@example.com', 'me@azul.com'])
+  assert.deepEqual(ownerRecipients({ owner_email: 'OWNER_EMAIL_HERE, ok@example.com' }), ['ok@example.com'], 'placeholders are dropped')
 })
