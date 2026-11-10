@@ -11,7 +11,8 @@ CRM imports, delivery webhooks and automatic reply handling are not implemented.
    migrations in order (do not re-run the seed section in schema.sql):
    - `supabase/migrations/20261007_ai_agents_service.sql`
    - `supabase/migrations/20261008_agent_operations.sql`
-   On a new project first apply schema.sql, then both migrations.
+   - `supabase/migrations/20261110_speed_to_lead.sql` (speed-to-lead agent; see `docs/speed-to-lead-build-plan.md`)
+   On a new project first apply schema.sql, then the migrations in this order.
 2. In Supabase Auth, set Site URL to `https://app.azulwebdev.com` and add
    `https://app.azulwebdev.com/admin` to allowed redirect URLs. Disable public
    sign-ups. Create the first owner account using the Supabase dashboard.

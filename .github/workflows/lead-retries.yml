@@ -1,0 +1,31 @@
+name: Speed-to-lead retries
+# Places the agent's retry calls (no answer, after-hours leads) and flags stuck leads for the owner.
+# Off unless the repo variable LEAD_RETRY_ENABLED is 'true'. Needs the repo secret CRON_SECRET
+# (same value as CRON_SECRET in Vercel). This calls real phone numbers: don't run it by hand to "check" it.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '4,14,24,34,44,54 * * * *'
+permissions: {}
+concurrency:
+  group: azul-lead-retries
+  cancel-in-progress: false
+jobs:
+  tick:
+    if: vars.LEAD_RETRY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Place due retry calls
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$CRON_SECRET" ]]; then
+            echo "Add the repo secret CRON_SECRET before enabling retries."
+            exit 1
+          fi
+          curl --fail --silent --show-error --max-time 70 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "https://app.azulwebdev.com/api/leads/retry"
