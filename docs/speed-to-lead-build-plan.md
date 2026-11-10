@@ -4,7 +4,7 @@ Written 2026-11-10. Replaces the Make.com scenarios (A new lead, B call ended, C
 
 Make keeps running Test AC Co. until step 5 passes. Nothing here touches a real client until then.
 
-**Status 2026-11-10:** steps 1–5 done. Migration applied and verified; code live (commits ab5d10e…712590e). Test AC Co. runs on `/api/leads/*` in testing mode (test number +17864249866); Vapi Server URL → `/api/leads/call-ended` with an `x-vapi-secret` header; Make A and B are OFF. Passed: booking (calendar + owner/customer emails), don't call me, no answer → retry email. Still to confirm: the 2-hour retry call itself. Delete the Make scenarios and cancel Make after 2026-11-24 if nothing breaks. Steps 6–7 not started.
+**Status 2026-11-10:** steps 1–5 done and Test AC Co. runs on `/api/leads/*` (Make A and B are OFF; delete them and cancel Make after 2026-11-24). Part 2 built locally (not yet migrated or deployed): owner first (step 6), inbound callbacks, the Leads section and Azul-only Agent setup on the dashboard's Speed-to-Lead Agent page, "stop calling", and step 7 cleanup (privacy policy, `/speed-to-lead-site` skill, per-client template, inbound prompt template). Migration `20261111_speed_to_lead_owner_inbound.sql` must be applied before that code ships.
 
 ## What moves where
 
@@ -148,3 +148,10 @@ Same flow as the walkthrough's Scenario E, in code:
 
 - **Vercel plan**: Hobby is for non-commercial use. Paying clients' lead calls likely need Pro ($20/mo). Check before the first real client.
 - **Lead confirmation sender**: from Azul's Resend domain with the client's name ("Test AC Co. via Azul"), reply-to the owner. Fine for now; per-client sending domains can come later.
+
+## Part 2 (built 2026-11-10)
+
+- **Dashboard**: Speed-to-Lead Agent page shows the agent's mode and rules, this month's numbers (leads, median time to first call during calling hours, booked, need you), and the latest 100 leads with status, call summary and "Stop calling". Business teams never see the form key, Vapi IDs or raw provider errors.
+- **Agent setup (Azul only)**: same page. Replaces the SQL for adding a client; shows the lead address and form key (hidden until revealed) and rotates the key. Routes: `GET /api/leads/list`, `GET|POST /api/leads/agent`, `POST /api/leads/stop` (same single function).
+- **Owner first**: `POST /api/leads/owner?step=pressed|dial_done|owner_done&lead=…`. Every Twilio request is checked with `X-Twilio-Signature` (URL rebuilt from `LEAD_PUBLIC_URL`, default `https://app.azulwebdev.com`). Only before anyone was called for the lead; if Twilio fails, the AI calls immediately; the owner is never rung twice.
+- **Inbound callbacks**: a Vapi report with `call.type = inboundPhoneCall` is matched to the business by `vapi_phone_number_id`, recorded once per call id, and emailed to the owner. A booking or do-not-call updates the lead; any other callback stops queued retries and hands the lead to the owner. Setup per client: `ai-agents/clients/_template/inbound-prompt.md`.

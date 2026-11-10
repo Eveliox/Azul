@@ -10,9 +10,10 @@ const agent = { client_id: 'c1', business_name: 'Test AC Co.', vapi_assistant_id
 const newLead = { id: 'lead-1', client_id: 'c1', name: 'Maria Lopez', phone: '+13055550100', service: 'AC repair', status: 'new', attempts: 0 }
 const form = { name: 'Maria Lopez', phone: '(305) 555-0100', consent: 'yes', service: 'AC repair', email: 'maria@example.com' }
 
-// Fake Supabase client: records every rpc and answers from `answers`.
-function fakeDb({ agentRow = agent, call = null, answers = {} } = {}) {
+// Fake Supabase client: records every rpc and write, answers rpcs from `answers` and reads from `tables`.
+function fakeDb({ agentRow = agent, call = null, answers = {}, tables = {} } = {}) {
   const log = []
+  const writes = []
   const defaults = {
     rb_create_lead: { created: true, lead: newLead },
     rb_claim_lead: [{ ...newLead, status: 'dialing', lease_token: 'lease-1' }],
@@ -20,17 +21,24 @@ function fakeDb({ agentRow = agent, call = null, answers = {} } = {}) {
     rb_record_call_result: [],
     rb_sweep_stuck_leads: [],
     rb_claim_lead_retries: [],
+    rb_lead_transition: [{ ...newLead, status: 'dialing', lease_token: 'lease-2' }],
+    rb_record_inbound_call: { recorded: true, lead: null },
   }
+  const read = (table) => table in tables ? tables[table] : table === 'rb_lead_agents' ? agentRow : table === 'rb_lead_calls' ? call : null
   return {
-    log,
+    log, writes,
     rpcs: (name) => log.filter((c) => c.name === name),
     async rpc(name, args) { log.push({ name, args }); return { data: name in answers ? answers[name] : defaults[name] } },
     from(table) {
+      const one = () => { const v = read(table); return Array.isArray(v) ? v[0] ?? null : v }
       const q = {
-        select: () => q,
-        eq: () => q,
-        in: async () => ({ data: table === 'rb_lead_agents' && agentRow ? [agentRow] : [] }),
-        maybeSingle: async () => ({ data: table === 'rb_lead_agents' ? agentRow : call }),
+        select: () => q, eq: () => q, order: () => q, limit: () => q, gte: () => q,
+        in: async () => ({ data: [].concat(read(table) || []) }),
+        upsert: (row) => { writes.push({ table, op: 'upsert', row }); return q },
+        update: (row) => { writes.push({ table, op: 'update', row }); return q },
+        maybeSingle: async () => ({ data: one() }),
+        single: async () => ({ data: { ...(one() || {}), ...(writes.at(-1)?.row || {}) } }),
+        then: (resolve) => resolve({ data: [].concat(read(table) || []) }),
       }
       return q
     },
@@ -162,4 +170,147 @@ test('retry worker: off unless enabled; emails owner about stuck leads; dials cl
   assert.equal(mail.sent[0].subject, 'Check this lead: Maria Lopez')
   assert.equal(vapi.requests.length, 1)
   assert.equal(database.rpcs('rb_finish_lead_attempt')[0].args.p_lease, 'lease-9')
+})
+
+// ── Owner first ─────────────────────────────────────────────────────
+import { twilioSignature, ownerUrl } from '../api/_lib/leads.js'
+import { handleOwnerStep, getLeadDashboard, saveLeadAgent, stopLead } from '../api/_lib/lead-agent.js'
+const ownerAgent = { ...agent, owner_first: true, owner_cell: '+13055559999', twilio_number: '+13055550000' }
+const twilioEnv = { ...env, TWILIO_ACCOUNT_SID: 'AC123', TWILIO_AUTH_TOKEN: 'tw-token' }
+function fakeProviders() {
+  const requests = []
+  const fetchImpl = async (url, init) => {
+    requests.push({ url, init })
+    if (url.includes('twilio.com')) return { ok: true, status: 201, json: async () => ({ sid: 'CA-owner-1' }) }
+    return { ok: true, status: 201, json: async () => ({ id: 'call-ai-1' }) }
+  }
+  return { requests, fetchImpl }
+}
+
+test('owner first: rings the owner from the business number instead of calling the lead', async () => {
+  const database = fakeDb({ agentRow: ownerAgent, answers: { rb_finish_lead_attempt: [{ ...newLead, status: 'owner_ringing' }] } }); const p = fakeProviders()
+  const r = await handleNewLead({ key: KEY, body: form, database, env: twilioEnv, now: NOW, send: fakeMail().send, fetchImpl: p.fetchImpl })
+  assert.equal(r.body.status, 'owner_ringing')
+  assert.equal(p.requests.length, 1); assert.match(p.requests[0].url, /Accounts\/AC123\/Calls\.json$/)
+  assert.equal(p.requests[0].init.headers.Authorization, `Basic ${Buffer.from('AC123:tw-token').toString('base64')}`)
+  const sent = new URLSearchParams(p.requests[0].init.body)
+  assert.equal(sent.get('To'), '+13055559999'); assert.equal(sent.get('From'), '+13055550000')
+  assert.equal(sent.get('StatusCallback'), 'https://app.azulwebdev.com/api/leads/owner?step=owner_done&lead=lead-1')
+  assert.match(sent.get('Twiml'), /Maria, AC repair\. Press 1/); assert.match(sent.get('Twiml'), /step=pressed&amp;lead=lead-1/)
+  assert.deepEqual(database.rpcs('rb_finish_lead_attempt')[0].args.p_result, { call_id: 'CA-owner-1', kind: 'owner' })
+})
+
+test('owner first: if Twilio fails the AI calls right away; retries never ring the owner again', async () => {
+  const p = { requests: [], fetchImpl: async (url, init) => { p.requests.push(url); return url.includes('twilio') ? { ok: false, status: 401, json: async () => ({ message: 'Authenticate' }) } : { ok: true, status: 201, json: async () => ({ id: 'call-ai-1' }) } } }
+  const database = fakeDb({ agentRow: ownerAgent })
+  await handleNewLead({ key: KEY, body: form, database, env: twilioEnv, now: NOW, send: fakeMail().send, fetchImpl: p.fetchImpl })
+  assert.equal(p.requests.length, 2); assert.match(p.requests[1], /api\.vapi\.ai/)
+  assert.deepEqual(database.rpcs('rb_finish_lead_attempt')[0].args.p_result, { call_id: 'call-ai-1', kind: 'ai' })
+  const due = { ...newLead, status: 'dialing', lease_token: 'l', first_call_at: '2026-11-10T17:00:00Z', attempts: 1, last_attempt_at: '2026-11-10T17:00:00Z' }
+  const p2 = fakeProviders()
+  await processLeadRetries({ database: fakeDb({ agentRow: ownerAgent, answers: { rb_claim_lead_retries: [due] } }), env: twilioEnv, now: NOW, send: fakeMail().send, fetchImpl: p2.fetchImpl })
+  assert.equal(p2.requests.length, 1); assert.match(p2.requests[0].url, /api\.vapi\.ai/)
+})
+
+const LEAD_ID = '11111111-2222-4333-8444-555555555555'
+const ownerLead = { ...newLead, id: LEAD_ID, status: 'owner_ringing', first_call_at: NOW.toISOString(), attempts: 0 }
+const signed = (step, params) => ({ step, leadId: LEAD_ID, params, signature: twilioSignature(ownerUrl(twilioEnv, step, LEAD_ID), params, 'tw-token') })
+
+test('owner steps: unsigned or forged requests are refused before any database access', async () => {
+  const database = fakeDb({ agentRow: ownerAgent, tables: { rb_leads: ownerLead } })
+  assert.equal((await handleOwnerStep({ ...signed('pressed', { Digits: '1' }), signature: 'forged', database, env: twilioEnv })).status, 403)
+  const r = signed('pressed', { Digits: '1' })
+  assert.equal((await handleOwnerStep({ ...r, params: { Digits: '9' }, database, env: twilioEnv })).status, 403, 'params changed after signing')
+  assert.equal((await handleOwnerStep({ ...r, database, env: { ...twilioEnv, TWILIO_AUTH_TOKEN: '' } })).status, 403)
+  assert.equal(database.log.length, 0)
+})
+
+test('owner presses 1: connected to the lead from the business number', async () => {
+  const database = fakeDb({ agentRow: ownerAgent, tables: { rb_leads: ownerLead }, answers: { rb_lead_transition: [{ ...ownerLead, status: 'owner_connecting' }] } })
+  const r = await handleOwnerStep({ ...signed('pressed', { Digits: '1', CallSid: 'CA-owner-1' }), database, env: twilioEnv })
+  assert.equal(r.status, 200)
+  assert.match(r.xml, /<Dial callerId="\+13055550000"[^>]*action="https:\/\/app\.azulwebdev\.com\/api\/leads\/owner\?step=dial_done&amp;lead=/)
+  assert.match(r.xml, /<Number>\+13055550100<\/Number>/)
+  assert.deepEqual(database.rpcs('rb_lead_transition')[0].args.p_from, ['owner_ringing'])
+  const other = await handleOwnerStep({ ...signed('pressed', { Digits: '5' }), database: fakeDb({ agentRow: ownerAgent, tables: { rb_leads: ownerLead } }), env: twilioEnv })
+  assert.match(other.xml, /assistant will call them/)
+})
+
+test('owner did not press 1: the AI calls the lead when the owner call ends', async () => {
+  const database = fakeDb({ agentRow: ownerAgent, tables: { rb_leads: ownerLead } }); const p = fakeProviders()
+  await handleOwnerStep({ ...signed('owner_done', { CallStatus: 'completed' }), database, env: twilioEnv, now: NOW, send: fakeMail().send, fetchImpl: p.fetchImpl })
+  assert.deepEqual(database.rpcs('rb_lead_transition')[0].args, { p_lead: LEAD_ID, p_from: ['owner_ringing'], p_to: 'dialing', p_notes: null, p_next: null, p_lease: true })
+  assert.equal(p.requests.length, 1); assert.match(p.requests[0].url, /api\.vapi\.ai/)
+  const none = fakeDb({ agentRow: ownerAgent, tables: { rb_leads: ownerLead }, answers: { rb_lead_transition: [] } }); const p2 = fakeProviders()
+  await handleOwnerStep({ ...signed('owner_done', {}), database: none, env: twilioEnv, now: NOW, fetchImpl: p2.fetchImpl })
+  assert.equal(p2.requests.length, 0, 'owner already connected: no AI call')
+})
+
+test('owner connected but the lead did not answer: queued for an AI retry', async () => {
+  const database = fakeDb({ agentRow: ownerAgent, tables: { rb_leads: ownerLead } })
+  const r = await handleOwnerStep({ ...signed('dial_done', { DialCallStatus: 'no-answer' }), database, env: twilioEnv, now: NOW })
+  const args = database.rpcs('rb_lead_transition')[0].args
+  assert.equal(args.p_to, 'retry'); assert.deepEqual(args.p_from, ['owner_connecting']); assert.equal(args.p_next, '2026-11-10T21:00:00.000Z')
+  assert.match(r.xml, /try them again later/)
+  const talked = fakeDb({ agentRow: ownerAgent, tables: { rb_leads: ownerLead } })
+  await handleOwnerStep({ ...signed('dial_done', { DialCallStatus: 'completed', DialCallDuration: '95' }), database: talked, env: twilioEnv, now: NOW })
+  assert.equal(talked.rpcs('rb_lead_transition')[0].args.p_to, 'owner_talked')
+})
+
+// ── Inbound callbacks ───────────────────────────────────────────────
+test('inbound callback: recorded against the business by its number, owner emailed', async () => {
+  const lead = { ...newLead, status: 'needs_owner', email: 'maria@example.com' }
+  const database = fakeDb({ answers: { rb_record_inbound_call: { recorded: true, lead: { ...lead, status: 'booked' } } } }); const mail = fakeMail()
+  const body = { message: { type: 'end-of-call-report', endedReason: 'customer-ended-call', durationSeconds: 80, transcript: 'User: calling back',
+    call: { id: 'in-1', type: 'inboundPhoneCall', phoneNumberId: 'pn', customer: { number: '+13055550100' } },
+    analysis: { summary: 'Booked Thursday.' }, artifact: { structuredOutputs: { x: { result: { appointment_booked: true, appointment_time: '2026-11-12T10:00:00-05:00' } } } } } }
+  const r = await handleCallEnded({ secret: 's3cret', body, database, env, now: NOW, send: mail.send })
+  assert.deepEqual(r.body, { ok: true, inbound: true, status: 'booked' })
+  const args = database.rpcs('rb_record_inbound_call')[0].args
+  assert.equal(args.p_client, 'c1'); assert.equal(args.p_phone, '+13055550100'); assert.equal(args.p_result.booked, true)
+  assert.equal(mail.sent[0].subject, 'Booked on a callback: Maria Lopez · Thursday, November 12 at 10:00 AM')
+  assert.deepEqual(mail.sent[1].to, ['maria@example.com'])
+})
+
+test('inbound callback: unknown number ignored, duplicate report sends nothing, hang-ups not emailed', async () => {
+  const msg = (extra = {}) => ({ message: { type: 'end-of-call-report', durationSeconds: 3, call: { id: 'in-2', type: 'inboundPhoneCall', phoneNumberId: 'pn', customer: { number: '+13055550100' } }, ...extra } })
+  assert.match((await handleCallEnded({ secret: 's3cret', body: msg(), database: fakeDb({ agentRow: null }), env })).body.ignored, /not linked/)
+  const mail = fakeMail()
+  await handleCallEnded({ secret: 's3cret', body: msg(), database: fakeDb({ answers: { rb_record_inbound_call: { recorded: false } } }), env, send: mail.send })
+  await handleCallEnded({ secret: 's3cret', body: msg(), database: fakeDb(), env, send: mail.send })
+  assert.equal(mail.sent.length, 0)
+})
+
+// ── Dashboard ───────────────────────────────────────────────────────
+test('dashboard: a business team never sees the form key, Vapi IDs or raw provider errors', async () => {
+  const fullAgent = { ...agent, form_key: 'f'.repeat(64), test_numbers: ['+13055550100'] }
+  const leads = [{ ...newLead, received_at: NOW.toISOString(), status: 'retry', last_error: 'Vapi 402: card declined for acct 123' }]
+  const team = await getLeadDashboard({ clientId: 'c1', isMaster: false, database: fakeDb({ agentRow: fullAgent, tables: { rb_leads: leads } }), env, now: NOW })
+  assert.equal(team.agent.form_key, undefined); assert.equal(team.agent.vapi_assistant_id, undefined); assert.equal(team.agent.test_numbers, undefined)
+  assert.equal(team.leads[0].last_error, 'The call could not be placed.')
+  assert.equal(team.calls_enabled, true); assert.equal(team.stats.leads, 1)
+  const azul = await getLeadDashboard({ clientId: 'c1', isMaster: true, database: fakeDb({ agentRow: fullAgent, tables: { rb_leads: leads } }), env, now: NOW })
+  assert.equal(azul.agent.form_key, 'f'.repeat(64)); assert.match(azul.leads[0].last_error, /402/)
+})
+
+test('agent settings: validated, saved with upsert, warning when the plan lacks the agent', async () => {
+  const settings = { business_name: 'Test AC Co.', vapi_assistant_id: 'asst-1', vapi_phone_number_id: 'pn-1', owner_email: 'owner@example.com', mode: 'testing', test_numbers: '(786) 424-9866' }
+  const database = fakeDb({ tables: { rb_clients: { id: 'c1', services: ['website'] } } })
+  const r = await saveLeadAgent({ clientId: 'c1', body: settings, database, env, now: NOW })
+  assert.equal(r.status, 200); assert.match(r.body.warning, /not in this business/)
+  assert.deepEqual(database.writes[0].row.test_numbers, ['+17864249866'])
+  assert.equal(database.writes[0].row.client_id, 'c1')
+  assert.equal((await saveLeadAgent({ clientId: 'c1', body: { ...settings, owner_email: 'nope' }, database, env, now: NOW })).status, 400)
+  const rotate = fakeDb({ tables: { rb_clients: { id: 'c1', services: ['calls'] } } })
+  await saveLeadAgent({ clientId: 'c1', body: { rotate_key: true }, database: rotate, env, now: NOW })
+  assert.match(rotate.writes[0].row.form_key, /^[0-9a-f]{64}$/)
+  assert.equal((await saveLeadAgent({ clientId: 'c9', body: settings, database: fakeDb({ tables: { rb_clients: null } }), env })).status, 404)
+})
+
+test('stop calling: only this business’s queued leads', async () => {
+  assert.equal((await stopLead({ clientId: 'c1', leadId: 'x', database: fakeDb({ tables: { rb_leads: null } }), env })).status, 404)
+  const database = fakeDb({ tables: { rb_leads: { id: 'lead-1' } }, answers: { rb_lead_transition: [{ ...newLead, status: 'not_called' }] } })
+  const r = await stopLead({ clientId: 'c1', leadId: 'lead-1', database, env })
+  assert.equal(r.status, 200); assert.deepEqual(database.rpcs('rb_lead_transition')[0].args.p_from, ['retry', 'new'])
+  assert.equal((await stopLead({ clientId: 'c1', leadId: 'lead-1', database: fakeDb({ tables: { rb_leads: { id: 'lead-1' } }, answers: { rb_lead_transition: [] } }), env })).status, 409)
 })

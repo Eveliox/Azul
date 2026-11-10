@@ -141,3 +141,58 @@ test('sender uses the verified address with the business name', () => {
   assert.deepEqual(ownerRecipients(agent), ['owner@example.com', 'me@azul.com'])
   assert.deepEqual(ownerRecipients({ owner_email: 'OWNER_EMAIL_HERE, ok@example.com' }), ['ok@example.com'], 'placeholders are dropped')
 })
+
+import { twilioSignature, ownerCallTwiml, validateAgentSettings, leadStats, agentForViewer, inboundOwnerEmail } from '../api/_lib/leads.js'
+
+test('Twilio signature matches Twilio’s documented example', () => {
+  assert.equal(twilioSignature('https://mycompany.com/myapp.php?foo=1&bar=2', { CallSid: 'CA1234567890ABCDE', Caller: '+12349013030', Digits: '1234', From: '+12349013030', To: '+18005551212' }, '12345'), '0/KCTR6DLpKmkAf8muzZqo1nDgQ=')
+})
+
+test('owner call script: spoken text cannot break the XML', () => {
+  const x = ownerCallTwiml({ id: 'L1', name: 'Ana <b>& Co', service: 'AC "repair"' }, {})
+  assert.doesNotMatch(x, /<b>/); assert.match(x, /New website lead\. Ana, AC repair\. Press 1/)
+  assert.match(x, /action="https:\/\/app\.azulwebdev\.com\/api\/leads\/owner\?step=pressed&amp;lead=L1"/)
+  const blank = ownerCallTwiml({ id: 'L1', name: '', service: '' }, { LEAD_PUBLIC_URL: 'https://x.test/' })
+  assert.match(blank, /New website lead\. a new customer, a request\./); assert.match(blank, /action="https:\/\/x\.test\/api\/leads/)
+})
+
+test('agent settings validation', () => {
+  const ok = { business_name: 'Test AC Co.', vapi_assistant_id: '92a1a4d7-12a6', vapi_phone_number_id: '90e9e838', owner_email: 'a@x.com, b@y.com', mode: 'active', call_start_hour: '9', call_end_hour: '18', twilio_number: '305 555 0000' }
+  const { row } = validateAgentSettings(ok)
+  assert.equal(row.call_start_hour, 9); assert.equal(row.twilio_number, '+13055550000'); assert.equal(row.owner_email, 'a@x.com, b@y.com'); assert.deepEqual(row.test_numbers, [])
+  const bad = (over, re) => assert.match(validateAgentSettings({ ...ok, ...over }).error, re)
+  bad({ business_name: '' }, /Business name/)
+  bad({ vapi_assistant_id: 'has space' }, /assistant ID/)
+  bad({ owner_email: 'a@x.com, nope' }, /owner email/)
+  bad({ call_end_hour: '8' }, /end after the start/)
+  bad({ owner_first: true }, /owner cell/)
+  bad({ mode: 'testing' }, /test number/)
+  bad({ timezone: 'Mars/Base' }, /timezone/)
+  bad({ max_attempts: 9 }, /1 to 5/)
+  bad({ test_numbers: '123' }, /Test numbers/)
+})
+
+test('dashboard numbers: this month only; speed measured on in-hours leads', () => {
+  const now = new Date('2026-11-10T20:00:00Z')
+  const L = (received, first, extra = {}) => ({ received_at: received, first_call_at: first, consent: true, status: 'calling', ...extra })
+  const stats = leadStats([
+    L('2026-11-10T15:00:00Z', '2026-11-10T15:00:20Z', { status: 'booked', booked: true }),
+    L('2026-11-10T16:00:00Z', '2026-11-10T16:02:00Z', { status: 'needs_owner' }),
+    L('2026-11-10T02:00:00Z', '2026-11-10T13:00:05Z'), // 9 PM lead, called at 8 AM: not counted for speed
+    L('2026-10-31T15:00:00Z', null, { status: 'no_answer' }), // last month, but still needs you
+  ], {}, now)
+  assert.deepEqual(stats, { leads: 3, called: 3, booked: 1, needs_you: 2, median_seconds_to_call: 20, within_minute: 50 })
+  assert.equal(leadStats([], {}, now).median_seconds_to_call, null)
+})
+
+test('team view of the agent hides keys and IDs', () => {
+  const a = { client_id: 'c', mode: 'active', form_key: 'k', vapi_assistant_id: 'v', owner_email: 'o@x.com', test_numbers: ['+1'] }
+  assert.deepEqual(Object.keys(agentForViewer(a, false)).filter((k) => a[k] !== undefined), ['client_id', 'mode'])
+  assert.equal(agentForViewer(a, true).form_key, 'k')
+})
+
+test('inbound email: stranger vs lead vs booking', () => {
+  assert.equal(inboundOwnerEmail({ phone: '+13055550100', lead: null, agent: {}, outcome: {} }).subject, 'Called back: +13055550100')
+  assert.match(inboundOwnerEmail({ phone: '+13055550100', lead: null, agent: {}, outcome: {} }).text, /not one of your website leads/)
+  assert.equal(inboundOwnerEmail({ lead: { name: 'Maria' }, agent: {}, outcome: { do_not_call: true } }).subject, 'Asked not to be called: Maria')
+})

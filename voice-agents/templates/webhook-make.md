@@ -1,5 +1,7 @@
 # Vapi → Make.com → SMS Webhook Setup
 
+> **Retired (2026-11-10).** Azul no longer uses Make. Speed-to-lead calls report to `https://app.azulwebdev.com/api/leads/call-ended` (see `ai-agents/clients/_template/README.md`). Inbound-only receptionists can use `/api/vapi-webhook`. Kept for reference only.
+
 This routes Vapi call summaries to the business owner's phone via SMS.
 
 ## Make.com scenario

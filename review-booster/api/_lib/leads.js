@@ -1,4 +1,5 @@
 // Speed-to-lead agent: pure helpers (no network, no database). Orchestration is in lead-agent.js.
+import { createHmac } from 'node:crypto'
 
 const NY = 'America/New_York'
 const DEFAULTS = { timezone: NY, call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120 }
@@ -320,4 +321,116 @@ export function leadConfirmationEmail({ lead, agent, appointmentTime }) {
     text: body,
     html: `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1f2937"><p>${esc(body)}</p></div>`,
   }
+}
+
+// ── Owner first (Twilio) ────────────────────────────────────────────
+
+export const publicBase = (env) => String(env.LEAD_PUBLIC_URL || 'https://app.azulwebdev.com').replace(/\/+$/, '')
+// Callback URLs are always built (and re-built for signature checks) from these two params, in this order.
+export const ownerUrl = (env, step, leadId) => `${publicBase(env)}/api/leads/owner?step=${encodeURIComponent(step)}&lead=${encodeURIComponent(leadId)}`
+
+// Twilio's X-Twilio-Signature: base64 HMAC-SHA1 of the URL plus every POST param (sorted by name, name+value).
+export function twilioSignature(url, params, authToken) {
+  const data = Object.keys(params || {}).sort().reduce((s, k) => s + k + (params[k] ?? ''), url)
+  return createHmac('sha1', authToken).update(Buffer.from(data, 'utf8')).digest('base64')
+}
+
+const xml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]))
+// Spoken text: no symbols that read badly or break the voice.
+const speakable = (s, max = 60) => String(s ?? '').replace(/[<>&"{}[\]\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max)
+
+// What the owner hears when their phone rings. Pressing 1 connects them to the lead.
+export function ownerCallTwiml(lead, env) {
+  const who = (String(lead.name ?? '').trim() && speakable(firstName(lead.name))) || 'a new customer'
+  const what = speakable(lead.service) || 'a request'
+  const action = xml(ownerUrl(env, 'pressed', lead.id))
+  return `<Response><Gather numDigits="1" timeout="8" action="${action}" method="POST"><Say>New website lead. ${xml(who)}, ${xml(what)}. Press 1 to call them now.</Say><Pause length="1"/><Say>Press 1 to call them now.</Say></Gather><Say>Okay, the assistant will call them.</Say></Response>`
+}
+export function ownerDialTwiml(lead, agent, env) {
+  return `<Response><Say>Connecting you now.</Say><Dial callerId="${xml(agent.twilio_number)}" timeout="25" action="${xml(ownerUrl(env, 'dial_done', lead.id))}" method="POST"><Number>${xml(lead.phone)}</Number></Dial></Response>`
+}
+export const sayTwiml = (text) => text ? `<Response><Say>${xml(text)}</Say></Response>` : '<Response/>'
+
+// ── Dashboard ───────────────────────────────────────────────────────
+const NEEDS_YOU = ['needs_owner', 'no_answer', 'failed', 'blocked']
+// Numbers for the client's dashboard. "This month" is the calendar month in the agent's timezone.
+export function leadStats(leads, agent, now) {
+  const r = rules(agent)
+  const p = localParts(now, r.timezone)
+  const month = leads.filter((l) => { const q = localParts(new Date(l.received_at), r.timezone); return q.y === p.y && q.m === p.m })
+  // Speed is measured only on leads that arrived during calling hours with consent (after-hours leads wait on purpose).
+  const timed = month.filter((l) => l.consent && l.first_call_at && nextCallTime(new Date(l.received_at), agent).getTime() === new Date(l.received_at).getTime())
+    .map((l) => Math.max(0, (new Date(l.first_call_at) - new Date(l.received_at)) / 1000)).sort((a, b) => a - b)
+  const median = timed.length ? timed[Math.floor((timed.length - 1) / 2)] : null
+  return {
+    leads: month.length,
+    called: month.filter((l) => l.first_call_at).length,
+    booked: month.filter((l) => l.booked || l.status === 'booked').length,
+    needs_you: leads.filter((l) => NEEDS_YOU.includes(l.status)).length,
+    median_seconds_to_call: median == null ? null : Math.round(median),
+    within_minute: timed.length ? Math.round(timed.filter((s) => s <= 60).length / timed.length * 100) : null,
+  }
+}
+
+// What a business's team may see about its agent. Azul (master) also gets IDs and the form key.
+const CLIENT_AGENT_FIELDS = ['client_id', 'mode', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at']
+export const agentForViewer = (agent, isMaster) => !agent ? null : isMaster ? agent : Object.fromEntries(CLIENT_AGENT_FIELDS.map((k) => [k, agent[k]]))
+
+const ID = /^[A-Za-z0-9-]{1,100}$/
+const int = (v) => (v === '' || v == null ? NaN : Number(v))
+// Validates the agent setup form. Returns { row } or { error }.
+export function validateAgentSettings(b = {}) {
+  const row = {
+    business_name: text(b.business_name, 120),
+    vapi_assistant_id: text(b.vapi_assistant_id, 100),
+    vapi_phone_number_id: text(b.vapi_phone_number_id, 100),
+    mode: ['testing', 'active', 'paused'].includes(b.mode) ? b.mode : null,
+    timezone: text(b.timezone, 60) || NY,
+    call_start_hour: int(b.call_start_hour ?? 8),
+    call_end_hour: int(b.call_end_hour ?? 20),
+    call_sundays: b.call_sundays === true,
+    max_attempts: int(b.max_attempts ?? 3),
+    retry_gap_minutes: int(b.retry_gap_minutes ?? 120),
+    owner_first: b.owner_first === true,
+  }
+  if (!row.business_name) return { error: 'Business name (as callers hear it) is required.' }
+  if (!ID.test(row.vapi_assistant_id || '')) return { error: 'Vapi assistant ID is required (letters, numbers and dashes).' }
+  if (!ID.test(row.vapi_phone_number_id || '')) return { error: 'Vapi phone number ID is required (letters, numbers and dashes).' }
+  if (!row.mode) return { error: 'Choose a mode.' }
+  try { new Intl.DateTimeFormat('en-US', { timeZone: row.timezone }) } catch { return { error: 'Unknown timezone.' } }
+  if (!Number.isInteger(row.call_start_hour) || !Number.isInteger(row.call_end_hour) || row.call_start_hour < 0 || row.call_end_hour > 24 || row.call_end_hour <= row.call_start_hour) return { error: 'Calling hours must be whole hours, with the end after the start.' }
+  if (!Number.isInteger(row.max_attempts) || row.max_attempts < 1 || row.max_attempts > 5) return { error: 'Calls per lead must be 1 to 5.' }
+  if (!Number.isInteger(row.retry_gap_minutes) || row.retry_gap_minutes < 30 || row.retry_gap_minutes > 1440) return { error: 'Time between calls must be 30 to 1440 minutes.' }
+  const emails = String(b.owner_email || '').split(',').map((s) => s.trim()).filter(Boolean)
+  if (!emails.length || emails.some((e) => !EMAIL.test(e))) return { error: 'Enter the owner email (several allowed, separated by commas).' }
+  row.owner_email = emails.join(', ').slice(0, 500)
+  for (const [key, label] of [['owner_cell', 'Owner cell'], ['twilio_number', 'Business (Twilio) number']]) {
+    const raw = text(b[key], 40)
+    row[key] = raw ? toE164(raw) : null
+    if (raw && !row[key]) return { error: `${label} must be a valid US number.` }
+  }
+  if (row.owner_first && (!row.owner_cell || !row.twilio_number)) return { error: 'Owner first needs the owner cell and the business Twilio number.' }
+  const tests = (Array.isArray(b.test_numbers) ? b.test_numbers : String(b.test_numbers || '').split(/[,\n]/)).map((s) => String(s).trim()).filter(Boolean)
+  row.test_numbers = tests.map(toE164)
+  if (row.test_numbers.some((n) => !n)) return { error: 'Test numbers must be valid US numbers.' }
+  if (row.test_numbers.length > 10) return { error: 'Up to 10 test numbers.' }
+  if (row.mode === 'testing' && !row.test_numbers.length) return { error: 'Testing mode needs at least one test number (your own phone).' }
+  return { row }
+}
+
+// Sent to the owner when a lead (or anyone) calls the business number back.
+export function inboundOwnerEmail({ phone, lead, agent, outcome, report }) {
+  const name = lead?.name ? oneLine(lead.name).slice(0, 80) : phone || 'Unknown caller'
+  const when = formatWhen(outcome.appointment_time, rules(agent).timezone)
+  const subject = outcome.booked ? `Booked on a callback: ${name}${when ? ` · ${when}` : ''}` : outcome.do_not_call ? `Asked not to be called: ${name}` : `Called back: ${name}`
+  const intro = outcome.booked ? 'They called the business number back and booked a visit.'
+    : outcome.do_not_call ? 'They called back and asked not to be called again. The agent added them to the do-not-contact list.'
+    : lead ? 'They called the business number back. The agent stopped any queued calls; read the summary and follow up.' : 'Someone called the business number. They are not one of your website leads.'
+  const secs = report?.durationSeconds || 0
+  const { text: body, html } = layout({
+    heading: subject, intro,
+    rows: [...(lead ? leadRows(lead) : [['Phone', phone, phone ? `tel:${phone}` : null]]), ['Appointment', when], ['Call length', secs ? `${Math.floor(secs / 60)}m ${secs % 60}s` : null], ['Recording', report?.recordingUrl ? 'Listen' : null, report?.recordingUrl]],
+    sections: [...(outcome.summary ? [['Summary', outcome.summary]] : []), ...(report?.transcript ? [['Transcript', report.transcript.slice(0, 6000)]] : [])],
+  })
+  return { subject, text: body, html }
 }

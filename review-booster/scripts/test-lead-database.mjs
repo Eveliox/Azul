@@ -6,8 +6,11 @@ const db = new PGlite()
 await db.exec(`create role anon; create role authenticated; create role service_role;
 create table rb_clients(id uuid primary key, name text, active boolean default true, services text[] default '{calls}');`)
 const migration = await readFile(new URL('../supabase/migrations/20261110_speed_to_lead.sql', import.meta.url), 'utf8')
+const part2 = await readFile(new URL('../supabase/migrations/20261111_speed_to_lead_owner_inbound.sql', import.meta.url), 'utf8')
 await db.exec(migration)
 await db.exec(migration) // must be safe to apply twice
+await db.exec(part2)
+await db.exec(part2)
 
 const c1 = '11111111-1111-4111-8111-111111111111', c2 = '22222222-2222-4222-8222-222222222222'
 await db.query('insert into rb_clients(id,name) values($1,$2),($3,$4)', [c1, 'One', c2, 'Two'])
@@ -119,10 +122,40 @@ await db.query("update rb_leads set last_attempt_at=now()-interval '31 minutes' 
 await db.query('select * from rb_sweep_stuck_leads()')
 assert.equal((await record('call-5', { status: 'booked', booked: true, appointment_time: '2026-11-12T09:00:00-05:00' })).status, 'booked')
 
+// Owner first: owner call recorded without counting as an AI attempt; transitions only from the expected state.
+const transition = async (id, from, to, extra = {}) => (await db.query('select * from rb_lead_transition($1,$2,$3,$4,$5,$6)', [id, from, to, extra.notes ?? null, extra.next ?? null, extra.lease ?? false])).rows[0]
+const o = (await create(c1, lead('+13055550190'))).lead
+const ringing = await finish(await claim(o.id), { call_id: 'CA-owner-1', kind: 'owner' })
+assert.equal(ringing.status, 'owner_ringing'); assert.equal(ringing.attempts, 0, 'owner call is not an AI attempt')
+assert.ok(ringing.first_call_at)
+const handover = await transition(o.id, ['owner_ringing'], 'dialing', { lease: true })
+assert.equal(handover.status, 'dialing'); assert.ok(handover.lease_token)
+assert.equal(await transition(o.id, ['owner_ringing'], 'dialing', { lease: true }), undefined, 'second status callback is a no-op')
+assert.equal((await finish(handover, { call_id: 'call-6' })).attempts, 1)
+await assert.rejects(() => transition(o.id, ['calling'], 'booked'), 'transition cannot set final call statuses')
+assert.equal((await transition(o.id, ['retry'], 'not_called', { notes: 'Stopped by your team' })), undefined, 'stop only applies to queued leads')
+
+// Inbound callback: recorded once; stops queued retries; booking wins; unknown numbers still logged.
+const inbound = async (id, client, phone, result) => (await one('select rb_record_inbound_call($1,$2,$3,$4::jsonb) as r', [id, client, phone, JSON.stringify(result)])).r
+const cb = (await create(c1, lead('+13055550200'))).lead
+await finish(await claim(cb.id), { status: 'retry', next_attempt_at: retryAt })
+const back = await inbound('in-1', c1, '+13055550200', { summary: 'Called back, wants a call tomorrow.', ended_reason: 'customer-ended-call' })
+assert.equal(back.recorded, true); assert.equal(back.lead.status, 'needs_owner'); assert.equal(back.lead.next_attempt_at, null)
+assert.equal((await inbound('in-1', c1, '+13055550200', {})).recorded, false, 'same call id recorded once')
+const bk = await inbound('in-2', c1, '+13055550200', { booked: true, appointment_time: '2026-11-12T10:00:00-05:00' })
+assert.equal(bk.lead.status, 'booked'); assert.equal(bk.lead.appointment_time, '2026-11-12T10:00:00-05:00')
+const stranger = await inbound('in-3', c1, '+13055550299', { do_not_call: true })
+assert.equal(stranger.recorded, true); assert.equal(stranger.lead, null)
+assert.ok(await one("select 1 as ok from rb_do_not_contact where client_id=$1 and phone='+13055550299'", [c1]))
+const live = (await create(c1, lead('+13055550210'))).lead
+await finish(await claim(live.id), { call_id: 'call-7' })
+assert.equal((await inbound('in-4', c1, '+13055550210', {})).lead.status, 'calling', 'a callback never overwrites a call in progress')
+
 // No browser access to tables or functions.
 await db.exec('set role anon')
 await assert.rejects(() => db.query('select * from rb_leads'))
 await assert.rejects(() => db.query('select * from rb_claim_lead_retries(5)'))
+await assert.rejects(() => db.query("select rb_record_inbound_call('x',$1,'+13055550100','{}'::jsonb)", [c1]))
 await db.exec('reset role')
 await db.close()
-console.log('PASS: reapplicable lead migration, duplicate guard, consent and do-not-contact, exclusive claims, stale leases, one-time call reports, retry limits, pause, sweep and public access restrictions.')
+console.log('PASS: reapplicable lead migration, duplicate guard, consent and do-not-contact, exclusive claims, stale leases, one-time call reports, retry limits, pause, sweep, owner-first handover, inbound callbacks and public access restrictions.')

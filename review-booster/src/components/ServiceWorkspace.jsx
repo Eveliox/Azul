@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 import AgentStudio from './AgentStudio.jsx'
+import LeadsPanel from './LeadsPanel.jsx'
 import { Icon } from './DashboardVisuals.jsx'
 import { SERVICES, UPCOMING, SETUP, MONTHLY, DELIVERY, activeServices, monthId, planKey, readPlan, reviewEvents } from './servicePlan.js'
 import './service-workspace.css'
@@ -99,7 +100,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
         <section className="panel service-activity"><div className="panel-heading"><div><h2>Recent activity</h2><p>Website and speed-to-lead planning updates</p></div><select className="input" aria-label="Filter recent activity" value={activityFilter} onChange={(e) => setActivityFilter(e.target.value)}><option value="all">All activity</option><option value="attention">Needs attention</option><option value="completed">Completed</option></select></div>
           {error && <div className="error-banner" role="alert">Review activity is unavailable: {error}</div>}
           {loading ? <div className="empty-state" role="status">Loading review activity…</div> : !events.length ? <div className="empty-state"><Icon name="clock" size={25}/><h3>No activity for this filter</h3><p>{'Complete a website or speed-to-lead planning step to see it here.'}</p></div> : <ul className="activity-list">{events.map((event) => <li key={event.id}><span className={`activity-dot ${event.state}`}/><button onClick={() => navigate(event.service)}><strong>{event.title}</strong><small>{event.detail}</small></button><time dateTime={event.date}>{new Date(event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</time></li>)}</ul>}
-          <p className="chart-footnote">Live website analytics, lead calls, and bookings are not connected. This feed shows planning updates.</p>
+          <p className="chart-footnote">This feed shows planning updates. Live lead calls and bookings are on the Speed-to-Lead Agent page.</p>
         </section>
         <aside className="panel next-actions"><div className="panel-heading"><div><h2>Up next</h2><p>Your next steps, not a live calendar</p></div><Icon name="clock" size={18}/></div>
           {included.includes('reviews') && (filter === 'all' || filter === 'reviews') && <button className="next-action" onClick={() => navigate('requests')}><span className="next-service">REVIEW BOOSTER</span><strong>{client.pending || 0} requests scheduled</strong><span>Open customer activity<Icon name="chevron" size={15}/></span></button>}
@@ -110,6 +111,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
     </> : service && (() => { const d = DELIVERY[view]; return <>
       <section className={`service-intro service-${service.color}`}><WindowBar title={`// ${service.name} / DELIVERY //`}/><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{d.intro}</p></div></section>
       {view === 'agents' && <AgentStudio/>}
+      {view === 'calls' && <LeadsPanel client={client} demo={demo} isMaster={isMaster}/>}
       {storageNote}
       <div className="delivery-grid"><div className="delivery-main">
         <TaskList title={d.setupTitle} tasks={SETUP[view]} state={setup}/>

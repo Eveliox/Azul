@@ -1,0 +1,37 @@
+// Local browser check of the Speed-to-Lead Agent page. Uses dev-server.js sample data; never run against a live business.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const origin=process.env.UI_TEST_ORIGIN || 'http://127.0.0.1:3014';
+async function signIn(page,key){
+  await page.goto(`${origin}/admin`);await page.getByLabel('Workspace access key').fill(key);await page.getByRole('button',{name:'Sign in to your workspace'}).click();
+  await page.getByRole('button',{name:'Speed-to-Lead Agent'}).first().click();await page.getByRole('heading',{name:'Leads',exact:true}).waitFor();
+}
+const overflow=(page)=>page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+(async()=>{
+  const browser=await chromium.launch({headless:true});const errors=[];
+  // Azul (master): live list, filters, details, agent setup with hidden form key.
+  const page=await browser.newPage({viewport:{width:1440,height:1000}});page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+  await signIn(page,'dev-master-key-123');
+  await page.getByText('Live',{exact:true}).waitFor();
+  for(const text of ['Leads this month','Time to first call','Booked this month','Need you','Maria Lopez','Sofia Martinez'])await page.getByText(text,{exact:true}).first().waitFor();
+  await page.getByRole('button',{name:'Needs you'}).click();
+  if(await page.getByText('Maria Lopez',{exact:true}).count())throw Error('Needs-you filter still shows a booked lead');
+  await page.getByText('Sofia Martinez',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'All leads'}).click();
+  await page.locator('.lead-detail summary').first().click();await page.getByText('Booked a repair visit',{exact:false}).waitFor();
+  await page.getByText('Agent setup',{exact:true}).click();
+  const key=page.getByLabel(/Form key/);if(await key.getAttribute('type')!=='password')throw Error('Form key is not hidden by default');
+  await page.getByRole('button',{name:'Reveal'}).click();if(await key.getAttribute('type')!=='text')throw Error('Reveal does not show the key');
+  await page.screenshot({path:'/tmp/azul-leads-desktop.png',fullPage:true});
+  await page.getByRole('button',{name:'Stop calling'}).first().click();await page.getByText("won't call Daniel Rivera",{exact:false}).waitFor();
+  await page.setViewportSize({width:390,height:844});if(await overflow(page))throw Error('Leads page overflows at phone width');
+  await page.screenshot({path:'/tmp/azul-leads-mobile.png',fullPage:true});
+  // Business team: sees leads, never the agent setup or form key.
+  const team=await browser.newPage({viewport:{width:1280,height:900}});team.on('pageerror',e=>errors.push(e.message));
+  await signIn(team,'demo-business-key-helloyou-12345678');
+  await team.getByText('Maria Lopez',{exact:true}).first().waitFor();
+  if(await team.getByText('Agent setup',{exact:true}).count())throw Error('Business team can see the agent setup');
+  if(await team.getByLabel(/Form key/).count())throw Error('Business team can see the form key');
+  if(errors.length)throw Error(errors.join('\n'));
+  console.log('PASS speed-to-lead page: agent status, numbers, lead filters and details, stop calling, Azul-only setup with hidden form key, team view without setup, phone width.');
+  await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

@@ -22,6 +22,21 @@ const requests = Array.from({ length: 32 }, (_, i) => {
   return { id: `sample-${i}`, client_id: clients[0].client_id, customer_name: names[i % names.length], customer_email: `sample${i}@example.com`, language: i % 3 ? 'en' : 'es', status, rating, feedback: rating === 3 ? 'The wait was longer than expected. The team was helpful once we started.' : null, error: status === 'failed' ? 'Sample delivery error. No real message was attempted.' : null, created_at: sent, send_at: sent, sent_at: ['pending', 'failed'].includes(status) ? null : sent, clicked_at: ['rated', 'clicked'].includes(status) ? sent : null, rated_at: status === 'rated' ? sent : null, token: `sample-${i}` }
 }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
+// Sample speed-to-lead activity (fake names and 555 numbers).
+const minutesAgo = (m) => new Date(Date.now() - m * 60000).toISOString()
+const leadAgents = { 'demo-helloyou': { client_id: 'demo-helloyou', mode: 'active', business_name: 'Hello You Wellness Center', vapi_assistant_id: 'demo-assistant', vapi_phone_number_id: 'demo-number', twilio_number: '+13055550000', owner_email: 'owner@example.com', owner_cell: '+13055550199', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: [], form_key: 'demo-form-key-not-real-0000000000000000000000000000000000000000', updated_at: minutesAgo(600) } }
+const leads = [
+  { id: 'lead-1', received_at: minutesAgo(18), name: 'Maria Lopez', phone: '+13055550100', service: 'AC repair', language: 'es', consent: true, status: 'booked', attempts: 1, first_call_at: minutesAgo(17.7), booked: true, appointment_time: new Date(Date.now() + 26 * 3600000).toISOString(), summary: 'AC blowing warm air since yesterday. Booked a repair visit; confirmed the address.', address: '1100 W 49th St, Hialeah, FL' },
+  { id: 'lead-2', received_at: minutesAgo(95), name: 'Daniel Rivera', phone: '+13055550101', service: 'New AC system', language: 'en', consent: true, status: 'retry', attempts: 1, first_call_at: minutesAgo(94.6), next_attempt_at: new Date(Date.now() + 25 * 60000).toISOString(), summary: 'Voicemail. Left a message.', ended_reason: 'voicemail' },
+  { id: 'lead-3', received_at: minutesAgo(240), name: 'Sofia Martinez', phone: '+13055550102', service: 'AC tune-up', language: 'en', consent: true, status: 'needs_owner', attempts: 1, first_call_at: minutesAgo(239.5), summary: 'Wants a price before booking. Asked for the owner to call back after 5 PM.', notes: null },
+  { id: 'lead-4', received_at: minutesAgo(1500), name: 'James Wilson', phone: '+13055550103', service: 'AC repair', language: 'en', consent: true, status: 'handed_off', attempts: 1, first_call_at: minutesAgo(1499.6), summary: 'No cooling with an elderly parent at home. Transferred to the owner.' },
+  { id: 'lead-5', received_at: minutesAgo(2900), name: 'Isabella Torres', phone: '+13055550104', service: 'New AC system', language: 'es', consent: false, status: 'not_called', attempts: 0, notes: 'No call consent on the form' },
+]
+function leadStatsDemo() {
+  const called = leads.filter((l) => l.first_call_at)
+  return { leads: leads.length, called: called.length, booked: leads.filter((l) => l.booked).length, needs_you: leads.filter((l) => ['needs_owner', 'no_answer', 'failed', 'blocked'].includes(l.status)).length, median_seconds_to_call: 22, within_minute: 100 }
+}
+
 function stats(c) {
   const rows = requests.filter((r) => r.client_id === c.client_id)
   const ratings = rows.filter((r) => r.rating)
@@ -74,6 +89,23 @@ createServer(async (req, res) => {
           const now = new Date().toISOString()
           const r = { ...body, id: randomUUID(), token: randomBytes(12).toString('hex'), client_id: c.client_id, language: body.language || c.default_language || 'en', created_at: now, send_at: new Date(Date.now() + (body.send_now ? 0 : Number(c.delay_hours ?? 3) * 3600000)).toISOString(), status: 'pending', rating: null, sent_at: null, clicked_at: null, rated_at: null }
           requests.unshift(r); return json(201, { request: r, link: `http://localhost:${port}/r/${r.token}` })
+        }
+      }
+      if (url.pathname.startsWith('/api/leads/')) {
+        const agent = leadAgents[c.client_id] || null
+        if (url.pathname === '/api/leads/list' && req.method === 'GET') {
+          const visible = agent && !master ? Object.fromEntries(['client_id', 'mode', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at'].map((k) => [k, agent[k]])) : agent
+          return json(200, { agent: visible, leads: agent ? leads : [], stats: agent ? leadStatsDemo() : { leads: 0, called: 0, booked: 0, needs_you: 0, median_seconds_to_call: null, within_minute: null }, calls_enabled: true })
+        }
+        if (url.pathname === '/api/leads/stop' && req.method === 'POST') {
+          const lead = leads.find((l) => l.id === body.lead_id && ['retry', 'new'].includes(l.status))
+          if (!lead) return json(409, { error: 'This lead is not waiting for a call anymore.' })
+          Object.assign(lead, { status: 'not_called', next_attempt_at: null, notes: 'Stopped by your team' }); return json(200, { lead })
+        }
+        if (url.pathname === '/api/leads/agent') {
+          if (!master) return json(403, { error: 'Only Azul can change the agent settings.' })
+          if (req.method === 'GET') return json(200, { agent })
+          if (req.method === 'POST') return json(409, { error: 'Demo workspace: agent settings are not saved.' })
         }
       }
       if (url.pathname === '/api/messages') {

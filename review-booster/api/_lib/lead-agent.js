@@ -1,11 +1,13 @@
 // Speed-to-lead agent: the steps that touch Vapi, the database and email.
 // Every dependency is a parameter so tests run with fakes. Routes are in api/leads/[action].js.
-import { timingSafeEqual } from 'node:crypto'
+import { timingSafeEqual, randomBytes } from 'node:crypto'
 import { db } from './db.js'
 import { sendEmail } from './email.js'
 import {
   leadFromForm, dialPlan, vapiCallBody, nextRetryTime, parseCallReport, outcomeFromReport,
   ownerCallEmail, ownerAlertEmail, leadConfirmationEmail, ownerRecipients, senderFor, formatWhen, rules,
+  ownerUrl, twilioSignature, ownerCallTwiml, ownerDialTwiml, sayTwiml, inboundOwnerEmail, toE164,
+  leadStats, agentForViewer, validateAgentSettings,
 } from './leads.js'
 
 const safeEqual = (a, b) => {
@@ -37,6 +39,24 @@ export async function placeVapiCall(body, { env, fetchImpl }) {
   return data.id
 }
 
+// Owner first: ring the owner's cell from the business number. Returns the Twilio call SID.
+export async function placeOwnerCall(lead, agent, { env, fetchImpl }) {
+  const sid = env.TWILIO_ACCOUNT_SID, token = env.TWILIO_AUTH_TOKEN
+  if (!sid || !token) throw new Error('Twilio credentials are not set')
+  const res = await fetchImpl(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(sid)}/Calls.json`, {
+    method: 'POST',
+    headers: { Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      To: agent.owner_cell, From: agent.twilio_number, Twiml: ownerCallTwiml(lead, env), Timeout: '25',
+      StatusCallback: ownerUrl(env, 'owner_done', lead.id), StatusCallbackMethod: 'POST',
+    }),
+    signal: AbortSignal.timeout(15_000),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok || !data?.sid) throw new Error(`Twilio ${res.status}: ${data?.message || 'no call sid returned'}`.slice(0, 300))
+  return data.sid
+}
+
 // Email failures are logged, never thrown: the lead and its status are already saved.
 async function notify(send, msg) {
   if (!msg.to?.length) return
@@ -52,10 +72,17 @@ export async function dialLead(lead, agent, ctx) {
   if (plan.action === 'skip') result = { status: 'not_called', notes: plan.notes }
   else if (plan.action === 'defer') result = { status: 'retry', next_attempt_at: plan.next_attempt_at, notes: plan.notes }
   else {
-    try {
-      result = { call_id: await placeVapiCall(vapiCallBody(lead, agent, now), { env, fetchImpl }), kind: 'ai' }
-    } catch (e) {
-      result = { error: String(e.message || 'Call failed').slice(0, 300), next_attempt_at: nextRetryTime(lead, agent, now) }
+    // Owner first: only before anyone has been called for this lead. If Twilio fails, the AI calls instead.
+    if (agent.owner_first && agent.owner_cell && agent.twilio_number && !lead.first_call_at) {
+      try { result = { call_id: await placeOwnerCall(lead, agent, ctx), kind: 'owner' } }
+      catch (e) { console.error('owner_call_failed', String(e.message).slice(0, 120)) }
+    }
+    if (!result) {
+      try {
+        result = { call_id: await placeVapiCall(vapiCallBody(lead, agent, now), { env, fetchImpl }), kind: 'ai' }
+      } catch (e) {
+        result = { error: String(e.message || 'Call failed').slice(0, 300), next_attempt_at: nextRetryTime(lead, agent, now) }
+      }
     }
   }
   const [updated] = await rpcRows(database, 'rb_finish_lead_attempt', { p_lead: lead.id, p_lease: lead.lease_token, p_result: result })
@@ -112,6 +139,7 @@ export async function handleCallEnded({ secret, body, ...deps }) {
   if (message?.type !== 'end-of-call-report') return { status: 200, body: { ok: true, ignored: 'not an end-of-call-report' } }
   const report = parseCallReport(message)
   if (!report.callId) return { status: 200, body: { ok: true, ignored: 'no call id' } }
+  if (message.call?.type === 'inboundPhoneCall') return handleInboundCall(message, report, ctx)
 
   const call = await ctx.database.from('rb_lead_calls').select('call_id, ended_at, client_id, lead:rb_leads(*)').eq('call_id', report.callId).maybeSingle()
   if (call.error) throw call.error
@@ -158,4 +186,119 @@ export async function processLeadRetries({ limit = 5, ...deps } = {}) {
     try { await dialLead(lead, agent, ctx); processed++ } catch (e) { failed++; console.error('lead_retry_failed', e.code || String(e.message).slice(0, 120)) }
   }
   return { swept: swept.length, processed, failed }
+}
+
+// A lead (or anyone) called the business number back and talked to the inbound assistant.
+async function handleInboundCall(message, report, ctx) {
+  const phoneNumberId = message.call?.phoneNumberId || message.phoneNumber?.id
+  if (!phoneNumberId) return { status: 200, body: { ok: true, ignored: 'no phone number id' } }
+  const found = await ctx.database.from('rb_lead_agents').select('*').eq('vapi_phone_number_id', phoneNumberId).limit(1).maybeSingle()
+  if (found.error) throw found.error
+  const agent = found.data
+  if (!agent) return { status: 200, body: { ok: true, ignored: 'number not linked to a business' } }
+  const raw = String(message.call?.customer?.number || message.customer?.number || '').slice(0, 40)
+  const phone = toE164(raw) || raw || null
+  const outcome = outcomeFromReport(report, { attempts: 0 }, agent, ctx.now)
+  const rec = await ctx.database.rpc('rb_record_inbound_call', {
+    p_call_id: report.callId, p_client: agent.client_id, p_phone: phone,
+    p_result: { booked: outcome.booked, appointment_time: outcome.appointment_time, do_not_call: outcome.do_not_call, summary: outcome.summary, ended_reason: outcome.ended_reason },
+  })
+  if (rec.error) throw rec.error
+  if (!rec.data?.recorded) return { status: 200, body: { ok: true, ignored: 'already recorded' } }
+  const lead = rec.data.lead
+  // Hang-ups and dead air: recorded, no email.
+  if (!report.transcript && report.durationSeconds < 8) return { status: 200, body: { ok: true, inbound: true } }
+  await notify(ctx.send, toOwner(agent, ctx.env, inboundOwnerEmail({ phone, lead, agent, outcome, report })))
+  if (outcome.booked && lead?.email) {
+    const confirmation = leadConfirmationEmail({ lead, agent, appointmentTime: outcome.appointment_time })
+    if (confirmation) await notify(ctx.send, { to: [lead.email], from: senderFor(agent.business_name, ctx.env), replyTo: ownerRecipients(agent)[0], ...confirmation })
+  }
+  return { status: 200, body: { ok: true, inbound: true, status: lead?.status || null } }
+}
+
+// POST /api/leads/owner?step=…&lead=…: Twilio webhooks for the owner-first call.
+// pressed: the owner pressed a key · dial_done: the owner's call to the lead ended · owner_done: the owner's call ended.
+export async function handleOwnerStep({ step, leadId, params = {}, signature, ...deps }) {
+  const ctx = context(deps)
+  const token = ctx.env.TWILIO_AUTH_TOKEN
+  if (!token || !['pressed', 'dial_done', 'owner_done'].includes(step) || !/^[0-9a-f-]{36}$/i.test(String(leadId || ''))) return { status: 403, xml: '<Response/>' }
+  if (!safeEqual(signature, twilioSignature(ownerUrl(ctx.env, step, leadId), params, token))) return { status: 403, xml: '<Response/>' }
+
+  const found = await ctx.database.from('rb_leads').select('*').eq('id', leadId).maybeSingle()
+  if (found.error) throw found.error
+  const lead = found.data
+  if (!lead) return { status: 200, xml: '<Response/>' }
+  const agentQuery = await ctx.database.from('rb_lead_agents').select('*').eq('client_id', lead.client_id).maybeSingle()
+  if (agentQuery.error) throw agentQuery.error
+  const agent = agentQuery.data
+  const move = async (from, to, extra = {}) => (await rpcRows(ctx.database, 'rb_lead_transition', { p_lead: lead.id, p_from: from, p_to: to, p_notes: extra.notes ?? null, p_next: extra.next ?? null, p_lease: extra.lease ?? false }))[0]
+
+  if (step === 'pressed') {
+    if (String(params.Digits) !== '1' || !agent?.twilio_number) return { status: 200, xml: sayTwiml('Okay, the assistant will call them.') }
+    const moved = await move(['owner_ringing'], 'owner_connecting', { notes: 'Owner pressed 1' })
+    return { status: 200, xml: moved ? ownerDialTwiml(lead, agent, ctx.env) : sayTwiml('This lead is already being handled.') }
+  }
+  if (step === 'dial_done') {
+    if (params.DialCallStatus === 'completed') {
+      await move(['owner_connecting'], 'owner_talked', { notes: `Owner talked to them (${Number(params.DialCallDuration) || 0}s)` })
+      return { status: 200, xml: '<Response/>' }
+    }
+    await move(['owner_connecting'], 'retry', { notes: 'Owner called, no answer', next: nextRetryTime(lead, agent, ctx.now) })
+    return { status: 200, xml: sayTwiml("They didn't answer. The assistant will try them again later.") }
+  }
+  // owner_done: if nobody pressed 1, the lead is still owner_ringing → the AI calls now.
+  const handover = await move(['owner_ringing'], 'dialing', { lease: true })
+  // The owner already had their chance: never ring them again for this lead.
+  if (handover && agent) await dialLead(handover, { ...agent, owner_first: false }, ctx)
+  return { status: 200, xml: '<Response/>' }
+}
+
+// ── Dashboard (GET /api/leads/list, GET|POST /api/leads/agent, POST /api/leads/stop) ──
+const LEAD_COLUMNS = 'id, received_at, name, phone, email, address, zip, service, details, language, consent, status, attempts, first_call_at, last_attempt_at, next_attempt_at, booked, appointment_time, summary, notes, ended_reason, last_error'
+
+export async function getLeadDashboard({ clientId, isMaster, ...deps }) {
+  const ctx = context(deps)
+  // The list shows the latest 100; the numbers use every lead from the last 32 days (covers this month in any timezone).
+  const since = new Date(ctx.now.getTime() - 32 * 86_400_000).toISOString()
+  const [agentQuery, leadsQuery, recentQuery] = await Promise.all([
+    ctx.database.from('rb_lead_agents').select('*').eq('client_id', clientId).maybeSingle(),
+    ctx.database.from('rb_leads').select(LEAD_COLUMNS).eq('client_id', clientId).order('received_at', { ascending: false }).limit(100),
+    ctx.database.from('rb_leads').select('received_at, first_call_at, consent, booked, status').eq('client_id', clientId).gte('received_at', since).limit(10000),
+  ])
+  for (const q of [agentQuery, leadsQuery, recentQuery]) if (q.error) throw q.error
+  const agent = agentQuery.data
+  const leads = (leadsQuery.data || []).map((l) => (isMaster ? l : { ...l, last_error: l.last_error ? 'The call could not be placed.' : null }))
+  return {
+    agent: agentForViewer(agent, isMaster),
+    leads,
+    stats: leadStats(recentQuery.data || [], agent || {}, ctx.now),
+    calls_enabled: ctx.env.LEAD_CALLS_ENABLED === 'true',
+  }
+}
+
+export async function saveLeadAgent({ clientId, body, ...deps }) {
+  const ctx = context(deps)
+  const client = await ctx.database.from('rb_clients').select('id, services').eq('id', clientId).maybeSingle()
+  if (client.error) throw client.error
+  if (!client.data) return { status: 404, body: { error: 'Business not found.' } }
+  if (body?.rotate_key) {
+    const { data, error } = await ctx.database.from('rb_lead_agents').update({ form_key: randomBytes(32).toString('hex'), updated_at: ctx.now.toISOString() }).eq('client_id', clientId).select('*').maybeSingle()
+    if (error) throw error
+    return data ? { status: 200, body: { agent: data } } : { status: 404, body: { error: 'Save the agent settings first.' } }
+  }
+  const { row, error: invalid } = validateAgentSettings(body)
+  if (invalid) return { status: 400, body: { error: invalid } }
+  const { data, error } = await ctx.database.from('rb_lead_agents').upsert({ client_id: clientId, ...row, updated_at: ctx.now.toISOString() }, { onConflict: 'client_id' }).select('*').single()
+  if (error) throw error
+  const warning = (client.data.services || []).includes('calls') ? null : 'Saved, but Speed-to-Lead Agent is not in this business’s plan, so its website leads are refused. Add it under Workspace access.'
+  return { status: 200, body: { agent: data, warning } }
+}
+
+export async function stopLead({ clientId, leadId, ...deps }) {
+  const ctx = context(deps)
+  const found = await ctx.database.from('rb_leads').select('id').eq('id', leadId).eq('client_id', clientId).maybeSingle()
+  if (found.error) throw found.error
+  if (!found.data) return { status: 404, body: { error: 'Lead not found.' } }
+  const [moved] = await rpcRows(ctx.database, 'rb_lead_transition', { p_lead: leadId, p_from: ['retry', 'new'], p_to: 'not_called', p_notes: 'Stopped by your team', p_next: null, p_lease: false })
+  return moved ? { status: 200, body: { lead: moved } } : { status: 409, body: { error: 'This lead is not waiting for a call anymore.' } }
 }
