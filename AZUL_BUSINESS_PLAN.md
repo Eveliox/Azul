@@ -210,7 +210,7 @@ Waitlist only for now. Do NOT build this before you have 10+ paying clients on o
 |---|---|---|
 | Reviews, SMS, email, Vapi lead alerts | **Review Booster** (own build: Vercel Pro + Supabase + Twilio + Resend) | ~$20-45 + ~$0.01/SMS |
 | Social + GBP scheduling | Meta Business Suite (free) or Publer / Localo | Free-low |
-| Glue between client tools | Make.com | Free-low |
+| Glue between client tools | Azul's own code (Review Booster on Vercel + Supabase); Make.com retired 2026-11-10 | Vercel Pro $20/mo |
 | AI phone answering | Vapi.ai or Bland.ai | ~$50/client (usage) |
 | Content generation | Claude API + ChatGPT Plus | $20-100 |
 | Local rank tracking | LocalFalcon | $40 |

@@ -104,7 +104,7 @@ Extract the above fields from the call transcript. If the caller did not provide
 
 ## Post-Call Webhook
 
-Set Server URL to your Make.com or custom endpoint. Filter for `end-of-call-report` events.
+Set Server URL to `https://app.azulwebdev.com/api/vapi-webhook` (inbound receptionist) or `/api/leads/call-ended` (speed-to-lead). Filter for `end-of-call-report` events.
 
 **SMS template to owner:**
 ```

@@ -4,7 +4,7 @@ Written 2026-11-10. Replaces the Make.com scenarios (A new lead, B call ended, C
 
 Make keeps running Test AC Co. until step 5 passes. Nothing here touches a real client until then.
 
-**Status 2026-11-10:** steps 1–5 done and Test AC Co. runs on `/api/leads/*` (Make A and B are OFF; delete them and cancel Make after 2026-11-24). Part 2 built locally (not yet migrated or deployed): owner first (step 6), inbound callbacks, the Leads section and Azul-only Agent setup on the dashboard's Speed-to-Lead Agent page, "stop calling", and step 7 cleanup (privacy policy, `/speed-to-lead-site` skill, per-client template, inbound prompt template). Migration `20261111_speed_to_lead_owner_inbound.sql` must be applied before that code ships.
+**Status 2026-11-11:** all steps and parts 2–5 are live (commits through c5f5209). Test AC Co. runs on the Azul template; Make A, B and C are off (delete them and cancel Make after 2026-11-24). Open: Vercel Pro and a lawyer's review of the consent wording before the first paying client; Facebook/Instagram lead ads with the first ads client.
 
 ## What moves where
 

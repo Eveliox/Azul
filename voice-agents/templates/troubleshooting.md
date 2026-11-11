@@ -6,11 +6,11 @@
 
 **Check:**
 1. Webhook URL correct in Vapi → Assistant → Server URL?
-2. Make.com scenario active and not paused?
+2. Speed-to-lead: the client's agent is not Paused, and Vercel `LEAD_CALLS_ENABLED` is `true` (Make.com was retired 2026-11-10)?
 3. Twilio credentials valid and funded?
 4. Phone number in correct E.164 format (+1XXXXXXXXXX)?
 
-**Quick test:** Trigger a test call, check Make.com execution history for errors.
+**Quick test:** Speed-to-Lead Agent → Setup → **Send test call**, then check the lead's details and the Vercel logs for errors.
 
 ---
 

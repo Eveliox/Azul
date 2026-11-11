@@ -96,6 +96,8 @@ supabase/schema.sql   tables + stats view + HelloYou seed
 
 ## Vapi lead alerts (`POST /api/vapi-webhook`)
 
+For inbound-only receptionist assistants. The speed-to-lead agent uses `/api/leads/call-ended` instead (next section).
+
 Emails the business owner after every real AI-answered call. Vapi sends its end-of-call report here; we format the summary, caller number and captured fields and send via Resend. Nothing is stored.
 
 **Vercel env:** `VAPI_WEBHOOK_SECRET`, `VAPI_LEAD_TO` (see `.env.example` for optional per-assistant routing).
@@ -103,6 +105,16 @@ Emails the business owner after every real AI-answered call. Vapi sends its end-
 **Vapi setup:** Assistant → Advanced → Server URL: `https://app.azulwebdev.com/api/vapi-webhook`, Server URL Secret: same value as `VAPI_WEBHOOK_SECRET`, Server Messages: `end-of-call-report`.
 
 Calls under 8s with no transcript (hang-ups) are ignored. If Resend fails, the endpoint still returns 200 (Vapi won't retry) and the error is in the Vercel function logs. Transcripts can contain personal details — set `VAPI_LEAD_TRANSCRIPT=false` for clients who only want the summary.
+
+## Speed-to-lead agent (`/api/leads/*`)
+
+Calls every new website lead within seconds, books on the client's Google Calendar, retries unanswered leads, answers callbacks, and emails the owner after every call. Clients see their leads, numbers and settings on the dashboard's Speed-to-Lead Agent page.
+
+- **Routes** (all in `api/leads/[action].js`): `new` (lead from a client's website server, `x-lead-key` = the client's form key), `form` and `form-info` (public hosted form at `/f/<slug>`), `call-ended` (Vapi Server URL: call reports and callbacks), `retry` (every 5 minutes from Supabase pg_cron, `Authorization: Bearer LEAD_CRON_SECRET`), `owner` (Twilio owner-first calls), and the dashboard's `list`, `agent`, `profile`, `controls`, `stop`, `test-call`.
+- **Vercel env:** `VAPI_API_KEY`, `VAPI_LEAD_AGENT_SECRET`, `LEAD_CALLS_ENABLED=true`, `LEAD_CRON_SECRET`, and optionally `AZUL_OPS_EMAIL` (daily check-in), `LEAD_CALENDAR_SHARE_EMAIL`, `LEAD_EMAIL_FROM`, `LEAD_PUBLIC_URL`. See `.env.example`.
+- **Vapi setup per client:** import their Twilio number; on that number set no inbound assistant, Server URL `https://app.azulwebdev.com/api/leads/call-ended`, header `x-vapi-secret` = `VAPI_LEAD_AGENT_SECRET`. Everything else is in the dashboard (Speed-to-Lead Agent → Setup).
+- **Tests:** `tests/leads.test.js`, `lead-agent.test.js`, `lead-prompts.test.js`, `lead-reports.test.js`, `scripts/test-lead-database.mjs` (migrations in PGlite) and `scripts/test-leads-ui.cjs` (browser, via `/ui-check`).
+- Design, decisions and status: `../docs/speed-to-lead-build-plan.md`.
 
 ## AI Agents operations
 

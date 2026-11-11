@@ -34,7 +34,7 @@ From the job posting, sorted. Automate now = in this build.
 | [Jobber / Housecall Pro / QuickBooks] | | User invite / API key | | ☐ |
 | [Calendar] | | | | ☐ |
 | Twilio number (texts / calls) | | Azul account, per-client number | | ☐ |
-| Make.com scenario / Vercel function | | Azul account | | ☐ |
+| Vercel function (review-booster) | | Azul account | | ☐ |
 | Supabase log table | | Azul account | | ☐ |
 
 - [ ] Texting registration (A2P 10DLC) submitted on [date], approved on [date]
@@ -82,7 +82,7 @@ What moves it up a level: [e.g. "two weeks with no must-not failures and owner O
 
 ## 8. Kill switch
 
-How to turn this agent off in under 2 minutes: [e.g. dial ##61# on the owner's phone; turn off the "Estimate Follow-Up" scenario in Make.com]
+How to turn this agent off in under 2 minutes: [e.g. dial ##61# on the owner's phone; set the agent to Paused in the dashboard]
 
 ## 9. Price
 

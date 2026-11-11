@@ -5,7 +5,7 @@ Two independent apps in one repo. Each has its own `package.json`, dependencies,
 | App | Path | Stack | Vercel project | Production URL |
 |---|---|---|---|---|
 | Landing site | `/` | React 18 + Vite + Tailwind | `azul` | https://azulwebdev.com |
-| Review Booster | `review-booster/` | React 18 + Vite 8 + Tailwind 4 UI, Vercel serverless `api/`, Supabase (DB + Auth), Twilio (SMS), Resend (email), OpenAI (AI Agents) | `azul-reviews` | https://app.azulwebdev.com (also https://azul-reviews.vercel.app) |
+| Review Booster | `review-booster/` | React 18 + Vite 8 + Tailwind 4 UI, Vercel serverless `api/`, Supabase (DB + Auth), Twilio (SMS, owner-first calls), Resend (email), Vapi (speed-to-lead AI calls), OpenAI (AI Agents) | `azul-reviews` | https://app.azulwebdev.com (also https://azul-reviews.vercel.app) |
 
 Review Booster needs Node 22.12+. Its AI Agents rollout (what's on, what's still off, how to turn it on) is in `review-booster/PRODUCTION.md`.
 
@@ -37,13 +37,22 @@ The landing site has no tests or linter. Run the checks for every app a change t
 ## Environment variables
 
 - Vercel env vars for Review Booster are set in the dashboard (no Vercel CLI here). `.env.example` lists every variable.
-- A `VITE_` prefix puts the value into public browser code. Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` may have it; Vercel stores those two as **Config**. Everything else (service-role key, Twilio, Resend, OpenAI, `ADMIN_KEY`, `CRON_SECRET`) stays **Sensitive** and never gets a `VITE_` name.
+- A `VITE_` prefix puts the value into public browser code. Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` may have it; Vercel stores those two as **Config**. Everything else (service-role key, Twilio, Resend, OpenAI, Vapi, `ADMIN_KEY`, `CRON_SECRET`, `LEAD_CRON_SECRET`, `VAPI_LEAD_AGENT_SECRET`) stays **Sensitive** and never gets a `VITE_` name.
 - `VITE_` values are baked in at build time: changing one needs a redeploy.
 
 ## Sign-in
 
 - Individual email accounts (Supabase Auth). Agency admins are rows in `rb_agency_admins`; team members are rows in `rb_workspace_members`. Public sign-up is off; users are created in the Supabase dashboard or invited from Workspace access.
 - Legacy shared access keys still work until `DISABLE_LEGACY_ACCESS_KEYS=true`. Don't set it until every client has a working email login.
+
+## Speed-to-lead agent
+
+- Website leads (or the hosted form at `/f/<slug>`) → `POST /api/leads/new` → saved in Supabase → Vapi calls the lead within seconds during calling hours → `/api/leads/call-ended` records the result, emails the owner and confirms bookings. Replaced Make.com (2026-11-10).
+- Code: `review-booster/api/leads/[action].js` (every lead route in one serverless function; Vercel Hobby allows 12 and the app uses 11), `api/_lib/leads.js`, `lead-agent.js`, `lead-prompts.js` (call scripts and the assistant sent to Vapi), `lead-reports.js` (daily/weekly emails). Migrations `20261110`–`20261114`. Design, history and status: `docs/speed-to-lead-build-plan.md`. Per-client onboarding: `ai-agents/clients/_template/README.md` (git-ignored).
+- Each client is a row in `rb_lead_agents` (edited in the dashboard: Speed-to-Lead Agent → Setup) plus business details in `rb_lead_profiles` (the client fills them in). `assistant_mode = azul` builds the script from those details on every call; `vapi` uses an assistant saved in Vapi.
+- Kill switches: Vercel `LEAD_CALLS_ENABLED` (anything but `true` = no calls anywhere), a client's mode (`testing` only calls its test numbers, `paused` saves and emails), and the Supabase cron job below.
+- To test, use **Send test call** in Setup (test numbers only, any hour). Never send a lead to `/api/leads/new` or `/f/<slug>` with a phone number that isn't the user's own.
+- Calling hours are capped at 8 AM–8 PM (Florida law) for everyone.
 
 ## Deploy
 
@@ -52,7 +61,7 @@ The landing site has no tests or linter. Run the checks for every app a change t
 - Smoke checks (GET only):
   - Landing site: `https://azulwebdev.com/` → 200
   - Review Booster: `https://app.azulwebdev.com/` → 200, and `https://app.azulwebdev.com/api/review/smoke-check-nonexistent` → 404 with body `{"error":"Not found"}` (a 500, or any other body, means env vars or Supabase are broken)
-- **Never** call these as a check, and never POST anything: `/api/send-due` (texts and emails real customers), `/api/agent-worker` (spends AI budget and emails customers), `/api/agents`, `/api/team`, `/api/leads/*` (`new` and `retry` place real AI phone calls). Speed-to-lead retries run every 5 minutes from Supabase (pg_cron job `azul-lead-retries`, calling `/api/leads/retry` with the Vault secret `azul_lead_cron_secret` = Vercel `LEAD_CRON_SECRET`); stop with `select cron.unschedule('azul-lead-retries');`. The GitHub "Speed-to-lead retries" workflow is only a backup (GitHub runs schedules here a few times a day) and stays off unless the repo variable `LEAD_RETRY_ENABLED` is `true`.
+- **Never** call these as a check, and never POST anything: `/api/send-due` (texts and emails real customers), `/api/agent-worker` (spends AI budget and emails customers), `/api/agents`, `/api/team`, `/api/leads/*` (`new`, `form`, `retry`, `owner` and `test-call` can place real phone calls). Speed-to-lead retries run every 5 minutes from Supabase (pg_cron job `azul-lead-retries`, calling `/api/leads/retry` with the Vault secret `azul_lead_cron_secret` = Vercel `LEAD_CRON_SECRET`); stop with `select cron.unschedule('azul-lead-retries');`. The GitHub "Speed-to-lead retries" workflow is only a backup (GitHub runs schedules here a few times a day) and stays off unless the repo variable `LEAD_RETRY_ENABLED` is `true`.
 - The "Estimate follow-up worker" GitHub workflow stays off unless the repo variable `AGENT_WORKER_ENABLED` is `true`. Don't enable it without the user.
 - Rollback: Vercel dashboard → project → Deployments → previous deployment → Promote to Production. Migrations are additive and stay in place.
 

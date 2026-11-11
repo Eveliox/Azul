@@ -1,5 +1,7 @@
 # Custom AI Agents: Build and Delivery Guide
 
+> **2026-11-10:** Azul no longer uses Make.com. New agents are built as code in `review-booster/` (Vercel + Supabase), like the speed-to-lead agent (`review-booster/api/leads/`). Mentions of Make below are from the earlier plan; read them as "a Vercel function or scheduled job".
+
 How to build the agents Azul sells as **Custom AI Agents** ($497/mo + $997 setup per agent): from the moment a job posting comes in through the website drawer to a working agent that you keep improving every month.
 
 This builds on what you already run. The Bilingual Receptionist is the Vapi receptionist from `voice-agents/`, and the Review Requester is `review-booster/`. You don't need a new platform. You need a repeatable way to turn a job posting into a spec, a spec into an agent, and an agent into something you can trust at 2am.

@@ -33,7 +33,7 @@ Manual workflow for delivering bilingual AI receptionist service via Vapi. First
 |------|---------|------|
 | Vapi.ai | Voice AI platform | ~$0.05-0.09/min |
 | Twilio (via Vapi) | Phone number | ~$3/mo |
-| Make.com or custom webhook | Post-call SMS/email | Free tier |
+| Azul's own webhook (`/api/vapi-webhook` or `/api/leads/call-ended`) | Post-call email | Included |
 
 ## Weekly rhythm
 
