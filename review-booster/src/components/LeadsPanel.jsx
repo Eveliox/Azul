@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 import { Icon } from './DashboardVisuals.jsx'
+import BusinessDetails from './BusinessDetails.jsx'
+import { outboundPrompt, inboundPrompt, validateProfile } from '../../api/_lib/lead-prompts.js'
 import './leads-panel.css'
 
 // Live speed-to-lead activity for one business, plus (Azul only) the agent's setup.
@@ -89,7 +91,7 @@ export default function LeadsPanel({ client, demo, isMaster }) {
             const [label, tone] = LEAD_STATUS[l.status] || [l.status, 'cancelled']
             const speed = firstCall(l)
             return <li key={l.id} className="lead-row">
-              <div className="lead-who"><strong>{l.name}</strong><small><a href={`tel:${l.phone}`}>{formatPhone(l.phone)}</a>{l.service ? ` · ${l.service}` : ''}{l.language === 'es' ? ' · ES' : ''}</small></div>
+              <div className="lead-who"><strong>{l.name}{l.is_test && <span className="test-badge">Test</span>}</strong><small><a href={`tel:${l.phone}`}>{formatPhone(l.phone)}</a>{l.service ? ` · ${l.service}` : ''}{l.language === 'es' ? ' · ES' : ''}</small></div>
               <div className="lead-state"><span className={`status-pill status-${tone}`}><i/>{label}</span>{l.attempts > 0 && <small>{l.attempts} call{l.attempts > 1 ? 's' : ''}</small>}</div>
               <div className="lead-time"><small>Received {when(l.received_at, tz)}</small>
                 <small>{speed != null ? `First call after ${seconds(speed)}` : l.status === 'retry' && l.next_attempt_at ? `Next call ${when(l.next_attempt_at, tz)}` : l.consent ? 'Not called yet' : 'No call permission'}</small>
@@ -108,15 +110,19 @@ export default function LeadsPanel({ client, demo, isMaster }) {
         <p className="chart-footnote leads-footnote">The list shows the latest 100 leads; the numbers count every lead this month. "Time to first call" counts leads that arrived during calling hours; after-hours leads are called when hours start. You get an email after every call.</p>
       </section>
 
-      {isMaster && <AgentSetup key={`${client.client_id}:${agent?.updated_at || 'new'}`} client={client} agent={agent} demo={demo} onSaved={(msg) => { setMessage(msg); setReload((n) => n + 1) }}/>}
+      <BusinessDetails key={client.client_id} client={client} profile={data.profile} updatedAt={data.profile_updated_at} shareEmail={data.calendar_share_email} demo={demo} onSaved={() => setReload((n) => n + 1)}/>
+      {isMaster && <AgentSetup key={`${client.client_id}:${agent?.updated_at || 'new'}`} client={client} agent={agent} profile={data.profile} gaps={data.gaps || []} demo={demo} onSaved={(msg) => { setMessage(msg); setReload((n) => n + 1) }}/>}
     </>}
   </div>
 }
 
-const BLANK = { business_name: '', mode: 'testing', vapi_assistant_id: '', vapi_phone_number_id: '', twilio_number: '', owner_email: '', owner_cell: '', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: '' }
+const BLANK = { assistant_mode: 'vapi', calendar_tool_ids: '', business_name: '', mode: 'testing', vapi_assistant_id: '', vapi_phone_number_id: '', twilio_number: '', owner_email: '', owner_cell: '', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: '' }
 
-function AgentSetup({ client, agent, demo, onSaved }) {
-  const [f, setF] = useState(() => agent ? { ...BLANK, ...agent, twilio_number: agent.twilio_number || '', owner_cell: agent.owner_cell || '', test_numbers: (agent.test_numbers || []).join(', ') } : { ...BLANK, business_name: client.name })
+function AgentSetup({ client, agent, profile, gaps, demo, onSaved }) {
+  const [f, setF] = useState(() => agent ? { ...BLANK, ...agent, vapi_assistant_id: agent.vapi_assistant_id || '', twilio_number: agent.twilio_number || '', owner_cell: agent.owner_cell || '', test_numbers: (agent.test_numbers || []).join(', '), calendar_tool_ids: (agent.calendar_tool_ids || []).join(', ') } : { ...BLANK, business_name: client.name })
+  const [testNumber, setTestNumber] = useState(agent?.test_numbers?.[0] || '')
+  const [testResult, setTestResult] = useState('')
+  const [preview, setPreview] = useState('outbound')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [warning, setWarning] = useState('')
@@ -135,6 +141,15 @@ function AgentSetup({ client, agent, demo, onSaved }) {
     try { await api('/api/leads/agent', { method: 'POST', body: { client_id: client.client_id, rotate_key: true } }); onSaved('New form key issued. Update the website’s LEAD_FORM_KEY.') }
     catch (e) { setError(e.message) } finally { setBusy(false) }
   }
+  async function testCall() {
+    setBusy(true); setError(''); setTestResult('')
+    try { const r = await api('/api/leads/test-call', { method: 'POST', body: { client_id: client.client_id, phone: testNumber } }); setTestResult(r.status === 'calling' || r.status === 'owner_ringing' ? `Calling ${formatPhone(testNumber)} now. The result appears in Leads after the call.` : `Not called: ${r.last_error || r.status}`); onSaved('Test call sent.') }
+    catch (e) { setError(e.message) } finally { setBusy(false) }
+  }
+  const validProfile = profile && validateProfile(profile).data
+  const promptText = validProfile ? (preview === 'outbound'
+    ? outboundPrompt({ profile: validProfile, agent: { ...f, owner_cell: f.owner_cell || null }, lead: { name: 'Maria Lopez', service: validProfile.services[0], address: '1100 W 49th St, Hialeah, FL', language: 'en' }, now: new Date() })
+    : inboundPrompt({ profile: validProfile, agent: { ...f, owner_cell: f.owner_cell || null }, now: new Date() })) : ''
   async function copy(text, what) { try { await navigator.clipboard.writeText(text); setCopied(what) } catch { setError('Could not copy. Select the text and copy it manually.') } }
   const field = (key, label, props = {}) => <label className="label" key={key}>{label}<input className="input" value={f[key] ?? ''} onChange={set(key)} {...props}/></label>
 
@@ -147,7 +162,9 @@ function AgentSetup({ client, agent, demo, onSaved }) {
         {field('test_numbers', 'Test numbers (testing mode)', { placeholder: '(786) 555-0100, (305) 555-0101' })}
       </fieldset>
       <fieldset><legend>Vapi & phone</legend>
-        {field('vapi_assistant_id', 'Vapi assistant ID', { required: true, placeholder: '92a1a4d7-…', spellCheck: false })}
+        <label className="label">Call script<select className="input" value={f.assistant_mode} onChange={set('assistant_mode')}><option value="vapi">Vapi assistant (saved in Vapi)</option><option value="azul">Azul template (built from business details)</option></select></label>
+        {field('vapi_assistant_id', f.assistant_mode === 'vapi' ? 'Vapi assistant ID' : 'Vapi assistant ID (not used in Azul template mode)', { required: f.assistant_mode === 'vapi', placeholder: '92a1a4d7-…', spellCheck: false })}
+        {field('calendar_tool_ids', 'Calendar tool IDs (check availability, book)', { required: f.assistant_mode === 'azul', placeholder: 'tool-id-1, tool-id-2', spellCheck: false })}
         {field('vapi_phone_number_id', 'Vapi phone number ID (the imported Twilio number)', { required: true, placeholder: '90e9e838-…', spellCheck: false })}
         {field('twilio_number', 'Business number (Twilio)', { type: 'tel', placeholder: '(305) 555-0000' })}
       </fieldset>
@@ -171,6 +188,18 @@ function AgentSetup({ client, agent, demo, onSaved }) {
       <button className="btn-primary" disabled={busy || demo}>{busy ? 'Saving…' : agent ? 'Save agent settings' : 'Create agent'}</button>
       {demo && <p className="chart-footnote">Demo workspace: settings are not saved.</p>}
     </form>
+
+    {agent && <div className="agent-connect">
+      <h3>Before using the Azul template</h3>
+      {gaps.length ? <ul className="gap-list">{gaps.map((g) => <li key={g}><Icon name="clock" size={13}/>{g}</li>)}</ul> : <p className="form-note"><Icon name="check" size={14}/> Business details, calendar and transfers are ready.</p>}
+      {validProfile && <details className="prompt-preview"><summary>Preview the call script</summary>
+        <div className="service-filters" role="group" aria-label="Script to preview">{[['outbound', 'Calling a new lead'], ['inbound', 'Answering a callback']].map(([id, label]) => <button type="button" key={id} className={preview === id ? 'selected' : ''} aria-pressed={preview === id} onClick={() => setPreview(id)}>{label}</button>)}</div>
+        <pre>{promptText}</pre><p className="chart-footnote">Sample lead: Maria Lopez. Uses the settings in the form above, saved or not.</p></details>}
+      <h3>Send a test call</h3>
+      <p className="muted">Calls one of the test numbers now, at any hour and in any mode, with the current settings. The result shows up in Leads.</p>
+      {(agent.test_numbers || []).length ? <div className="key-row"><select className="input" aria-label="Test number" value={testNumber} onChange={(e) => setTestNumber(e.target.value)}>{agent.test_numbers.map((n) => <option key={n} value={n}>{formatPhone(n)}</option>)}</select><button type="button" className="btn-primary" disabled={busy || demo || !testNumber} onClick={testCall}>Send test call</button></div> : <p className="form-note">Add a test number above and save first.</p>}
+      {testResult && <p className="form-note" role="status">{testResult}</p>}
+    </div>}
 
     {agent?.form_key && <div className="agent-connect">
       <h3>Connect the website</h3>

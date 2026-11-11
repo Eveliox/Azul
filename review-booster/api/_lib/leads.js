@@ -140,8 +140,10 @@ export function formatWhen(value, tz = NY, language = 'en') {
 
 // ── Calling ─────────────────────────────────────────────────────────
 // What to do with a lead that holds a dialing lease.
-export function dialPlan(lead, agent, env, now) {
+export function dialPlan(lead, agent, env, now, { test = false } = {}) {
   if (env.LEAD_CALLS_ENABLED !== 'true') return { action: 'skip', notes: 'Automatic calls are switched off.' }
+  // Test calls from the dashboard only go to the business's test numbers, at any hour, in any mode.
+  if (test) return (agent.test_numbers || []).includes(lead.phone) ? { action: 'call' } : { action: 'skip', notes: 'Test calls only go to the test numbers.' }
   if (agent.mode === 'paused') return { action: 'skip', notes: 'The agent is paused for this business.' }
   if (agent.mode !== 'active' && !(agent.test_numbers || []).includes(lead.phone)) return { action: 'skip', notes: 'Testing mode: this number is not on the test list.' }
   const next = nextCallTime(now, agent)
@@ -327,6 +329,7 @@ export function leadConfirmationEmail({ lead, agent, appointmentTime }) {
 
 export const publicBase = (env) => String(env.LEAD_PUBLIC_URL || 'https://app.azulwebdev.com').replace(/\/+$/, '')
 // Callback URLs are always built (and re-built for signature checks) from these two params, in this order.
+export const callEndedUrl = (env) => `${publicBase(env)}/api/leads/call-ended`
 export const ownerUrl = (env, step, leadId) => `${publicBase(env)}/api/leads/owner?step=${encodeURIComponent(step)}&lead=${encodeURIComponent(leadId)}`
 
 // Twilio's X-Twilio-Signature: base64 HMAC-SHA1 of the URL plus every POST param (sorted by name, name+value).
@@ -373,7 +376,7 @@ export function leadStats(leads, agent, now) {
 }
 
 // What a business's team may see about its agent. Azul (master) also gets IDs and the form key.
-const CLIENT_AGENT_FIELDS = ['client_id', 'mode', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at']
+const CLIENT_AGENT_FIELDS = ['client_id', 'mode', 'assistant_mode', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at']
 export const agentForViewer = (agent, isMaster) => !agent ? null : isMaster ? agent : Object.fromEntries(CLIENT_AGENT_FIELDS.map((k) => [k, agent[k]]))
 
 const ID = /^[A-Za-z0-9-]{1,100}$/
@@ -392,9 +395,14 @@ export function validateAgentSettings(b = {}) {
     max_attempts: int(b.max_attempts ?? 3),
     retry_gap_minutes: int(b.retry_gap_minutes ?? 120),
     owner_first: b.owner_first === true,
+    assistant_mode: b.assistant_mode === 'azul' ? 'azul' : 'vapi',
+    calendar_tool_ids: (Array.isArray(b.calendar_tool_ids) ? b.calendar_tool_ids : String(b.calendar_tool_ids || '').split(/[,\s]+/)).map((s) => String(s).trim()).filter(Boolean),
   }
+  if (!row.vapi_assistant_id) row.vapi_assistant_id = null
   if (!row.business_name) return { error: 'Business name (as callers hear it) is required.' }
-  if (!ID.test(row.vapi_assistant_id || '')) return { error: 'Vapi assistant ID is required (letters, numbers and dashes).' }
+  if (row.assistant_mode === 'vapi' ? !ID.test(row.vapi_assistant_id || '') : row.vapi_assistant_id && !ID.test(row.vapi_assistant_id)) return { error: 'Vapi assistant ID is required in "Vapi assistant" mode (letters, numbers and dashes).' }
+  if (row.calendar_tool_ids.length > 5 || row.calendar_tool_ids.some((t) => !ID.test(t))) return { error: 'Calendar tool IDs: up to 5, letters, numbers and dashes.' }
+  if (row.assistant_mode === 'azul' && !row.calendar_tool_ids.length) return { error: 'Azul template mode needs the calendar tool IDs (check availability and book).' }
   if (!ID.test(row.vapi_phone_number_id || '')) return { error: 'Vapi phone number ID is required (letters, numbers and dashes).' }
   if (!row.mode) return { error: 'Choose a mode.' }
   try { new Intl.DateTimeFormat('en-US', { timeZone: row.timezone }) } catch { return { error: 'Unknown timezone.' } }

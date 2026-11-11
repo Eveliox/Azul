@@ -11,6 +11,9 @@ await db.exec(migration)
 await db.exec(migration) // must be safe to apply twice
 await db.exec(part2)
 await db.exec(part2)
+const part3 = await readFile(new URL('../supabase/migrations/20261112_speed_to_lead_profiles.sql', import.meta.url), 'utf8')
+await db.exec(part3)
+await db.exec(part3)
 
 const c1 = '11111111-1111-4111-8111-111111111111', c2 = '22222222-2222-4222-8222-222222222222'
 await db.query('insert into rb_clients(id,name) values($1,$2),($3,$4)', [c1, 'One', c2, 'Two'])
@@ -151,9 +154,22 @@ const live = (await create(c1, lead('+13055550210'))).lead
 await finish(await claim(live.id), { call_id: 'call-7' })
 assert.equal((await inbound('in-4', c1, '+13055550210', {})).lead.status, 'calling', 'a callback never overwrites a call in progress')
 
+// Part 3: test calls skip the duplicate guard; profiles locked down; assistant mode checked.
+const t1 = await create(c1, lead('+13055550300', { test: true, name: 'Test call' }))
+const t2 = await create(c1, lead('+13055550300', { test: true, name: 'Test call' }))
+assert.equal(t1.created && t2.created, true, 'test calls are never treated as duplicates')
+assert.equal(t2.lead.notes, 'Test call from the dashboard'); assert.equal(t2.lead.is_test, true)
+await finish(await claim(t2.lead.id), { status: 'retry', next_attempt_at: retryAt })
+assert.ok(!(await claimRetries()).some((l) => l.id === t2.lead.id), 'test leads are never retried')
+assert.equal((await create(c1, lead('+13055550300'))).created, false, 'normal leads still are')
+await assert.rejects(() => db.query("update rb_lead_agents set assistant_mode='other' where client_id=$1", [c1]))
+await db.query("update rb_lead_agents set assistant_mode='azul', vapi_assistant_id=null, calendar_tool_ids=array['t1','t2'] where client_id=$1", [c1])
+await db.query(`insert into rb_lead_profiles(client_id,data) values($1,'{"trade":"air conditioning"}')`, [c1])
+
 // No browser access to tables or functions.
 await db.exec('set role anon')
 await assert.rejects(() => db.query('select * from rb_leads'))
+await assert.rejects(() => db.query('select * from rb_lead_profiles'))
 await assert.rejects(() => db.query('select * from rb_claim_lead_retries(5)'))
 await assert.rejects(() => db.query("select rb_record_inbound_call('x',$1,'+13055550100','{}'::jsonb)", [c1]))
 await db.exec('reset role')

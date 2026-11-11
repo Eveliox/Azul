@@ -2,23 +2,26 @@ import { timingSafeEqual } from 'node:crypto'
 import { authenticate, readJson } from '../_lib/auth.js'
 import {
   handleNewLead, handleCallEnded, processLeadRetries, handleOwnerStep, getLeadDashboard, saveLeadAgent, stopLead,
+  saveProfile, handleTestCall,
 } from '../_lib/lead-agent.js'
 
 // Speed-to-lead agent. One function for all routes (Vercel Hobby allows 12 functions per deployment).
 //   POST /api/leads/new         lead from a client's website server. Header x-lead-key = rb_lead_agents.form_key
-//   POST /api/leads/call-ended  Vapi Server URL (outbound and inbound assistants).
+//   POST /api/leads/call-ended  Vapi Server URL: end-of-call reports, and assistant-request for callbacks.
 //                               x-vapi-secret or Authorization: Bearer = VAPI_LEAD_AGENT_SECRET
 //   POST /api/leads/retry       scheduled worker. Authorization: Bearer LEAD_CRON_SECRET
 //   POST /api/leads/owner       Twilio webhooks for owner-first calls (checked with X-Twilio-Signature)
 //   GET  /api/leads/list        dashboard: a business's leads and numbers (its team, or Azul)
 //   GET|POST /api/leads/agent   Azul only: read or save a business's agent settings, rotate its form key
 //   POST /api/leads/stop        dashboard: stop calling a queued lead
+//   POST /api/leads/profile     dashboard: save the business details the agent's script is built from (team or Azul)
+//   POST /api/leads/test-call   Azul only: call one of the agent's test numbers now (any hour, any mode)
 // Never call these as a health check: /new, /retry and /owner can place real phone calls.
 // Env: VAPI_API_KEY, VAPI_LEAD_AGENT_SECRET, LEAD_CALLS_ENABLED=true, LEAD_CRON_SECRET, RESEND_API_KEY,
 //      EMAIL_FROM, TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN (owner first). Optional: LEAD_EMAIL_FROM, LEAD_PUBLIC_URL.
 export const config = { maxDuration: 60 }
 
-const METHODS = { new: ['POST'], 'call-ended': ['POST'], retry: ['POST'], owner: ['POST'], list: ['GET'], agent: ['GET', 'POST'], stop: ['POST'] }
+const METHODS = { new: ['POST'], 'call-ended': ['POST'], retry: ['POST'], owner: ['POST'], list: ['GET'], agent: ['GET', 'POST'], stop: ['POST'], profile: ['POST'], 'test-call': ['POST'] }
 
 // Its own secret, separate from CRON_SECRET (which also guards /api/send-due).
 function bearerMatches(req, secret) {
@@ -68,7 +71,15 @@ export default async function handler(req, res) {
       const r = await stopLead({ clientId, leadId: String(body.lead_id || '') })
       return res.status(r.status).json(r.body)
     }
+    if (action === 'profile') {
+      const r = await saveProfile({ clientId, body, userId: auth.userId })
+      return res.status(r.status).json(r.body)
+    }
     if (!isMaster) return res.status(403).json({ error: 'Only Azul can change the agent settings.' })
+    if (action === 'test-call') {
+      const r = await handleTestCall({ clientId, phone: body.phone })
+      return res.status(r.status).json(r.body)
+    }
     if (req.method === 'GET') return res.json({ agent: (await getLeadDashboard({ clientId, isMaster: true })).agent })
     const r = await saveLeadAgent({ clientId, body })
     return res.status(r.status).json(r.body)

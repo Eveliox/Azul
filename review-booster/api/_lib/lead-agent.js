@@ -7,8 +7,9 @@ import {
   leadFromForm, dialPlan, vapiCallBody, nextRetryTime, parseCallReport, outcomeFromReport,
   ownerCallEmail, ownerAlertEmail, leadConfirmationEmail, ownerRecipients, senderFor, formatWhen, rules,
   ownerUrl, twilioSignature, ownerCallTwiml, ownerDialTwiml, sayTwiml, inboundOwnerEmail, toE164,
-  leadStats, agentForViewer, validateAgentSettings,
+  leadStats, agentForViewer, validateAgentSettings, callEndedUrl,
 } from './leads.js'
+import { buildAssistant, validateProfile, profileGaps, templateReady } from './lead-prompts.js'
 
 const safeEqual = (a, b) => {
   const x = Buffer.from(String(a ?? ''))
@@ -65,9 +66,23 @@ async function notify(send, msg) {
 const toOwner = (agent, env, email) => ({ to: ownerRecipients(agent), from: senderFor('Azul Lead Agent', env), ...email })
 
 // Dials a lead that holds a dialing lease, then records the result (which releases the lease).
-export async function dialLead(lead, agent, ctx) {
+// The Vapi /call body: the assistant saved in Vapi, or (assistant_mode 'azul') one built from the business details.
+export async function callBody(lead, agent, ctx) {
+  if (agent.assistant_mode !== 'azul') return vapiCallBody(lead, agent, ctx.now)
+  const found = await ctx.database.from('rb_lead_profiles').select('data').eq('client_id', agent.client_id).maybeSingle()
+  if (found.error) throw found.error
+  const profile = found.data?.data && validateProfile(found.data.data).data
+  if (!profile) throw new Error('Business details are missing or incomplete, so the agent has no script')
+  return {
+    assistant: buildAssistant({ direction: 'outbound', profile, agent, lead, now: ctx.now, serverUrl: callEndedUrl(ctx.env), secret: ctx.env.VAPI_LEAD_AGENT_SECRET }),
+    phoneNumberId: agent.vapi_phone_number_id,
+    customer: { number: lead.phone, name: String(lead.name).slice(0, 40) },
+  }
+}
+
+export async function dialLead(lead, agent, ctx, { test = false } = {}) {
   const { database, env, now, send, fetchImpl } = ctx
-  const plan = dialPlan(lead, agent, env, now)
+  const plan = dialPlan(lead, agent, env, now, { test })
   let result
   if (plan.action === 'skip') result = { status: 'not_called', notes: plan.notes }
   else if (plan.action === 'defer') result = { status: 'retry', next_attempt_at: plan.next_attempt_at, notes: plan.notes }
@@ -79,13 +94,15 @@ export async function dialLead(lead, agent, ctx) {
     }
     if (!result) {
       try {
-        result = { call_id: await placeVapiCall(vapiCallBody(lead, agent, now), { env, fetchImpl }), kind: 'ai' }
+        result = { call_id: await placeVapiCall(await callBody(lead, agent, ctx), { env, fetchImpl }), kind: 'ai' }
       } catch (e) {
-        result = { error: String(e.message || 'Call failed').slice(0, 300), next_attempt_at: nextRetryTime(lead, agent, now) }
+        const error = String(e.message || 'Call failed').slice(0, 300)
+        result = test ? { status: 'not_called', notes: `Test call failed: ${error}`.slice(0, 300) } : { error, next_attempt_at: nextRetryTime(lead, agent, now) }
       }
     }
   }
   const [updated] = await rpcRows(database, 'rb_finish_lead_attempt', { p_lead: lead.id, p_lease: lead.lease_token, p_result: result })
+  if (test) return updated || null // the dashboard shows the result; no owner alerts for tests
   if (result.error) {
     const reason = updated?.status === 'failed'
       ? `The agent couldn't place the call and has stopped trying (${result.error}). Call them yourself.`
@@ -136,6 +153,7 @@ export async function handleCallEnded({ secret, body, ...deps }) {
   const ctx = context(deps)
   if (!ctx.env.VAPI_LEAD_AGENT_SECRET || !safeEqual(secret, ctx.env.VAPI_LEAD_AGENT_SECRET)) return { status: 401, body: { error: 'Unauthorized' } }
   const message = body?.message
+  if (message?.type === 'assistant-request') return handleAssistantRequest(message, ctx)
   if (message?.type !== 'end-of-call-report') return { status: 200, body: { ok: true, ignored: 'not an end-of-call-report' } }
   const report = parseCallReport(message)
   if (!report.callId) return { status: 200, body: { ok: true, ignored: 'no call id' } }
@@ -149,10 +167,13 @@ export async function handleCallEnded({ secret, body, ...deps }) {
   const agent = agentQuery.data || {}
 
   const outcome = outcomeFromReport(report, call.data.lead, agent, ctx.now)
+  if (call.data.lead.is_test && outcome.status === 'retry') { outcome.status = 'no_answer'; delete outcome.next_attempt_at }
   const [updated] = await rpcRows(ctx.database, 'rb_record_call_result', { p_call_id: report.callId, p_result: outcome })
   if (!updated) return { status: 200, body: { ok: true, ignored: 'already recorded' } }
 
-  await notify(ctx.send, toOwner(agent, ctx.env, ownerCallEmail({ lead: updated, agent, outcome, report })))
+  const email = ownerCallEmail({ lead: updated, agent, outcome, report })
+  if (updated.is_test) email.subject = `[Test] ${email.subject}`
+  await notify(ctx.send, toOwner(agent, ctx.env, email))
   if (outcome.status === 'booked' && updated.email) {
     const confirmation = leadConfirmationEmail({ lead: updated, agent, appointmentTime: outcome.appointment_time })
     if (confirmation) await notify(ctx.send, { to: [updated.email], from: senderFor(agent.business_name, ctx.env), replyTo: ownerRecipients(agent)[0], ...confirmation })
@@ -254,18 +275,19 @@ export async function handleOwnerStep({ step, leadId, params = {}, signature, ..
 }
 
 // ── Dashboard (GET /api/leads/list, GET|POST /api/leads/agent, POST /api/leads/stop) ──
-const LEAD_COLUMNS = 'id, received_at, name, phone, email, address, zip, service, details, language, consent, status, attempts, first_call_at, last_attempt_at, next_attempt_at, booked, appointment_time, summary, notes, ended_reason, last_error'
+const LEAD_COLUMNS = 'id, is_test, received_at, name, phone, email, address, zip, service, details, language, consent, status, attempts, first_call_at, last_attempt_at, next_attempt_at, booked, appointment_time, summary, notes, ended_reason, last_error'
 
 export async function getLeadDashboard({ clientId, isMaster, ...deps }) {
   const ctx = context(deps)
   // The list shows the latest 100; the numbers use every lead from the last 32 days (covers this month in any timezone).
   const since = new Date(ctx.now.getTime() - 32 * 86_400_000).toISOString()
-  const [agentQuery, leadsQuery, recentQuery] = await Promise.all([
+  const [agentQuery, leadsQuery, recentQuery, profileQuery] = await Promise.all([
     ctx.database.from('rb_lead_agents').select('*').eq('client_id', clientId).maybeSingle(),
     ctx.database.from('rb_leads').select(LEAD_COLUMNS).eq('client_id', clientId).order('received_at', { ascending: false }).limit(100),
-    ctx.database.from('rb_leads').select('received_at, first_call_at, consent, booked, status').eq('client_id', clientId).gte('received_at', since).limit(10000),
+    ctx.database.from('rb_leads').select('received_at, first_call_at, consent, booked, status').eq('client_id', clientId).eq('is_test', false).gte('received_at', since).limit(10000),
+    ctx.database.from('rb_lead_profiles').select('data, updated_at').eq('client_id', clientId).maybeSingle(),
   ])
-  for (const q of [agentQuery, leadsQuery, recentQuery]) if (q.error) throw q.error
+  for (const q of [agentQuery, leadsQuery, recentQuery, profileQuery]) if (q.error) throw q.error
   const agent = agentQuery.data
   const leads = (leadsQuery.data || []).map((l) => (isMaster ? l : { ...l, last_error: l.last_error ? 'The call could not be placed.' : null }))
   return {
@@ -273,6 +295,10 @@ export async function getLeadDashboard({ clientId, isMaster, ...deps }) {
     leads,
     stats: leadStats(recentQuery.data || [], agent || {}, ctx.now),
     calls_enabled: ctx.env.LEAD_CALLS_ENABLED === 'true',
+    profile: profileQuery.data?.data || null,
+    profile_updated_at: profileQuery.data?.updated_at || null,
+    gaps: profileGaps(profileQuery.data?.data, agent),
+    calendar_share_email: ctx.env.LEAD_CALENDAR_SHARE_EMAIL || null,
   }
 }
 
@@ -288,6 +314,7 @@ export async function saveLeadAgent({ clientId, body, ...deps }) {
   }
   const { row, error: invalid } = validateAgentSettings(body)
   if (invalid) return { status: 400, body: { error: invalid } }
+  if (row.assistant_mode === 'azul' && !templateReady()) return { status: 400, body: { error: 'The Azul template isn\'t ready yet: its voice settings still need to be copied from Test AC. Keep "Vapi assistant" for now.' } }
   const { data, error } = await ctx.database.from('rb_lead_agents').upsert({ client_id: clientId, ...row, updated_at: ctx.now.toISOString() }, { onConflict: 'client_id' }).select('*').single()
   if (error) throw error
   const warning = (client.data.services || []).includes('calls') ? null : 'Saved, but Speed-to-Lead Agent is not in this business’s plan, so its website leads are refused. Add it under Workspace access.'
@@ -301,4 +328,59 @@ export async function stopLead({ clientId, leadId, ...deps }) {
   if (!found.data) return { status: 404, body: { error: 'Lead not found.' } }
   const [moved] = await rpcRows(ctx.database, 'rb_lead_transition', { p_lead: leadId, p_from: ['retry', 'new'], p_to: 'not_called', p_notes: 'Stopped by your team', p_next: null, p_lease: false })
   return moved ? { status: 200, body: { lead: moved } } : { status: 409, body: { error: 'This lead is not waiting for a call anymore.' } }
+}
+
+// ── Callbacks answered by Azul (phone number with no inbound assistant, server URL → call-ended) ──
+// Vapi waits at most 7.5 s for this answer. Anything missing: forward the caller to the owner instead of dropping.
+async function handleAssistantRequest(message, ctx) {
+  const phoneNumberId = message.call?.phoneNumberId || message.phoneNumber?.id
+  const found = phoneNumberId ? await ctx.database.from('rb_lead_agents').select('*').eq('vapi_phone_number_id', phoneNumberId).limit(1).maybeSingle() : { data: null }
+  if (found.error) throw found.error
+  const agent = found.data
+  const forward = (why) => {
+    console.error('assistant_request_forwarded', why)
+    return agent?.owner_cell
+      ? { status: 200, body: { destination: { type: 'number', number: agent.owner_cell, message: '' } } }
+      : { status: 200, body: { error: 'This number is not set up yet. Please call back later.' } }
+  }
+  if (!agent) return forward('number not linked to a business')
+  if (agent.assistant_mode !== 'azul') return forward('business uses a Vapi assistant: set it as the number’s inbound assistant')
+  const profileQuery = await ctx.database.from('rb_lead_profiles').select('data').eq('client_id', agent.client_id).maybeSingle()
+  if (profileQuery.error) throw profileQuery.error
+  const profile = profileQuery.data?.data && validateProfile(profileQuery.data.data).data
+  if (!profile) return forward('business details incomplete')
+  return { status: 200, body: { assistant: buildAssistant({ direction: 'inbound', profile, agent, now: ctx.now, serverUrl: callEndedUrl(ctx.env), secret: ctx.env.VAPI_LEAD_AGENT_SECRET }) } }
+}
+
+// ── Business details (GET in /list; POST /api/leads/profile) and test calls (POST /api/leads/test-call) ──
+export async function saveProfile({ clientId, body, userId, ...deps }) {
+  const ctx = context(deps)
+  const { data, error: invalid } = validateProfile(body)
+  if (invalid) return { status: 400, body: { error: invalid } }
+  const { error } = await ctx.database.from('rb_lead_profiles').upsert({ client_id: clientId, data, updated_at: ctx.now.toISOString(), updated_by: userId || null }, { onConflict: 'client_id' })
+  if (error) throw error
+  return { status: 200, body: { profile: data } }
+}
+
+export async function handleTestCall({ clientId, phone, ...deps }) {
+  const ctx = context(deps)
+  const agentQuery = await ctx.database.from('rb_lead_agents').select('*').eq('client_id', clientId).maybeSingle()
+  if (agentQuery.error) throw agentQuery.error
+  const agent = agentQuery.data
+  if (!agent) return { status: 404, body: { error: 'Save the agent settings first.' } }
+  const number = toE164(phone)
+  if (!number || !(agent.test_numbers || []).includes(number)) return { status: 400, body: { error: 'Test calls only go to the agent’s test numbers. Add the number in Agent setup first.' } }
+  if (ctx.env.LEAD_CALLS_ENABLED !== 'true') return { status: 409, body: { error: 'Automatic calls are switched off for every business (LEAD_CALLS_ENABLED).' } }
+  const profileQuery = await ctx.database.from('rb_lead_profiles').select('data').eq('client_id', clientId).maybeSingle()
+  if (profileQuery.error) throw profileQuery.error
+  const service = profileQuery.data?.data?.services?.[0] || 'a service request'
+  const created = await ctx.database.rpc('rb_create_lead', { p_client: clientId, p_data: { name: 'Test Caller', phone: number, service, consent: true, consent_text: 'Test call from the dashboard', page_url: 'dashboard test call', language: 'en', test: true } })
+  if (created.error) throw created.error
+  const { lead } = created.data
+  if (lead.status !== 'new') return { status: 409, body: { error: lead.status === 'blocked' ? 'This number is on the do-not-contact list.' : 'The test lead could not be called.' } }
+  const [leased] = await rpcRows(ctx.database, 'rb_claim_lead', { p_lead: lead.id })
+  if (!leased) return { status: 409, body: { error: 'The test lead is already being called.' } }
+  // A test never rings the owner (owner first) and is never retried.
+  const done = await dialLead(leased, { ...agent, owner_first: false }, ctx, { test: true })
+  return { status: 200, body: { status: done?.status || 'dialing', last_error: done?.notes || done?.last_error || null } }
 }

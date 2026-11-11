@@ -314,3 +314,89 @@ test('stop calling: only this business’s queued leads', async () => {
   assert.equal(r.status, 200); assert.deepEqual(database.rpcs('rb_lead_transition')[0].args.p_from, ['retry', 'new'])
   assert.equal((await stopLead({ clientId: 'c1', leadId: 'lead-1', database: fakeDb({ tables: { rb_leads: { id: 'lead-1' } }, answers: { rb_lead_transition: [] } }), env })).status, 409)
 })
+
+// ── Azul-built assistants, callbacks answered by Azul, test calls, business details ──
+import { saveProfile, handleTestCall } from '../api/_lib/lead-agent.js'
+const goodProfile = { trade: 'air conditioning', area: 'Hialeah, Florida', visit_name: 'AC service visit', visit_minutes: 60, services: ['AC repair'], questions: [], emergencies: [], service_zips: [], booking_days: [1, 2, 3, 4, 5], booking_start_hour: 8, booking_end_hour: 17, min_notice_hours: 2, calendar_shared: true }
+const azulAgent = { ...agent, assistant_mode: 'azul', vapi_assistant_id: null, calendar_tool_ids: ['t-check', 't-book'], owner_cell: '+13055559999', test_numbers: ['+17864249866'] }
+
+test('azul mode: the call carries an assistant built from the business details', async () => {
+  const database = fakeDb({ agentRow: azulAgent, tables: { rb_lead_profiles: { data: goodProfile } } }); const vapi = fakeVapi()
+  await handleNewLead({ key: KEY, body: form, database, env, now: NOW, send: fakeMail().send, fetchImpl: vapi.fetchImpl })
+  const body = vapi.requests[0].body
+  assert.equal(body.assistantId, undefined); assert.equal(body.phoneNumberId, 'pn'); assert.equal(body.customer.number, '+13055550100')
+  assert.match(body.assistant.model.messages[0].content, /You are calling Maria/)
+  assert.deepEqual(body.assistant.model.toolIds, ['t-check', 't-book'])
+  assert.equal(body.assistant.server.url, 'https://app.azulwebdev.com/api/leads/call-ended')
+})
+
+test('azul mode without business details: no call, owner told why', async () => {
+  const database = fakeDb({ agentRow: azulAgent, tables: { rb_lead_profiles: null } }); const vapi = fakeVapi(); const mail = fakeMail()
+  await handleNewLead({ key: KEY, body: form, database, env, now: NOW, send: mail.send, fetchImpl: vapi.fetchImpl })
+  assert.equal(vapi.requests.length, 0)
+  assert.match(database.rpcs('rb_finish_lead_attempt')[0].args.p_result.error, /Business details are missing/)
+  assert.match(mail.sent[0].text, /Business details are missing/)
+})
+
+test('callback: Azul answers with the inbound assistant, or forwards to the owner', async () => {
+  const req = { message: { type: 'assistant-request', call: { id: 'in-9', type: 'inboundPhoneCall', phoneNumberId: 'pn', customer: { number: '+13055550100' } } } }
+  const ok = await handleCallEnded({ secret: 's3cret', body: req, database: fakeDb({ agentRow: azulAgent, tables: { rb_lead_profiles: { data: goodProfile } } }), env, now: NOW })
+  assert.match(ok.body.assistant.model.messages[0].content, /Someone is calling the company's number/)
+  assert.equal(ok.body.assistant.voicemailDetection, 'off')
+  const vapiMode = await handleCallEnded({ secret: 's3cret', body: req, database: fakeDb({ agentRow: { ...azulAgent, assistant_mode: 'vapi' } }), env, now: NOW })
+  assert.deepEqual(vapiMode.body, { destination: { type: 'number', number: '+13055559999', message: '' } })
+  const noDetails = await handleCallEnded({ secret: 's3cret', body: req, database: fakeDb({ agentRow: azulAgent, tables: { rb_lead_profiles: null } }), env, now: NOW })
+  assert.equal(noDetails.body.destination.number, '+13055559999')
+  const unknown = await handleCallEnded({ secret: 's3cret', body: req, database: fakeDb({ agentRow: null }), env, now: NOW })
+  assert.match(unknown.body.error, /not set up/)
+  assert.equal((await handleCallEnded({ secret: 'wrong', body: req, database: fakeDb(), env })).status, 401)
+})
+
+test('test call: only test numbers, any hour, never deduplicated', async () => {
+  const lead = { ...newLead, phone: '+17864249866' }
+  const answers = { rb_create_lead: { created: true, lead }, rb_claim_lead: [{ ...lead, status: 'dialing', lease_token: 'l' }] }
+  assert.equal((await handleTestCall({ clientId: 'c1', phone: '(305) 555-0100', database: fakeDb({ agentRow: azulAgent }), env })).status, 400)
+  assert.equal((await handleTestCall({ clientId: 'c1', phone: '786-424-9866', database: fakeDb({ agentRow: azulAgent }), env: { ...env, LEAD_CALLS_ENABLED: 'false' } })).status, 409)
+  const database = fakeDb({ agentRow: azulAgent, tables: { rb_lead_profiles: { data: goodProfile } }, answers }); const vapi = fakeVapi()
+  const r = await handleTestCall({ clientId: 'c1', phone: '786-424-9866', database, env, now: NIGHT, send: fakeMail().send, fetchImpl: vapi.fetchImpl })
+  assert.equal(r.status, 200); assert.equal(vapi.requests.length, 1, 'calls even at 9 PM')
+  const data = database.rpcs('rb_create_lead')[0].args.p_data
+  assert.equal(data.test, true); assert.equal(data.service, 'AC repair'); assert.equal(data.consent, true)
+})
+
+test('business details: validated and saved with who changed them', async () => {
+  const database = fakeDb()
+  assert.equal((await saveProfile({ clientId: 'c1', body: { ...goodProfile, trade: '' }, database, env })).status, 400)
+  const r = await saveProfile({ clientId: 'c1', body: goodProfile, userId: 'u1', database, env, now: NOW })
+  assert.equal(r.status, 200); assert.equal(database.writes[0].table, 'rb_lead_profiles'); assert.equal(database.writes[0].row.updated_by, 'u1')
+})
+
+test('dashboard includes business details and what is missing', async () => {
+  const d = await getLeadDashboard({ clientId: 'c1', isMaster: false, database: fakeDb({ agentRow: azulAgent, tables: { rb_leads: [], rb_lead_profiles: { data: goodProfile, updated_at: 'x' } } }), env: { ...env, LEAD_CALENDAR_SHARE_EMAIL: 'calendar@azul.test' }, now: NOW })
+  assert.equal(d.profile.trade, 'air conditioning'); assert.ok(d.gaps.every((g) => g.startsWith('Voice settings'))); assert.equal(d.calendar_share_email, 'calendar@azul.test')
+  assert.equal(d.agent.calendar_tool_ids, undefined, 'tool IDs stay Azul-only')
+})
+
+test('switching to the Azul template is refused until the voice is set', async () => {
+  const { templateReady } = await import('../api/_lib/lead-prompts.js')
+  const body = { business_name: 'Test AC Co.', assistant_mode: 'azul', calendar_tool_ids: 't1, t2', vapi_phone_number_id: 'pn-1', owner_email: 'owner@example.com', mode: 'testing', test_numbers: '786 424 9866' }
+  const r = await saveLeadAgent({ clientId: 'c1', body, database: fakeDb({ tables: { rb_clients: { id: 'c1', services: ['calls'] } } }), env, now: NOW })
+  assert.equal(r.status, templateReady() ? 200 : 400)
+})
+
+test('test calls: never ring the owner, never retried, failures stay on the dashboard', async () => {
+  const lead = { ...newLead, phone: '+17864249866', is_test: true }
+  const ownerFirst = { ...azulAgent, owner_first: true, twilio_number: '+13055550000' }
+  const answers = { rb_create_lead: { created: true, lead }, rb_claim_lead: [{ ...lead, status: 'dialing', lease_token: 'l' }] }
+  const p = fakeProviders()
+  await handleTestCall({ clientId: 'c1', phone: '786-424-9866', database: fakeDb({ agentRow: ownerFirst, tables: { rb_lead_profiles: { data: goodProfile } }, answers }), env: twilioEnv, now: NOW, send: fakeMail().send, fetchImpl: p.fetchImpl })
+  assert.equal(p.requests.length, 1); assert.match(p.requests[0].url, /api\.vapi\.ai/, 'owner first skipped for tests')
+  const broken = fakeDb({ agentRow: azulAgent, tables: { rb_lead_profiles: null }, answers: { ...answers, rb_finish_lead_attempt: [{ ...lead, status: 'not_called', notes: 'Test call failed: Business details are missing' }] } }); const mail = fakeMail()
+  const r = await handleTestCall({ clientId: 'c1', phone: '786-424-9866', database: broken, env, now: NOW, send: mail.send, fetchImpl: fakeVapi().fetchImpl })
+  assert.equal(broken.rpcs('rb_finish_lead_attempt')[0].args.p_result.status, 'not_called')
+  assert.match(r.body.last_error, /Test call failed/); assert.equal(mail.sent.length, 0, 'no owner alert for a test')
+  const ended = fakeDb({ call: { call_id: 'call-1', ended_at: null, client_id: 'c1', lead: { ...lead, status: 'calling', attempts: 1 } }, answers: { rb_record_call_result: [{ ...lead, status: 'no_answer', attempts: 1 }] } }); const mail2 = fakeMail()
+  await handleCallEnded({ secret: 's3cret', body: report({}, 'voicemail'), database: ended, env, now: NOW, send: mail2.send })
+  assert.equal(ended.rpcs('rb_record_call_result')[0].args.p_result.status, 'no_answer', 'a test is never queued for a retry')
+  assert.match(mail2.sent[0].subject, /^\[Test\] /)
+})
