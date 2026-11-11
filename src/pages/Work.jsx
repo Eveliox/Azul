@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext'
 import { workProjects } from '../data/workProjects'
 import { StudioTitle, StudioLabel } from '../components/site/StartupKit'
@@ -11,6 +12,14 @@ export default function Work() {
   const { c } = useLanguage()
   const [filter, setFilter] = useState('all')
   const [selected, setSelected] = useState(null)
+  const [params, setParams] = useSearchParams()
+  useEffect(() => {
+    const id = params.get('project')
+    if (!id) return
+    const match = workProjects.find(p => p.id === id)
+    if (match) setSelected(match)
+    setParams(prev => { const next = new URLSearchParams(prev); next.delete('project'); return next }, { replace: true })
+  }, [params, setParams])
   const projects = workProjects.filter(p => filter === 'all' || p.category === filter)
   const copy = selected ? c.work.projects[selected.id] : null
   return <>
@@ -28,6 +37,7 @@ export default function Work() {
             <button className="work-card-button" onClick={() => setSelected(project)} aria-label={`${c.work.view}: ${text.title}`}>
               <div className="work-image"><WindowBar title={`// ${text.title} //`}/><img src={project.image} alt={text.imageAlt} loading="lazy"/><span className="work-image-link" aria-hidden="true">↗</span></div>
               <div className="work-card-heading"><h2>{text.title}</h2><Arrow /></div>
+              {text.caseStudy && <div className="work-card-metric">{text.caseStudy.metric}</div>}
               <div className="work-tags">{text.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
             </button>
           </article>
@@ -38,6 +48,6 @@ export default function Work() {
     <WebsiteTransformation initialMode="compare" />
     <section className="work-clients section"><div>{workProjects.filter(p=>p.category!=='studio').map(p=><span key={p.id}>{c.work.projects[p.id].title}</span>)}</div></section>
     <section className="work-cta section"><StudioTitle>{c.work.ctaTitle}</StudioTitle><a className="button" href={bookingUrl} target="_blank" rel="noreferrer">{c.work.cta}<Arrow /></a></section>
-    {selected && <Modal title={copy.title} onClose={() => setSelected(null)}><img className="work-modal-image" src={selected.image} alt={copy.imageAlt}/><p>{copy.description}</p><h3 className="work-modal-label">{c.work.scope}</h3><div className="work-tags">{copy.tags.map(tag=><span key={tag}>{tag}</span>)}</div><a className="button" href={selected.url} target="_blank" rel="noreferrer">{c.work.visit}<Arrow /></a></Modal>}
+    {selected && <Modal title={copy.title} onClose={() => setSelected(null)}><img className="work-modal-image" src={selected.image} alt={copy.imageAlt}/><p>{copy.description}</p><h3 className="work-modal-label">{c.work.scope}</h3><div className="work-tags">{copy.tags.map(tag=><span key={tag}>{tag}</span>)}</div>{copy.caseStudy && <div className="work-modal-case"><h3 className="work-modal-label">{c.work.results}</h3><div className="work-case-metric">{copy.caseStudy.metric}</div>{copy.caseStudy.note && <div className="work-case-note">{copy.caseStudy.note}</div>}<blockquote className="work-case-quote">“{copy.caseStudy.quote}”</blockquote><div className="work-case-byline">{copy.caseStudy.person} · {copy.caseStudy.role}</div><div className="work-case-approval">{copy.caseStudy.window} · {copy.caseStudy.approval}</div></div>}<a className="button" href={selected.url} target="_blank" rel="noreferrer">{c.work.visit}<Arrow /></a></Modal>}
   </>
 }

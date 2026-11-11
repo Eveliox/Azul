@@ -42,6 +42,17 @@
 .offer-faq .faq p{color:var(--muted);font-size:14px;line-height:1.8}
 
 .offer-cases{background:#f6f7f9}.offer-cases>p{color:var(--muted)}
+.offer-cases-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4vw;border-top:1px solid var(--line);padding-top:40px}
+.offer-case{display:flex;flex-direction:column;gap:14px}
+.offer-case-link{display:flex;flex-direction:column;gap:14px;color:inherit;text-decoration:none;height:100%}
+.offer-case-link:hover .offer-case-metric,.offer-case-link:focus-visible .offer-case-metric{color:var(--blue)}
+.offer-case-link:hover .offer-case-cta,.offer-case-link:focus-visible .offer-case-cta{gap:14px}
+.offer-case-cta{display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-family:'JetBrains Mono','IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);transition:gap .3s var(--ease,ease)}
+.offer-case-metric{font-size:clamp(28px,2.6vw,38px);font-weight:400;letter-spacing:-.04em;line-height:1.1;color:#17202a;margin-top:6px}
+.offer-case-note{font-size:13px;color:var(--blue);letter-spacing:-.01em}
+.offer-case-quote{margin:4px 0 0;padding:0;color:#2a3545;font-size:15px;line-height:1.7;font-style:normal}
+.offer-case-byline{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-family:'JetBrains Mono','IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.offer-cases-footer{margin:40px 0 0;font-size:12px;color:var(--muted);line-height:1.7}
 .offer-final{background:#f6f7f9}.offer-final>h2{max-width:900px}.offer-final>p{max-width:560px;margin-top:24px;color:var(--muted);font-size:15px;line-height:1.8}
 
 /* Services page */
@@ -54,8 +65,8 @@
 .offer-contact .offer-email{display:inline-flex;gap:12px;margin-top:26px;color:var(--blue);font-size:14px}
 
 @media(max-width:900px){
-  .offer-steps,.offer-services,.offer-pricing-grid,.offer-faq-grid{grid-template-columns:1fr}
-  .offer-steps{gap:34px}
+  .offer-steps,.offer-services,.offer-pricing-grid,.offer-faq-grid,.offer-cases-grid{grid-template-columns:1fr}
+  .offer-steps,.offer-cases-grid{gap:34px}
   .offer-pricing-grid,.offer-faq-grid{gap:40px}
   .offer-items>li{grid-template-columns:1fr;gap:6px}
 }

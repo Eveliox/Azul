@@ -31,4 +31,5 @@ dist-ssr
 # Local only: prospect research and screenshots (repo is public)
 reports/
 research/
+tmp/
 Screenshot *.png

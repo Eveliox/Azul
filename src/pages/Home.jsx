@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { StudioTitle, StudioLabel } from '../components/site/StartupKit'
 import { Hero } from '../components/site/Hero'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -6,8 +7,7 @@ import { OfferCtas, PackageCard } from '../components/site/Offer'
 import { SHOW_PRICES } from '../data/offer'
 import '../offer.css'
 
-// Hidden until Azul has real client results. Add them to c.offer.caseStudies, then set this to true.
-const SHOW_CASE_STUDIES = false
+const SHOW_CASE_STUDIES = true
 
 function HowItWorks() {
   const { c } = useLanguage()
@@ -39,8 +39,21 @@ function CaseStudies() {
   const { c } = useLanguage()
   const t = c.offer.caseStudies
   return <section className="section offer-cases" id="case-studies">
-    <StudioTitle>{t.title}</StudioTitle>
-    <p>{t.body}</p>
+    <StudioLabel>{t.eyebrow}</StudioLabel>
+    <div className="section-intro"><StudioTitle>{t.title}</StudioTitle><div><p>{t.body}</p></div></div>
+    <ol className="offer-cases-grid">
+      {t.items.map((item, i) => <li key={item.id} className="offer-case">
+        <Link to={`/work?project=${item.id}`} className="offer-case-link" aria-label={`${item.business} — ${t.view || 'see project'}`}>
+          <span className="service-index">0{i + 1}</span>
+          <div className="offer-case-metric">{item.metric}</div>
+          {item.note && <div className="offer-case-note">{item.note}</div>}
+          <blockquote className="offer-case-quote">“{item.quote}”</blockquote>
+          <div className="offer-case-byline">{item.person} · {item.role}</div>
+          <span className="offer-case-cta">{t.view || 'See the project'} →</span>
+        </Link>
+      </li>)}
+    </ol>
+    <p className="offer-cases-footer">{t.footer}</p>
   </section>
 }
 

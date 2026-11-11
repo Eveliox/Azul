@@ -96,7 +96,14 @@ export const offerCopy = {
     caseStudies: {
       eyebrow: 'Case studies',
       title: 'Results from Azul clients.',
-      body: 'Real client results will go here.',
+      body: 'Three South Florida businesses, one connected system. Owner-reported numbers, first 90 days post-launch.',
+      view: 'See the project',
+      items: [
+        { id: 'aspire', business: 'Aspire Roofing Services', metric: '+50 calls / month', note: 'Revenue doubled year-over-year', quote: 'Working with Azul was easy from day one. They listened, delivered fast, and the results speak for themselves. I’m glad I made the call.', person: 'Norberto', role: 'Owner, Aspire Roofing Services' },
+        { id: 'sanos', business: 'Sanos Medical Group', metric: '30+ new patient leads', quote: 'Our patients need to feel taken care of from the first click, and Azul got that right away. The site feels like our practice: professional, warm, and easy for everyone to use.', person: 'Harold', role: 'Owner, Sanos Medical Group' },
+        { id: 'coatings', business: '110% Coatings', metric: '+30 calls / month', quote: 'Azul didn’t just build us a website, they built us a machine that brings in customers. I’d recommend them to any business owner who’s serious about growing.', person: 'Ozzy', role: 'Owner, 110% Coatings' },
+      ],
+      footer: 'Owner-reported results, first 90 days post-launch. Approved by owners, November 2026.',
     },
     final: {
       eyebrow: 'Get started',
@@ -191,7 +198,14 @@ export const offerCopy = {
     caseStudies: {
       eyebrow: 'Casos de éxito',
       title: 'Resultados de clientes de Azul.',
-      body: 'Aquí irán resultados reales de clientes.',
+      body: 'Tres negocios del sur de Florida, un sistema conectado. Números reportados por los propietarios, primeros 90 días desde el lanzamiento.',
+      view: 'Ver el proyecto',
+      items: [
+        { id: 'aspire', business: 'Aspire Roofing Services', metric: '+50 llamadas / mes', note: 'Ingresos duplicados interanuales', quote: 'Trabajar con Azul fue fácil desde el primer día. Escucharon, entregaron rápido y los resultados hablan por sí solos. Me alegra haber hecho la llamada.', person: 'Norberto', role: 'Dueño, Aspire Roofing Services' },
+        { id: 'sanos', business: 'Sanos Medical Group', metric: '30+ nuevos pacientes potenciales', quote: 'Nuestros pacientes necesitan sentirse cuidados desde el primer clic, y Azul lo entendió enseguida. El sitio se siente como nuestra práctica: profesional, cálido y fácil para todos.', person: 'Harold', role: 'Dueño, Sanos Medical Group' },
+        { id: 'coatings', business: '110% Coatings', metric: '+30 llamadas / mes', quote: 'Azul no solo nos hizo un sitio web, nos hizo una máquina que trae clientes. Se lo recomendaría a cualquier dueño de negocio que esté serio sobre crecer.', person: 'Ozzy', role: 'Dueño, 110% Coatings' },
+      ],
+      footer: 'Resultados reportados por los propietarios, primeros 90 días desde el lanzamiento. Aprobado por los propietarios, noviembre de 2026.',
     },
     final: {
       eyebrow: 'Empieza hoy',
