@@ -1,14 +1,15 @@
 // Speed-to-lead agent: the steps that touch Vapi, the database and email.
 // Every dependency is a parameter so tests run with fakes. Routes are in api/leads/[action].js.
-import { timingSafeEqual, randomBytes } from 'node:crypto'
+import { timingSafeEqual, randomBytes, createHash } from 'node:crypto'
 import { db } from './db.js'
 import { sendEmail } from './email.js'
 import {
   leadFromForm, dialPlan, vapiCallBody, nextRetryTime, parseCallReport, outcomeFromReport,
   ownerCallEmail, ownerAlertEmail, leadConfirmationEmail, ownerRecipients, senderFor, formatWhen, rules,
   ownerUrl, twilioSignature, ownerCallTwiml, ownerDialTwiml, sayTwiml, inboundOwnerEmail, toE164,
-  leadStats, agentForViewer, validateAgentSettings, callEndedUrl,
+  leadStats, agentForViewer, validateAgentSettings, callEndedUrl, localParts, localDayStart,
 } from './leads.js'
+import { dailyDigest, weeklyOwnerEmail, validateControls, hostedConsentText, HOSTED_HOURLY_LIMIT, HOSTED_PER_IP_HOURLY, HOSTED_PER_PHONE_DAILY } from './lead-reports.js'
 import { buildAssistant, validateProfile, profileGaps, templateReady } from './lead-prompts.js'
 
 const safeEqual = (a, b) => {
@@ -125,7 +126,11 @@ export async function handleNewLead({ key, body, ...deps }) {
   const { data: agent, error } = await ctx.database.from('rb_lead_agents').select('*, rb_clients!inner(active, services)').eq('form_key', String(key)).maybeSingle()
   if (error) throw error
   if (!agent || !agent.rb_clients?.active || !agent.rb_clients.services?.includes('calls')) return { status: 401, body: { error: 'Unauthorized' } }
+  return ingestLead(agent, body, ctx)
+}
 
+// Saves a lead and, when allowed, calls it. Shared by the website endpoint and the hosted form.
+async function ingestLead(agent, body, ctx) {
   const parsed = leadFromForm(body)
   if (parsed.spam) return { status: 200, body: { ok: true } } // bots get a fake success
   if (parsed.error) return { status: 400, body: { error: parsed.error } }
@@ -183,9 +188,13 @@ export async function handleCallEnded({ secret, body, ...deps }) {
 
 // POST /api/leads/retry: scheduled. Flags stuck leads for the owner, then places due retry calls.
 export async function processLeadRetries({ limit = 5, ...deps } = {}) {
-  // Check the kill switch before connecting to anything.
-  if ((deps.env || process.env).LEAD_CALLS_ENABLED !== 'true') return { disabled: true, swept: 0, processed: 0 }
   const ctx = context(deps)
+  if (ctx.env.LEAD_CALLS_ENABLED !== 'true') {
+    // No calls, but the daily check-in (which says calls are off) and the owners' weekly email still go out.
+    let emails = []
+    try { emails = await runScheduledEmails(ctx) } catch (e) { console.error('scheduled_email_failed', e.code || String(e.message).slice(0, 120)) }
+    return { disabled: true, swept: 0, processed: 0, ...(emails.length ? { emails } : {}) }
+  }
   const swept = await rpcRows(ctx.database, 'rb_sweep_stuck_leads', {})
   const claimed = await rpcRows(ctx.database, 'rb_claim_lead_retries', { p_limit: limit })
   const agents = new Map()
@@ -206,7 +215,10 @@ export async function processLeadRetries({ limit = 5, ...deps } = {}) {
     // One bad lead must not block the rest; its lease expires and the sweep hands it to the owner.
     try { await dialLead(lead, agent, ctx); processed++ } catch (e) { failed++; console.error('lead_retry_failed', e.code || String(e.message).slice(0, 120)) }
   }
-  return { swept: swept.length, processed, failed }
+  // Daily and weekly emails ride on this 5-minute tick. A failure there never blocks calls.
+  let emails = []
+  try { emails = await runScheduledEmails(ctx) } catch (e) { console.error('scheduled_email_failed', e.code || String(e.message).slice(0, 120)) }
+  return { swept: swept.length, processed, failed, ...(emails.length ? { emails } : {}) }
 }
 
 // A lead (or anyone) called the business number back and talked to the inbound assistant.
@@ -222,7 +234,7 @@ async function handleInboundCall(message, report, ctx) {
   const outcome = outcomeFromReport(report, { attempts: 0 }, agent, ctx.now)
   const rec = await ctx.database.rpc('rb_record_inbound_call', {
     p_call_id: report.callId, p_client: agent.client_id, p_phone: phone,
-    p_result: { booked: outcome.booked, appointment_time: outcome.appointment_time, do_not_call: outcome.do_not_call, summary: outcome.summary, ended_reason: outcome.ended_reason },
+    p_result: { booked: outcome.booked, appointment_time: outcome.appointment_time, do_not_call: outcome.do_not_call, summary: outcome.summary, ended_reason: outcome.ended_reason, ...(outcome.cost != null ? { cost: outcome.cost } : {}) },
   })
   if (rec.error) throw rec.error
   if (!rec.data?.recorded) return { status: 200, body: { ok: true, ignored: 'already recorded' } }
@@ -277,6 +289,17 @@ export async function handleOwnerStep({ step, leadId, params = {}, signature, ..
 // ── Dashboard (GET /api/leads/list, GET|POST /api/leads/agent, POST /api/leads/stop) ──
 const LEAD_COLUMNS = 'id, is_test, received_at, name, phone, email, address, zip, service, details, language, consent, status, attempts, first_call_at, last_attempt_at, next_attempt_at, booked, appointment_time, summary, notes, ended_reason, last_error'
 
+// Azul only: what this business's calls cost this month (Vapi's per-call cost).
+async function monthCosts(ctx, clientId, agent) {
+  const p = localParts(ctx.now, agent?.timezone || 'America/New_York')
+  const since = new Date(Date.UTC(p.y, p.m - 1, 1) - 14 * 3600_000).toISOString()
+  const q = await ctx.database.from('rb_lead_calls').select('cost_usd, kind, lead:rb_leads(is_test)').eq('client_id', clientId).gte('placed_at', since).limit(20000)
+  if (q.error) throw q.error
+  // Vapi calls only (owner-first rings are Twilio and unpriced), test calls left out.
+  const rows = (q.data || []).filter((r) => r.kind !== 'owner' && !r.lead?.is_test)
+  return { month_usd: Math.round(rows.reduce((sum, r) => sum + (Number(r.cost_usd) || 0), 0) * 100) / 100, calls: rows.length, priced: rows.filter((r) => r.cost_usd != null).length }
+}
+
 export async function getLeadDashboard({ clientId, isMaster, ...deps }) {
   const ctx = context(deps)
   // The list shows the latest 100; the numbers use every lead from the last 32 days (covers this month in any timezone).
@@ -299,6 +322,7 @@ export async function getLeadDashboard({ clientId, isMaster, ...deps }) {
     profile_updated_at: profileQuery.data?.updated_at || null,
     gaps: profileGaps(profileQuery.data?.data, agent),
     calendar_share_email: ctx.env.LEAD_CALENDAR_SHARE_EMAIL || null,
+    ...(isMaster ? { costs: await monthCosts(ctx, clientId, agent) } : {}),
   }
 }
 
@@ -383,4 +407,105 @@ export async function handleTestCall({ clientId, phone, ...deps }) {
   // A test never rings the owner (owner first) and is never retried.
   const done = await dialLead(leased, { ...agent, owner_first: false }, ctx, { test: true })
   return { status: 200, body: { status: done?.status || 'dialing', last_error: done?.notes || done?.last_error || null } }
+}
+
+// ── Scheduled emails (from the retry tick) ──────────────────────────
+// After 8 AM Eastern: the daily check-in to Azul (AZUL_OPS_EMAIL) once a day, owners' results on Mondays.
+export async function runScheduledEmails(ctx) {
+  const p = localParts(ctx.now, 'America/New_York')
+  if (p.h < 8) return []
+  const dayStart = localDayStart(ctx.now, 'America/New_York').toISOString()
+  const claim = async (name) => (await ctx.database.rpc('rb_claim_job', { p_name: name, p_after: dayStart })).data === true
+  const sent = []
+  if (ctx.env.AZUL_OPS_EMAIL && await claim('daily-digest')) { await sendDailyDigest(ctx); sent.push('daily') }
+  if (p.wd === 1 && await claim('weekly-owners')) sent.push(`weekly:${await sendWeeklyOwnerEmails(ctx)}`)
+  return sent
+}
+
+async function recentData(ctx, days) {
+  const since = new Date(ctx.now.getTime() - days * 86_400_000).toISOString()
+  const [agentsQuery, leadsQuery, callsQuery] = await Promise.all([
+    ctx.database.from('rb_lead_agents').select('*, rb_clients!inner(name, active, services)'),
+    ctx.database.from('rb_leads').select('client_id, received_at, name, phone, service, status, first_call_at, booked, last_error, consent').eq('is_test', false).gte('received_at', since).limit(20000),
+    ctx.database.from('rb_lead_calls').select('client_id, placed_at, cost_usd, kind, lead:rb_leads(is_test)').gte('placed_at', new Date(ctx.now.getTime() - 32 * 86_400_000).toISOString()).limit(50000),
+  ])
+  for (const q of [agentsQuery, leadsQuery, callsQuery]) if (q.error) throw q.error
+  const agents = (agentsQuery.data || []).filter((a) => a.rb_clients?.active && (a.rb_clients.services || []).includes('calls')).map((a) => ({ ...a, client_name: a.rb_clients.name }))
+  // Costs: Vapi calls only (owner-first rings are Twilio and unpriced), test calls left out.
+  const calls = (callsQuery.data || []).filter((c) => c.kind !== 'owner' && !c.lead?.is_test)
+  return { agents, leads: leadsQuery.data || [], calls }
+}
+
+export async function sendDailyDigest(ctx) {
+  const { agents, leads, calls } = await recentData(ctx, 8)
+  const email = dailyDigest({ agents, leads, calls, now: ctx.now, callsEnabled: ctx.env.LEAD_CALLS_ENABLED === 'true' })
+  await notify(ctx.send, { to: String(ctx.env.AZUL_OPS_EMAIL).split(',').map((s) => s.trim()).filter(Boolean), from: senderFor('Azul Lead Agent', ctx.env), ...email })
+}
+
+export async function sendWeeklyOwnerEmails(ctx) {
+  const { agents, leads } = await recentData(ctx, 7)
+  let count = 0
+  for (const agent of agents.filter((a) => ['active', 'paused'].includes(a.mode) && a.weekly_email !== false)) {
+    const email = weeklyOwnerEmail({ agent, leads: leads.filter((l) => l.client_id === agent.client_id), now: ctx.now })
+    await notify(ctx.send, toOwner(agent, ctx.env, { ...email, from: senderFor(`${agent.business_name} via Azul`, ctx.env) }))
+    count++
+  }
+  return count
+}
+
+// ── Owner controls (POST /api/leads/controls; the business's team or Azul) ──
+export async function saveControls({ clientId, body, ...deps }) {
+  const ctx = context(deps)
+  const found = await ctx.database.from('rb_lead_agents').select('*').eq('client_id', clientId).maybeSingle()
+  if (found.error) throw found.error
+  if (!found.data) return { status: 404, body: { error: 'Your agent is not set up yet.' } }
+  const { row, error: invalid } = validateControls(body, found.data)
+  if (invalid) return { status: 400, body: { error: invalid } }
+  const { data, error } = await ctx.database.from('rb_lead_agents').update({ ...row, updated_at: ctx.now.toISOString() }).eq('client_id', clientId).select('*').maybeSingle()
+  if (error) throw error
+  return { status: 200, body: { agent: agentForViewer(data, false) } }
+}
+
+// ── Hosted lead form (GET /api/leads/form-info?slug=…, POST /api/leads/form?slug=…; public) ──
+async function hostedAgent(ctx, slug) {
+  if (!/^[a-z0-9-]{1,60}$/.test(String(slug || ''))) return null
+  const client = await ctx.database.from('rb_clients').select('id, name, active, services').eq('slug', slug).maybeSingle()
+  if (client.error) throw client.error
+  if (!client.data?.active || !(client.data.services || []).includes('calls')) return null
+  const agent = await ctx.database.from('rb_lead_agents').select('*').eq('client_id', client.data.id).maybeSingle()
+  if (agent.error) throw agent.error
+  return agent.data?.hosted_form && agent.data.privacy_url ? agent.data : null
+}
+
+export async function getHostedFormInfo({ slug, ...deps }) {
+  const ctx = context(deps)
+  const agent = await hostedAgent(ctx, slug)
+  if (!agent) return { status: 404, body: { error: 'This form is not available.' } }
+  const profile = await ctx.database.from('rb_lead_profiles').select('data').eq('client_id', agent.client_id).maybeSingle()
+  if (profile.error) throw profile.error
+  return { status: 200, body: { business: agent.business_name, services: profile.data?.data?.services || [], privacy_url: agent.privacy_url, consent: { en: hostedConsentText(agent.business_name, 'en'), es: hostedConsentText(agent.business_name, 'es') } } }
+}
+
+export async function handleHostedForm({ slug, body, ip, ...deps }) {
+  const ctx = context(deps)
+  const agent = await hostedAgent(ctx, slug)
+  if (!agent) return { status: 404, body: { error: 'This form is not available.' } }
+  // A public form must not become a way to make the agent call strangers. Limits (hosted-form leads only):
+  // per visitor (IP) per hour, per phone per day, and per business per hour.
+  const pageUrl = `${ctx.env.LEAD_PUBLIC_URL || 'https://app.azulwebdev.com'}/f/${slug}`
+  const ipHash = createHash('sha256').update(`azul-lead-form:${String(ip || 'unknown')}`).digest('hex').slice(0, 32)
+  const phone = toE164(body?.phone)
+  const count = async (filter, sinceMs) => {
+    const q = filter(ctx.database.from('rb_leads').select('id', { count: 'exact', head: true }).eq('client_id', agent.client_id).eq('page_url', pageUrl).gte('received_at', new Date(ctx.now.getTime() - sinceMs).toISOString()))
+    const r = await q
+    if (r.error) throw r.error
+    return r.count || 0
+  }
+  const tooMany = { status: 429, body: { error: 'Too many requests right now. Please call us instead.' } }
+  if (await count((q) => q.eq('extra->>ip_hash', ipHash), 3600_000) >= HOSTED_PER_IP_HOURLY) return tooMany
+  if (phone && await count((q) => q.eq('phone', phone), 86_400_000) >= HOSTED_PER_PHONE_DAILY) return tooMany
+  if (await count((q) => q, 3600_000) >= HOSTED_HOURLY_LIMIT) return tooMany
+  const language = body?.language === 'es' ? 'es' : 'en'
+  // The consent wording is always the text this form showed, never what the browser sends.
+  return ingestLead(agent, { ...body, ip_hash: ipHash, language, consent_text: hostedConsentText(agent.business_name, language), page_url: pageUrl }, ctx)
 }

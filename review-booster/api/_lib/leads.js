@@ -86,6 +86,9 @@ function zonedToUtc(y, m, d, h, min, tz) {
 }
 const isOpen = (p, r) => (r.call_sundays || p.wd !== 0) && p.h >= r.call_start_hour && p.h < r.call_end_hour
 
+// Midnight at the start of `now`'s local day.
+export const localDayStart = (now, tz = NY) => { const p = localParts(now, tz); return zonedToUtc(p.y, p.m, p.d, 0, 0, tz) }
+
 // `from` if it's inside calling hours, otherwise the next opening (e.g. 8:00 AM, skipping Sundays).
 export function nextCallTime(from, agent) {
   const r = rules(agent)
@@ -189,6 +192,7 @@ export function parseCallReport(message = {}) {
     transcript: multiline(message.transcript || message.artifact?.transcript, 20000),
     recordingUrl: text(message.recordingUrl || message.artifact?.recordingUrl, 500),
     durationSeconds: Math.round(Number(message.durationSeconds ?? 0)) || 0,
+    cost: Number.isFinite(Number(message.cost ?? message.call?.cost)) && Number(message.cost ?? message.call?.cost) >= 0 ? Number(message.cost ?? message.call?.cost) : null,
     fields,
   }
 }
@@ -208,6 +212,7 @@ export function outcomeFromReport(report, lead, agent, now) {
     appointment_time: booked ? text(f.appointment_time, 100) : null,
     summary: report.summary || null,
     do_not_call: yes(f.do_not_call),
+    ...(report.cost != null ? { cost: String(report.cost) } : {}),
   }
   if (booked) return { ...base, status: 'booked' }
   if (base.do_not_call) return { ...base, status: 'stopped' }
@@ -376,8 +381,8 @@ export function leadStats(leads, agent, now) {
 }
 
 // What a business's team may see about its agent. Azul (master) also gets IDs and the form key.
-const CLIENT_AGENT_FIELDS = ['client_id', 'mode', 'assistant_mode', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at']
-export const agentForViewer = (agent, isMaster) => !agent ? null : isMaster ? agent : Object.fromEntries(CLIENT_AGENT_FIELDS.map((k) => [k, agent[k]]))
+const CLIENT_AGENT_FIELDS = ['client_id', 'mode', 'assistant_mode', 'owner_email', 'owner_cell', 'weekly_email', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at']
+export const agentForViewer = (agent, isMaster) => !agent ? null : isMaster ? agent : { ...Object.fromEntries(CLIENT_AGENT_FIELDS.map((k) => [k, agent[k]])), has_business_number: Boolean(agent.twilio_number) }
 
 const ID = /^[A-Za-z0-9-]{1,100}$/
 const int = (v) => (v === '' || v == null ? NaN : Number(v))
@@ -396,6 +401,9 @@ export function validateAgentSettings(b = {}) {
     retry_gap_minutes: int(b.retry_gap_minutes ?? 120),
     owner_first: b.owner_first === true,
     assistant_mode: b.assistant_mode === 'azul' ? 'azul' : 'vapi',
+    weekly_email: b.weekly_email !== false,
+    hosted_form: b.hosted_form === true,
+    privacy_url: text(b.privacy_url, 300) || null,
     calendar_id: text(b.calendar_id, 260) || null,
     calendar_tool_ids: (Array.isArray(b.calendar_tool_ids) ? b.calendar_tool_ids : String(b.calendar_tool_ids || '').split(/[,\s]+/)).map((s) => String(s).trim()).filter(Boolean),
   }
@@ -403,12 +411,14 @@ export function validateAgentSettings(b = {}) {
   if (!row.business_name) return { error: 'Business name (as callers hear it) is required.' }
   if (row.assistant_mode === 'vapi' ? !ID.test(row.vapi_assistant_id || '') : row.vapi_assistant_id && !ID.test(row.vapi_assistant_id)) return { error: 'Vapi assistant ID is required in "Vapi assistant" mode (letters, numbers and dashes).' }
   if (row.calendar_tool_ids.length > 5 || row.calendar_tool_ids.some((t) => !ID.test(t))) return { error: 'Calendar tool IDs: up to 5, letters, numbers and dashes.' }
+  if (row.privacy_url && !/^https:\/\/[^\s]+$/.test(row.privacy_url)) return { error: 'Privacy page must be a full https:// address.' }
+  if (row.hosted_form && !row.privacy_url) return { error: 'The hosted form needs the business\'s privacy page address.' }
   if (row.calendar_id && !/^[A-Za-z0-9._%+-]{1,150}@[A-Za-z0-9.-]{3,100}$/.test(row.calendar_id)) return { error: 'Calendar ID looks wrong. Copy it from Google Calendar → the calendar\'s Settings → Integrate calendar (it ends in @group.calendar.google.com or @gmail.com).' }
   if (row.assistant_mode === 'azul' && !row.calendar_id && !row.calendar_tool_ids.length) return { error: 'Azul template mode needs the business\'s Google Calendar ID.' }
   if (!ID.test(row.vapi_phone_number_id || '')) return { error: 'Vapi phone number ID is required (letters, numbers and dashes).' }
   if (!row.mode) return { error: 'Choose a mode.' }
   try { new Intl.DateTimeFormat('en-US', { timeZone: row.timezone }) } catch { return { error: 'Unknown timezone.' } }
-  if (!Number.isInteger(row.call_start_hour) || !Number.isInteger(row.call_end_hour) || row.call_start_hour < 0 || row.call_end_hour > 24 || row.call_end_hour <= row.call_start_hour) return { error: 'Calling hours must be whole hours, with the end after the start.' }
+  if (!Number.isInteger(row.call_start_hour) || !Number.isInteger(row.call_end_hour) || row.call_start_hour < 8 || row.call_end_hour > 20 || row.call_end_hour <= row.call_start_hour) return { error: 'Calling hours must be whole hours between 8 AM and 8 PM (Florida law), with the end after the start.' }
   if (!Number.isInteger(row.max_attempts) || row.max_attempts < 1 || row.max_attempts > 5) return { error: 'Calls per lead must be 1 to 5.' }
   if (!Number.isInteger(row.retry_gap_minutes) || row.retry_gap_minutes < 30 || row.retry_gap_minutes > 1440) return { error: 'Time between calls must be 30 to 1440 minutes.' }
   const emails = String(b.owner_email || '').split(',').map((s) => s.trim()).filter(Boolean)

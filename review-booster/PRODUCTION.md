@@ -15,6 +15,7 @@ CRM imports, delivery webhooks and automatic reply handling are not implemented.
    - `supabase/migrations/20261111_speed_to_lead_owner_inbound.sql` (owner-first calls, inbound callbacks, stop calling)
    - `supabase/migrations/20261112_speed_to_lead_profiles.sql` (business details, Azul-built assistants, test calls)
    - `supabase/migrations/20261113_speed_to_lead_calendar.sql` (calendar ID per business)
+   - `supabase/migrations/20261114_speed_to_lead_ops.sql` (call costs, daily/weekly emails, owner controls, hosted form)
    On a new project first apply schema.sql, then the migrations in this order.
 2. In Supabase Auth, set Site URL to `https://app.azulwebdev.com` and add
    `https://app.azulwebdev.com/admin` to allowed redirect URLs. Disable public

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../api.js'
 import { Icon } from './DashboardVisuals.jsx'
 import BusinessDetails from './BusinessDetails.jsx'
+import AgentControls from './AgentControls.jsx'
 import { outboundPrompt, inboundPrompt, validateProfile } from '../../api/_lib/lead-prompts.js'
 import './leads-panel.css'
 
@@ -75,9 +76,11 @@ export default function LeadsPanel({ client, demo, isMaster }) {
           <div><dt>Unanswered leads</dt><dd>Up to {agent.max_attempts} calls, {seconds(agent.retry_gap_minutes * 60)} apart</dd></div>
           <div><dt>Owner first</dt><dd>{agent.owner_first ? 'Your phone rings first' : 'Off · the agent calls first'}</dd></div>
         </dl>}
+        {agent && <AgentControls key={`${client.client_id}:${agent.updated_at || ''}`} client={client} agent={agent} demo={demo} onSaved={(msg) => { setMessage(msg); setReload((n) => n + 1) }}/>}
         {!data.calls_enabled && <p className="leads-warning"><Icon name="shield" size={15}/>Automatic calls are switched off for every business right now. Leads are saved and emailed.</p>}
       </section>
 
+      {isMaster && data.costs && <p className="leads-cost"><Icon name="key" size={14}/>Azul only · Call cost this month: <b>${data.costs.month_usd.toFixed(2)}</b> over {data.costs.calls} calls{stats.leads ? ` · $${(data.costs.month_usd / stats.leads).toFixed(2)} per lead` : ''}{data.costs.priced < data.costs.calls ? ` · ${data.costs.calls - data.costs.priced} without a cost yet` : ''}</p>}
       <div className="leads-stats">
         {[['Leads this month', stats.leads ?? 0, 'From your website'], ['Time to first call', seconds(stats.median_seconds_to_call), stats.within_minute == null ? 'Median, during calling hours' : `${stats.within_minute}% called within a minute`], ['Booked this month', stats.booked ?? 0, 'Visits on your calendar'], ['Need you', stats.needs_you ?? 0, 'Call these leads back']]
           .map(([label, value, note]) => <div className="panel" key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></div>)}
@@ -116,10 +119,10 @@ export default function LeadsPanel({ client, demo, isMaster }) {
   </div>
 }
 
-const BLANK = { assistant_mode: 'vapi', calendar_id: '', calendar_tool_ids: '', business_name: '', mode: 'testing', vapi_assistant_id: '', vapi_phone_number_id: '', twilio_number: '', owner_email: '', owner_cell: '', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: '' }
+const BLANK = { hosted_form: false, privacy_url: '', weekly_email: true, assistant_mode: 'vapi', calendar_id: '', calendar_tool_ids: '', business_name: '', mode: 'testing', vapi_assistant_id: '', vapi_phone_number_id: '', twilio_number: '', owner_email: '', owner_cell: '', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: '' }
 
 function AgentSetup({ client, agent, profile, gaps, demo, onSaved }) {
-  const [f, setF] = useState(() => agent ? { ...BLANK, ...agent, vapi_assistant_id: agent.vapi_assistant_id || '', twilio_number: agent.twilio_number || '', owner_cell: agent.owner_cell || '', test_numbers: (agent.test_numbers || []).join(', '), calendar_tool_ids: (agent.calendar_tool_ids || []).join(', '), calendar_id: agent.calendar_id || '' } : { ...BLANK, business_name: client.name })
+  const [f, setF] = useState(() => agent ? { ...BLANK, ...agent, vapi_assistant_id: agent.vapi_assistant_id || '', twilio_number: agent.twilio_number || '', owner_cell: agent.owner_cell || '', test_numbers: (agent.test_numbers || []).join(', '), calendar_tool_ids: (agent.calendar_tool_ids || []).join(', '), calendar_id: agent.calendar_id || '', privacy_url: agent.privacy_url || '' } : { ...BLANK, business_name: client.name })
   const [testNumber, setTestNumber] = useState(agent?.test_numbers?.[0] || '')
   const [testResult, setTestResult] = useState('')
   const [preview, setPreview] = useState('outbound')
@@ -173,11 +176,18 @@ function AgentSetup({ client, agent, profile, gaps, demo, onSaved }) {
         {field('owner_email', 'Owner email(s), comma-separated', { required: true })}
         {field('owner_cell', 'Owner cell', { type: 'tel', placeholder: '(786) 555-0199' })}
         <label className="checkbox-row"><input type="checkbox" checked={f.owner_first} onChange={set('owner_first')}/>Owner first: ring the owner's cell first; press 1 to connect, otherwise the AI calls</label>
+        <label className="checkbox-row"><input type="checkbox" checked={f.weekly_email} onChange={set('weekly_email')}/>Weekly results email to the owner (Mondays)</label>
+      </fieldset>
+      <fieldset><legend>Hosted lead form</legend>
+        <label className="checkbox-row"><input type="checkbox" checked={f.hosted_form} onChange={set('hosted_form')}/>Turn on the form at app.azulwebdev.com/f/{client.slug || 'their-id'}</label>
+        {field('privacy_url', "Business's privacy page (required for the form)", { type: 'url', placeholder: 'https://theirsite.com/privacy' })}
+        {agent?.hosted_form && client.slug && <div className="key-row"><input className="input" readOnly aria-label="Hosted form link" value={`https://app.azulwebdev.com/f/${client.slug}`}/><a className="btn-ghost" href={`/f/${client.slug}`} target="_blank" rel="noreferrer">Open</a></div>}
+        <small className="field-hint">For businesses whose own site can't send leads: link it from Google Business Profile, Instagram, Facebook or an ad.</small>
       </fieldset>
       <fieldset><legend>Calling rules</legend>
         <div className="agent-setup-row">
-          <label className="label">Start<select className="input" value={f.call_start_hour} onChange={set('call_start_hour')}>{Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{hour(h)}</option>)}</select></label>
-          <label className="label">End<select className="input" value={f.call_end_hour} onChange={set('call_end_hour')}>{Array.from({ length: 24 }, (_, h) => h + 1).map((h) => <option key={h} value={h}>{h === 24 ? '12 AM (midnight)' : hour(h)}</option>)}</select></label>
+          <label className="label">Start<select className="input" value={f.call_start_hour} onChange={set('call_start_hour')}>{Array.from({ length: 12 }, (_, i) => i + 8).map((h) => <option key={h} value={h}>{hour(h)}</option>)}</select></label>
+          <label className="label">End<select className="input" value={f.call_end_hour} onChange={set('call_end_hour')}>{Array.from({ length: 12 }, (_, i) => i + 9).map((h) => <option key={h} value={h}>{hour(h)}</option>)}</select></label>
           <label className="label">Calls per lead<input className="input" type="number" min="1" max="5" value={f.max_attempts} onChange={set('max_attempts')}/></label>
           <label className="label">Minutes between<input className="input" type="number" min="30" max="1440" step="15" value={f.retry_gap_minutes} onChange={set('retry_gap_minutes')}/></label>
         </div>

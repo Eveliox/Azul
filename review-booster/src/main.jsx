@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ReviewGate from './pages/ReviewGate.jsx'
 import Admin from './pages/Admin.jsx'
+import HostedForm from './pages/HostedForm.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -11,6 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/r/:token" element={<ReviewGate />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/f/:slug" element={<HostedForm />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </BrowserRouter>

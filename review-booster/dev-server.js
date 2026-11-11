@@ -24,7 +24,7 @@ const requests = Array.from({ length: 32 }, (_, i) => {
 
 // Sample speed-to-lead activity (fake names and 555 numbers).
 const minutesAgo = (m) => new Date(Date.now() - m * 60000).toISOString()
-const leadAgents = { 'demo-helloyou': { client_id: 'demo-helloyou', mode: 'active', business_name: 'Hello You Wellness Center', vapi_assistant_id: 'demo-assistant', vapi_phone_number_id: 'demo-number', twilio_number: '+13055550000', owner_email: 'owner@example.com', owner_cell: '+13055550199', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: [], form_key: 'demo-form-key-not-real-0000000000000000000000000000000000000000', updated_at: minutesAgo(600) } }
+const leadAgents = { 'demo-helloyou': { client_id: 'demo-helloyou', mode: 'active', business_name: 'Hello You Wellness Center', vapi_assistant_id: 'demo-assistant', vapi_phone_number_id: 'demo-number', twilio_number: '+13055550000', owner_email: 'owner@example.com', owner_cell: '+13055550199', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: [], weekly_email: true, hosted_form: true, privacy_url: 'https://example.com/privacy', form_key: 'demo-form-key-not-real-0000000000000000000000000000000000000000', updated_at: minutesAgo(600) } }
 const leadProfiles = { 'demo-helloyou': { trade: 'air conditioning', area: 'Hialeah, Florida', visit_name: 'AC service visit', visit_minutes: 60, technician_word: 'technician', services: ['AC repair', 'New AC system', 'AC tune-up'], questions: ['Is this a repair, a new system, or a tune-up?', 'Is the AC blowing warm air or not turning on at all?'], emergencies: ['A gas smell: tell them to leave the house and call the gas company or 911 from outside.'], service_zips: ['33012', '33013', '33014'], booking_days: [1, 2, 3, 4, 5], booking_start_hour: 8, booking_end_hour: 17, min_notice_hours: 2, notes: '', calendar_email: 'owner@example.com', calendar_shared: true } }
 const leads = [
   { id: 'lead-1', received_at: minutesAgo(18), name: 'Maria Lopez', phone: '+13055550100', service: 'AC repair', language: 'es', consent: true, status: 'booked', attempts: 1, first_call_at: minutesAgo(17.7), booked: true, appointment_time: new Date(Date.now() + 26 * 3600000).toISOString(), summary: 'AC blowing warm air since yesterday. Booked a repair visit; confirmed the address.', address: '1100 W 49th St, Hialeah, FL' },
@@ -54,6 +54,17 @@ createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${port}`)
   const json = (code, data) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(data)) }
   try {
+    if (url.pathname === '/api/leads/form-info' && req.method === 'GET') {
+      const c = clients.find((x) => x.slug === url.searchParams.get('slug'))
+      const agent = c && leadAgents[c.client_id]
+      if (!agent?.hosted_form) return json(404, { error: 'This form is not available.' })
+      return json(200, { business: agent.business_name, services: leadProfiles[c.client_id]?.services || [], privacy_url: agent.privacy_url, consent: { en: `I agree that ${agent.business_name} may call and text me at this number, including with an AI assistant and automated technology, about my request. Consent is not required to buy. Msg & data rates may apply. Reply STOP to opt out.`, es: `Acepto que ${agent.business_name} me llame y me envíe mensajes de texto a este número, incluso con un asistente de IA y tecnología automatizada, sobre mi solicitud. El consentimiento no es necesario para comprar. Pueden aplicarse tarifas de mensajes y datos. Responda PARAR para cancelar.` } })
+    }
+    if (url.pathname === '/api/leads/form' && req.method === 'POST') {
+      const b = await readBody(req)
+      if (!String(b.name || '').trim() || String(b.phone || '').replace(/[^0-9]/g, '').length < 10) return json(400, { error: 'Enter a valid US phone number.' })
+      return json(200, { ok: true, status: 'calling', demo: true })
+    }
     if (url.pathname.startsWith('/api/')) {
       const key = req.headers['x-admin-key']
       const master = key === adminKey
@@ -95,15 +106,16 @@ createServer(async (req, res) => {
       if (url.pathname.startsWith('/api/leads/')) {
         const agent = leadAgents[c.client_id] || null
         if (url.pathname === '/api/leads/list' && req.method === 'GET') {
-          const visible = agent && !master ? Object.fromEntries(['client_id', 'mode', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at'].map((k) => [k, agent[k]])) : agent
+          const visible = agent && !master ? Object.fromEntries(['client_id', 'mode', 'owner_email', 'owner_cell', 'weekly_email', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at'].map((k) => [k, agent[k]])) : agent
           const profile = leadProfiles[c.client_id] || null
-          return json(200, { agent: visible, leads: agent ? leads : [], stats: agent ? leadStatsDemo() : { leads: 0, called: 0, booked: 0, needs_you: 0, median_seconds_to_call: null, within_minute: null }, calls_enabled: true, profile, profile_updated_at: profile ? minutesAgo(3000) : null, gaps: profile ? ['Calendar ID not set (Azul)'] : ['Business details not filled in'], calendar_share_email: 'calendar@azulwebdev.com' })
+          return json(200, { agent: visible, leads: agent ? leads : [], stats: agent ? leadStatsDemo() : { leads: 0, called: 0, booked: 0, needs_you: 0, median_seconds_to_call: null, within_minute: null }, calls_enabled: true, ...(master && agent ? { costs: { month_usd: 1.84, calls: 9, priced: 9 } } : {}), profile, profile_updated_at: profile ? minutesAgo(3000) : null, gaps: profile ? ['Calendar ID not set (Azul)'] : ['Business details not filled in'], calendar_share_email: 'calendar@azulwebdev.com' })
         }
         if (url.pathname === '/api/leads/stop' && req.method === 'POST') {
           const lead = leads.find((l) => l.id === body.lead_id && ['retry', 'new'].includes(l.status))
           if (!lead) return json(409, { error: 'This lead is not waiting for a call anymore.' })
           Object.assign(lead, { status: 'not_called', next_attempt_at: null, notes: 'Stopped by your team' }); return json(200, { lead })
         }
+        if (url.pathname === '/api/leads/controls' && req.method === 'POST') return json(409, { error: 'Demo workspace: settings are not saved.' })
         if (url.pathname === '/api/leads/profile' && req.method === 'POST') return json(409, { error: 'Demo workspace: business details are not saved.' })
         if (url.pathname === '/api/leads/test-call' && req.method === 'POST') return json(409, { error: 'Demo workspace: no calls are placed.' })
         if (url.pathname === '/api/leads/agent') {

@@ -165,11 +165,16 @@ test('agent settings validation', () => {
   bad({ vapi_assistant_id: 'has space' }, /assistant ID/)
   bad({ owner_email: 'a@x.com, nope' }, /owner email/)
   bad({ call_end_hour: '8' }, /end after the start/)
+  bad({ call_start_hour: '6' }, /8 AM and 8 PM/)
+  bad({ call_end_hour: '22' }, /8 AM and 8 PM/)
   bad({ owner_first: true }, /owner cell/)
   bad({ mode: 'testing' }, /test number/)
   bad({ timezone: 'Mars/Base' }, /timezone/)
   bad({ max_attempts: 9 }, /1 to 5/)
   bad({ test_numbers: '123' }, /Test numbers/)
+  bad({ hosted_form: true }, /privacy page/)
+  bad({ privacy_url: 'http://x.example' }, /https/)
+  assert.equal(validateAgentSettings({ ...ok, hosted_form: true, privacy_url: 'https://x.example/privacy' }).row.hosted_form, true)
 })
 
 test('dashboard numbers: this month only; speed measured on in-hours leads', () => {
@@ -187,7 +192,9 @@ test('dashboard numbers: this month only; speed measured on in-hours leads', () 
 
 test('team view of the agent hides keys and IDs', () => {
   const a = { client_id: 'c', mode: 'active', form_key: 'k', vapi_assistant_id: 'v', owner_email: 'o@x.com', test_numbers: ['+1'] }
-  assert.deepEqual(Object.keys(agentForViewer(a, false)).filter((k) => a[k] !== undefined), ['client_id', 'mode'])
+  const team = agentForViewer(a, false)
+  assert.deepEqual(Object.keys(team).filter((k) => a[k] !== undefined), ['client_id', 'mode', 'owner_email'])
+  assert.equal(team.form_key, undefined); assert.equal(team.vapi_assistant_id, undefined); assert.equal(team.test_numbers, undefined); assert.equal(team.has_business_number, false)
   assert.equal(agentForViewer(a, true).form_key, 'k')
 })
 

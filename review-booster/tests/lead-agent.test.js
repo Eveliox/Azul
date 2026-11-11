@@ -11,7 +11,7 @@ const newLead = { id: 'lead-1', client_id: 'c1', name: 'Maria Lopez', phone: '+1
 const form = { name: 'Maria Lopez', phone: '(305) 555-0100', consent: 'yes', service: 'AC repair', email: 'maria@example.com' }
 
 // Fake Supabase client: records every rpc and write, answers rpcs from `answers` and reads from `tables`.
-function fakeDb({ agentRow = agent, call = null, answers = {}, tables = {} } = {}) {
+function fakeDb({ agentRow = agent, call = null, answers = {}, tables = {}, counts = {} } = {}) {
   const log = []
   const writes = []
   const defaults = {
@@ -38,7 +38,7 @@ function fakeDb({ agentRow = agent, call = null, answers = {}, tables = {} } = {
         update: (row) => { writes.push({ table, op: 'update', row }); return q },
         maybeSingle: async () => ({ data: one() }),
         single: async () => ({ data: { ...(one() || {}), ...(writes.at(-1)?.row || {}) } }),
-        then: (resolve) => resolve({ data: [].concat(read(table) || []) }),
+        then: (resolve) => resolve({ data: [].concat(read(table) || []), count: counts[table] ?? 0 }),
       }
       return q
     },
@@ -160,7 +160,7 @@ test('call ended twice: second report sends no email', async () => {
 
 test('retry worker: off unless enabled; emails owner about stuck leads; dials claimed leads', async () => {
   const off = fakeDb()
-  assert.deepEqual(await processLeadRetries({ database: off, env: {} }), { disabled: true, swept: 0, processed: 0 })
+  assert.deepEqual(await processLeadRetries({ database: off, env: {}, now: new Date('2026-11-16T12:00:00Z') }), { disabled: true, swept: 0, processed: 0 })
   assert.equal(off.log.length, 0)
   const stuck = { ...newLead, id: 'lead-2', status: 'needs_owner', notes: 'No call report arrived from Vapi.' }
   const due = { ...newLead, status: 'dialing', lease_token: 'lease-9', attempts: 1, last_attempt_at: '2026-11-10T17:00:00Z' }
@@ -403,4 +403,96 @@ test('test calls: never ring the owner, never retried, failures stay on the dash
   await handleCallEnded({ secret: 's3cret', body: report({}, 'voicemail'), database: ended, env, now: NOW, send: mail2.send })
   assert.equal(ended.rpcs('rb_record_call_result')[0].args.p_result.status, 'no_answer', 'a test is never queued for a retry')
   assert.match(mail2.sent[0].subject, /^\[Test\] /)
+})
+
+// ── Costs, scheduled emails, owner controls, hosted form ────────────
+import { runScheduledEmails, saveControls, getHostedFormInfo, handleHostedForm } from '../api/_lib/lead-agent.js'
+const MONDAY_9AM = new Date('2026-11-16T14:00:00Z'), MONDAY_7AM = new Date('2026-11-16T12:00:00Z'), TUESDAY_9AM = new Date('2026-11-17T14:00:00Z')
+
+test('call cost from the Vapi report is saved with the result', async () => {
+  const lead = { ...newLead, status: 'calling', attempts: 1 }
+  const database = fakeDb({ call: { call_id: 'call-1', ended_at: null, client_id: 'c1', lead }, answers: { rb_record_call_result: [{ ...lead, status: 'needs_owner' }] } })
+  const body = report({}, 'customer-ended-call'); body.message.cost = 0.1834
+  await handleCallEnded({ secret: 's3cret', body, database, env, now: NOW, send: fakeMail().send })
+  assert.equal(database.rpcs('rb_record_call_result')[0].args.p_result.cost, '0.1834')
+})
+
+test('scheduled emails: after 8 AM Eastern, daily check-in once a day, owners on Mondays', async () => {
+  const live = { ...agent, mode: 'active', rb_clients: { name: 'Test AC Co.', active: true, services: ['calls'] } }
+  const opsEnv = { ...env, AZUL_OPS_EMAIL: 'me@azul.test' }
+  assert.deepEqual(await runScheduledEmails({ database: fakeDb(), env: opsEnv, now: MONDAY_7AM, send: fakeMail().send }), [], 'nothing before 8 AM')
+  const mail = fakeMail()
+  const sent = await runScheduledEmails({ database: fakeDb({ agentRow: live, answers: { rb_claim_job: true }, tables: { rb_leads: [], rb_lead_calls: [] } }), env: opsEnv, now: MONDAY_9AM, send: mail.send })
+  assert.deepEqual(sent, ['daily', 'weekly:1'])
+  assert.deepEqual(mail.sent[0].to, ['me@azul.test']); assert.match(mail.sent[0].subject, /^Azul daily: 0 leads/)
+  assert.deepEqual(mail.sent[1].to, ['owner@example.com']); assert.match(mail.sent[1].subject, /no new leads this week/)
+  const tuesday = fakeMail()
+  assert.deepEqual(await runScheduledEmails({ database: fakeDb({ agentRow: live, answers: { rb_claim_job: true }, tables: { rb_leads: [], rb_lead_calls: [] } }), env: opsEnv, now: TUESDAY_9AM, send: tuesday.send }), ['daily'])
+  const already = fakeMail()
+  assert.deepEqual(await runScheduledEmails({ database: fakeDb({ agentRow: live, answers: { rb_claim_job: false } }), env: opsEnv, now: MONDAY_9AM, send: already.send }), [])
+  assert.equal(already.sent.length, 0, 'claimed by an earlier tick')
+  assert.deepEqual(await runScheduledEmails({ database: fakeDb({ agentRow: { ...live, mode: 'testing' }, answers: { rb_claim_job: true }, tables: { rb_leads: [], rb_lead_calls: [] } }), env, now: MONDAY_9AM, send: fakeMail().send }), ['weekly:0'], 'no AZUL_OPS_EMAIL: no daily; testing clients get no weekly')
+})
+
+test('owner controls are saved for the business only through validation', async () => {
+  const database = fakeDb({ agentRow: { ...agent, mode: 'active', twilio_number: '+13055550000' } })
+  const r = await saveControls({ clientId: 'c1', body: { mode: 'paused', owner_email: 'owner@example.com', call_start_hour: 9, call_end_hour: 18 }, database, env, now: NOW })
+  assert.equal(r.status, 200); assert.equal(database.writes[0].row.mode, 'paused'); assert.equal(database.writes[0].row.call_start_hour, 9)
+  assert.equal(r.body.agent.form_key, undefined)
+  assert.equal((await saveControls({ clientId: 'c1', body: { mode: 'active', owner_email: 'o@x.com' }, database: fakeDb({ agentRow: { ...agent, mode: 'testing' } }), env })).status, 400)
+  assert.equal((await saveControls({ clientId: 'c1', body: {}, database: fakeDb({ agentRow: null }), env })).status, 404)
+})
+
+test('hosted form: only when switched on with a privacy page; consent text set by the server; rate-limited', async () => {
+  const client = { id: 'c1', name: 'Test AC Co.', active: true, services: ['calls'] }
+  const hosted = { ...agent, hosted_form: true, privacy_url: 'https://testac.example/privacy' }
+  const tables = { rb_clients: client, rb_lead_profiles: { data: { services: ['AC repair'] } } }
+  assert.equal((await getHostedFormInfo({ slug: 'Bad Slug!', database: fakeDb(), env })).status, 404)
+  assert.equal((await getHostedFormInfo({ slug: 'test-ac', database: fakeDb({ agentRow: { ...hosted, hosted_form: false }, tables }), env })).status, 404)
+  assert.equal((await getHostedFormInfo({ slug: 'test-ac', database: fakeDb({ agentRow: { ...hosted, privacy_url: null }, tables }), env })).status, 404)
+  const info = await getHostedFormInfo({ slug: 'test-ac', database: fakeDb({ agentRow: hosted, tables }), env })
+  assert.deepEqual(info.body.services, ['AC repair']); assert.match(info.body.consent.es, /^Acepto/)
+  assert.equal(info.body.privacy_url, 'https://testac.example/privacy'); assert.equal(info.body.form_key, undefined)
+  const database = fakeDb({ agentRow: hosted, tables }); const vapi = fakeVapi()
+  await handleHostedForm({ slug: 'test-ac', body: { ...form, language: 'es', consent_text: 'I agree to nothing', page_url: 'https://evil.example' }, database, env, now: NOW, send: fakeMail().send, fetchImpl: vapi.fetchImpl })
+  const data = database.rpcs('rb_create_lead')[0].args.p_data
+  assert.match(data.consent_text, /^Acepto que Test AC Co\./); assert.equal(data.page_url, 'https://app.azulwebdev.com/f/test-ac')
+  assert.equal(vapi.requests.length, 1)
+  const flooded = await handleHostedForm({ slug: 'test-ac', body: form, database: fakeDb({ agentRow: hosted, tables, counts: { rb_leads: 30 } }), env, now: NOW })
+  assert.equal(flooded.status, 429)
+})
+
+test('Azul sees this month\'s call costs on the dashboard; the business does not', async () => {
+  const tables = { rb_leads: [], rb_lead_profiles: null, rb_lead_calls: [{ cost_usd: '0.20' }, { cost_usd: '0.35' }, { cost_usd: null }] }
+  const azul = await getLeadDashboard({ clientId: 'c1', isMaster: true, database: fakeDb({ tables }), env, now: NOW })
+  assert.deepEqual(azul.costs, { month_usd: 0.55, calls: 3, priced: 2 })
+  const team = await getLeadDashboard({ clientId: 'c1', isMaster: false, database: fakeDb({ tables }), env, now: NOW })
+  assert.equal(team.costs, undefined)
+})
+
+test('review fixes: emails still go out with calls off; callback cost saved; costs skip tests and owner rings', async () => {
+  const live = { ...agent, mode: 'active', rb_clients: { name: 'Test AC Co.', active: true, services: ['calls'] } }
+  const mail = fakeMail()
+  const r = await processLeadRetries({ database: fakeDb({ agentRow: live, answers: { rb_claim_job: true }, tables: { rb_leads: [], rb_lead_calls: [] } }), env: { AZUL_OPS_EMAIL: 'me@azul.test', LEAD_CALLS_ENABLED: 'false' }, now: MONDAY_9AM, send: mail.send })
+  assert.equal(r.disabled, true); assert.deepEqual(r.emails, ['daily', 'weekly:1'])
+  assert.match(mail.sent[0].subject, /^Azul daily: CALLS OFF/); assert.match(mail.sent[0].text, /Automatic calls are OFF/)
+
+  const inboundDb = fakeDb({ answers: { rb_record_inbound_call: { recorded: true, lead: null } } })
+  await handleCallEnded({ secret: 's3cret', body: { message: { type: 'end-of-call-report', cost: 0.07, durationSeconds: 3, call: { id: 'in-c', type: 'inboundPhoneCall', phoneNumberId: 'pn', customer: { number: '+13055550100' } } } }, database: inboundDb, env, now: NOW, send: fakeMail().send })
+  assert.equal(inboundDb.rpcs('rb_record_inbound_call')[0].args.p_result.cost, '0.07')
+
+  const calls = [{ cost_usd: '0.20', kind: 'ai', lead: { is_test: false } }, { cost_usd: '0.50', kind: 'ai', lead: { is_test: true } }, { cost_usd: null, kind: 'owner', lead: { is_test: false } }, { cost_usd: '0.05', kind: 'inbound', lead: null }]
+  const azul = await getLeadDashboard({ clientId: 'c1', isMaster: true, database: fakeDb({ tables: { rb_leads: [], rb_lead_profiles: null, rb_lead_calls: calls } }), env, now: NOW })
+  assert.deepEqual(azul.costs, { month_usd: 0.25, calls: 2, priced: 2 })
+})
+
+test('review fixes: hosted form limits per visitor, per phone and per business', async () => {
+  const client = { id: 'c1', name: 'Test AC Co.', active: true, services: ['calls'] }
+  const hosted = { ...agent, hosted_form: true, privacy_url: 'https://testac.example/privacy' }
+  const tables = { rb_clients: client, rb_lead_profiles: { data: { services: [] } } }
+  assert.equal((await handleHostedForm({ slug: 'test-ac', body: form, ip: '1.2.3.4', database: fakeDb({ agentRow: hosted, tables, counts: { rb_leads: 3 } }), env, now: NOW })).status, 429, '3 from this visitor already')
+  const ok = fakeDb({ agentRow: hosted, tables, counts: { rb_leads: 2 } })
+  await handleHostedForm({ slug: 'test-ac', body: { ...form, ip_hash: 'forged' }, ip: '1.2.3.4', database: ok, env, now: NOW, send: fakeMail().send, fetchImpl: fakeVapi().fetchImpl })
+  const data = ok.rpcs('rb_create_lead')[0].args.p_data
+  assert.match(data.extra.ip_hash, /^[0-9a-f]{32}$/); assert.notEqual(data.extra.ip_hash, 'forged', 'the browser cannot set its own visitor id')
 })

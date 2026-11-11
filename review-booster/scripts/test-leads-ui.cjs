@@ -19,6 +19,7 @@ const overflow=(page)=>page.evaluate(()=>document.documentElement.scrollWidth>in
   await page.getByRole('button',{name:'All leads'}).click();
   await page.locator('.lead-detail summary').first().click();await page.getByText('Booked a repair visit',{exact:false}).waitFor();
   await page.getByText('Your business details',{exact:true}).waitFor();
+  await page.getByText('Call cost this month',{exact:false}).waitFor();
   await page.getByText('Agent setup',{exact:true}).click();
   await page.getByLabel('Call script').selectOption('azul');
   await page.getByText('Calendar ID not set (Azul)',{exact:true}).waitFor();
@@ -43,7 +44,23 @@ const overflow=(page)=>page.evaluate(()=>document.documentElement.scrollWidth>in
   await team.setViewportSize({width:390,height:844});if(await overflow(team))throw Error('Business details overflow at phone width');
   await team.screenshot({path:'/tmp/azul-business-details-mobile.png',fullPage:true});
   if(await team.getByLabel(/Form key/).count())throw Error('Business team can see the form key');
+  // Owner controls: the team can open their settings; the cost line is Azul-only.
+  await team.setViewportSize({width:1280,height:900});
+  await team.getByRole('button',{name:'Change settings'}).click();await team.getByLabel('Your agent').waitFor();
+  await team.getByLabel(/Lead alerts go to/).waitFor();
+  if(await team.getByText('Call cost this month',{exact:false}).count())throw Error('Business team can see call costs');
+  // Hosted form: public page, both languages, submits, fits a phone.
+  const pub=await browser.newPage({viewport:{width:390,height:844}});pub.on('pageerror',e=>errors.push(e.message));
+  await pub.goto(`${origin}/f/helloyou`);await pub.getByRole('heading',{name:'Request a callback'}).waitFor();
+  await pub.getByText('I agree that Hello You Wellness Center may call',{exact:false}).waitFor();
+  await pub.getByRole('button',{name:'Español'}).click();await pub.getByRole('heading',{name:'Solicite una llamada'}).waitFor();
+  await pub.getByLabel('Su nombre').fill('Maria Lopez');await pub.getByLabel('Número de celular').fill('(305) 555-0100');
+  await pub.getByRole('checkbox').check();await pub.getByRole('button',{name:'Solicitar una llamada'}).click();
+  await pub.getByText('¡Gracias, Maria!',{exact:false}).waitFor();
+  if(await overflow(pub))throw Error('Hosted form overflows at phone width');
+  await pub.screenshot({path:'/tmp/azul-hosted-form.png',fullPage:true});
+  await pub.goto(`${origin}/f/nope`);await pub.getByText('This form is not available.',{exact:false}).waitFor();
   if(errors.length)throw Error(errors.join('\n'));
-  console.log('PASS speed-to-lead page: agent status, numbers, lead filters and details, stop calling, Azul-only setup with hidden form key, team view without setup, business details with calendar walkthrough, Azul template switch with gaps and script preview, phone width.');
+  console.log('PASS speed-to-lead page: agent status, numbers, lead filters and details, stop calling, Azul-only setup with hidden form key, team view without setup, business details with calendar walkthrough, Azul template switch with gaps and script preview, owner settings, Azul-only costs, hosted form (EN/ES, submit, unknown slug), phone width.');
   await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

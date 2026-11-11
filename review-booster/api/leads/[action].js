@@ -2,7 +2,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { authenticate, readJson } from '../_lib/auth.js'
 import {
   handleNewLead, handleCallEnded, processLeadRetries, handleOwnerStep, getLeadDashboard, saveLeadAgent, stopLead,
-  saveProfile, handleTestCall,
+  saveProfile, handleTestCall, saveControls, getHostedFormInfo, handleHostedForm,
 } from '../_lib/lead-agent.js'
 
 // Speed-to-lead agent. One function for all routes (Vercel Hobby allows 12 functions per deployment).
@@ -16,12 +16,17 @@ import {
 //   POST /api/leads/stop        dashboard: stop calling a queued lead
 //   POST /api/leads/profile     dashboard: save the business details the agent's script is built from (team or Azul)
 //   POST /api/leads/test-call   Azul only: call one of the agent's test numbers now (any hour, any mode)
+//   POST /api/leads/controls    dashboard: the business's own settings (on/paused, hours, owner first, alerts)
+//   GET  /api/leads/form-info   public: what the hosted form at /f/<slug> shows
+//   POST /api/leads/form        public: a lead from the hosted form (rate-limited per business)
 // Never call these as a health check: /new, /retry and /owner can place real phone calls.
+// Never call these as a health check either: /form places a real call (it is the public version of /new).
 // Env: VAPI_API_KEY, VAPI_LEAD_AGENT_SECRET, LEAD_CALLS_ENABLED=true, LEAD_CRON_SECRET, RESEND_API_KEY,
-//      EMAIL_FROM, TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN (owner first). Optional: LEAD_EMAIL_FROM, LEAD_PUBLIC_URL.
+//      EMAIL_FROM, TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN (owner first). Optional: LEAD_EMAIL_FROM, LEAD_PUBLIC_URL, LEAD_CALENDAR_SHARE_EMAIL,
+//      AZUL_OPS_EMAIL (daily check-in recipient).
 export const config = { maxDuration: 60 }
 
-const METHODS = { new: ['POST'], 'call-ended': ['POST'], retry: ['POST'], owner: ['POST'], list: ['GET'], agent: ['GET', 'POST'], stop: ['POST'], profile: ['POST'], 'test-call': ['POST'] }
+const METHODS = { new: ['POST'], 'call-ended': ['POST'], retry: ['POST'], owner: ['POST'], list: ['GET'], agent: ['GET', 'POST'], stop: ['POST'], profile: ['POST'], 'test-call': ['POST'], controls: ['POST'], 'form-info': ['GET'], form: ['POST'] }
 
 // Its own secret, separate from CRON_SECRET (which also guards /api/send-due).
 // Stray spaces or line breaks from copy-pasting the secret (into Vercel or Supabase Vault) are ignored.
@@ -54,6 +59,16 @@ export default async function handler(req, res) {
       res.setHeader('Content-Type', 'text/xml')
       return res.status(r.status).send(r.xml)
     }
+    if (action === 'form-info') {
+      const r = await getHostedFormInfo({ slug: String(req.query.slug || '') })
+      if (r.status === 200) res.setHeader('Cache-Control', 'public, max-age=60')
+      return res.status(r.status).json(r.body)
+    }
+    if (action === 'form') {
+      const ip = String(req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+      const r = await handleHostedForm({ slug: String(req.query.slug || ''), body: readJson(req), ip })
+      return res.status(r.status).json(r.body)
+    }
     if (action === 'retry') {
       // Secrets only in headers, never in query URLs or logs.
       if (req.query?.key || !bearerMatches(req, process.env.LEAD_CRON_SECRET)) return res.status(401).json({ error: 'Unauthorized' })
@@ -70,6 +85,10 @@ export default async function handler(req, res) {
     if (action === 'list') return res.json(await getLeadDashboard({ clientId, isMaster }))
     if (action === 'stop') {
       const r = await stopLead({ clientId, leadId: String(body.lead_id || '') })
+      return res.status(r.status).json(r.body)
+    }
+    if (action === 'controls') {
+      const r = await saveControls({ clientId, body })
       return res.status(r.status).json(r.body)
     }
     if (action === 'profile') {

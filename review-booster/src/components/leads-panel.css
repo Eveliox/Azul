@@ -105,3 +105,14 @@
 .prompt-preview pre { white-space: pre-wrap; font-size: 11px; line-height: 1.6; background: #f8f9fc; border: 1px solid #edf0f5; border-radius: 8px; padding: 14px; max-height: 420px; overflow: auto; margin-top: 10px; color: #2c3a52; }
 @media (max-width: 900px) { .business-form { grid-template-columns: 1fr; } }
 .test-badge { margin-left: 8px; font-size: 9px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #8a6fd0; background: #f3effd; border-radius: 4px; padding: 2px 6px; vertical-align: middle; }
+
+/* Owner controls and costs */
+.agent-controls { grid-column: 1 / -1; }
+.agent-controls > .text-button { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--brand); }
+.agent-controls-form { display: grid; gap: 12px; max-width: 520px; margin-top: 12px; padding: 16px; background: #ffffffb3; border: 1px solid #e4ecf3; border-radius: 12px; }
+.agent-controls-form .label { display: grid; gap: 6px; }
+.agent-controls-form .checkbox-row { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: #526078; line-height: 1.5; }
+.agent-controls-form .checkbox-row input { margin-top: 3px; }
+.agent-controls-form .btn-primary { justify-self: start; }
+.controls-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.leads-cost { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; color: #526078; background: #f2f5fb; border-radius: 8px; padding: 9px 12px; }

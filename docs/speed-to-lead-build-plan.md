@@ -168,3 +168,13 @@ GitHub ran scheduled workflows here only a few times a day, so retries now run f
 - **Callbacks without an inbound assistant**: the business number's Server URL is `/api/leads/call-ended` (with the `x-vapi-secret` header) and no inbound assistant; Vapi sends `assistant-request` and the app answers with the callback assistant. Not ready, Vapi mode, or unknown number: the caller is forwarded to the owner's cell.
 - **Send test call** (`POST /api/leads/test-call`, Azul only): calls one of the agent's test numbers now, at any hour and in any mode; test leads skip the 10-minute duplicate guard.
 - Template settings copied from Test AC's Vapi export (2026-11-11): GPT-4.1, ElevenLabs Turbo v2.5 voice `SAz9YHcvj6GT2YYXdXww`, Deepgram nova-2 multi. Calendar tools are built per call from the business's **Calendar ID** (migration `20261113_speed_to_lead_calendar.sql`), so the only per-client Vapi step is importing the Twilio number. Voicemail detection and the call summary are on in the template (both were off on Test AC's saved assistant).
+
+## Part 5 (built 2026-11-11): running it as a service
+
+- **Daily check-in to Azul** (`AZUL_OPS_EMAIL` in Vercel): after 8 AM Eastern, once a day. Per client: leads, calls, bookings and spend in the last 24 h, this month's spend and cost per lead, and warnings (payment/credit errors from Vapi, calls that couldn't be placed, "no leads in 7 days" for live clients). If it stops arriving, the 5-minute Supabase job is down.
+- **Weekly results to owners**: Mondays after 8 AM Eastern, for live or paused agents with `weekly_email` on (owners can turn it off). Leads, calls, typical time to first call, bookings, and who still needs a callback.
+- Both ride on the 5-minute retry tick (`rb_claim_job` makes each run exactly once per day); nothing new to schedule.
+- **Owner controls** (`POST /api/leads/controls`): on/paused (only once Azul has taken the agent out of testing), calling hours, Sundays, alert emails, their cell, ring-me-first, weekly email.
+- **Call costs**: Vapi's `cost` from each end-of-call report is stored on `rb_lead_calls.cost_usd`; Azul sees this month's spend and cost per lead on the dashboard and in the daily email.
+- **Hosted lead form** at `/f/<slug>` (`GET /api/leads/form-info`, `POST /api/leads/form`, both public): EN/ES, consent text set by the server, honeypot, at most 30 leads per business per hour. Needs `hosted_form` on and the business's https privacy page in Agent setup.
+- **Not built: Facebook/Instagram lead ads.** Needs a Meta developer app with lead access approved by Meta and access to each client's Page; to do with the first ads client. Until then the hosted form works as the ad's link.

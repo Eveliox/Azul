@@ -17,6 +17,9 @@ await db.exec(part3)
 const part4 = await readFile(new URL('../supabase/migrations/20261113_speed_to_lead_calendar.sql', import.meta.url), 'utf8')
 await db.exec(part4)
 await db.exec(part4)
+const part5 = await readFile(new URL('../supabase/migrations/20261114_speed_to_lead_ops.sql', import.meta.url), 'utf8')
+await db.exec(part5)
+await db.exec(part5)
 
 const c1 = '11111111-1111-4111-8111-111111111111', c2 = '22222222-2222-4222-8222-222222222222'
 await db.query('insert into rb_clients(id,name) values($1,$2),($3,$4)', [c1, 'One', c2, 'Two'])
@@ -171,10 +174,34 @@ await db.query("update rb_lead_agents set calendar_id='5477abc@group.calendar.go
 await assert.rejects(() => db.query("update rb_lead_agents set calendar_id='not a calendar' where client_id=$1", [c1]))
 await db.query(`insert into rb_lead_profiles(client_id,data) values($1,'{"trade":"air conditioning"}')`, [c1])
 
+// Part 5: call cost saved once; scheduled jobs claimed once per period; hosted form needs an https privacy URL.
+const k = (await create(c1, lead('+13055550400'))).lead
+await finish(await claim(k.id), { call_id: 'call-cost' })
+await record('call-cost', { status: 'booked', booked: true, cost: '0.1834' })
+assert.equal((await one("select cost_usd from rb_lead_calls where call_id='call-cost'")).cost_usd, '0.1834')
+await record('call-cost', { status: 'booked', cost: '9' })
+assert.equal((await one("select cost_usd from rb_lead_calls where call_id='call-cost'")).cost_usd, '0.1834', 'cost recorded once')
+const k2 = (await create(c1, lead('+13055550401'))).lead
+await finish(await claim(k2.id), { call_id: 'call-nocost' })
+await record('call-nocost', { status: 'needs_owner', cost: 'abc' })
+assert.equal((await one("select cost_usd from rb_lead_calls where call_id='call-nocost'")).cost_usd, null, 'garbage cost ignored')
+await inbound('in-cost', c1, '+13055550402', { cost: '0.05' })
+assert.equal((await one("select cost_usd from rb_lead_calls where call_id='in-cost'")).cost_usd, '0.0500')
+const claimJob = async (after) => (await one('select rb_claim_job($1, $2) as ok', ['daily-digest', after])).ok
+const dayStart = new Date(Date.now() - 3600_000).toISOString()
+const both = await Promise.all([claimJob(dayStart), claimJob(dayStart)])
+assert.deepEqual(both.sort(), [false, true], 'a job runs once per period')
+assert.equal(await claimJob(dayStart), false)
+assert.equal(await claimJob(new Date(Date.now() + 60_000).toISOString()), true, 'runs again in the next period')
+await assert.rejects(() => db.query("update rb_lead_agents set privacy_url='http://insecure.example' where client_id=$1", [c1]))
+await db.query("update rb_lead_agents set privacy_url='https://example.com/privacy', hosted_form=true where client_id=$1", [c1])
+
 // No browser access to tables or functions.
 await db.exec('set role anon')
 await assert.rejects(() => db.query('select * from rb_leads'))
 await assert.rejects(() => db.query('select * from rb_lead_profiles'))
+await assert.rejects(() => db.query('select * from rb_lead_jobs'))
+await assert.rejects(() => db.query("select rb_claim_job('x', now())"))
 await assert.rejects(() => db.query('select * from rb_claim_lead_retries(5)'))
 await assert.rejects(() => db.query("select rb_record_inbound_call('x',$1,'+13055550100','{}'::jsonb)", [c1]))
 await db.exec('reset role')
