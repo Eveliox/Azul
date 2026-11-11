@@ -1,11 +1,10 @@
 // Meta Pixel for azulwebdev.com. Only loads after the visitor accepts optional
 // analytics in the cookie banner, matching the privacy policy at /privacy.
-// Set VITE_META_PIXEL_ID in Vercel to activate.
 
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-const PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID
+const PIXEL_ID = '1027268147060645'
 
 function hasAnalyticsConsent() {
   try { return JSON.parse(localStorage.getItem('azul-cookies'))?.analytics === true } catch { return false }
