@@ -374,7 +374,7 @@ export async function handleTestCall({ clientId, phone, ...deps }) {
   const profileQuery = await ctx.database.from('rb_lead_profiles').select('data').eq('client_id', clientId).maybeSingle()
   if (profileQuery.error) throw profileQuery.error
   const service = profileQuery.data?.data?.services?.[0] || 'a service request'
-  const created = await ctx.database.rpc('rb_create_lead', { p_client: clientId, p_data: { name: 'Test Caller', phone: number, service, consent: true, consent_text: 'Test call from the dashboard', page_url: 'dashboard test call', language: 'en', test: true } })
+  const created = await ctx.database.rpc('rb_create_lead', { p_client: clientId, p_data: { name: 'Maria Test', phone: number, service, consent: true, consent_text: 'Test call from the dashboard', page_url: 'dashboard test call', language: 'en', test: true } })
   if (created.error) throw created.error
   const { lead } = created.data
   if (lead.status !== 'new') return { status: 409, body: { error: lead.status === 'blocked' ? 'This number is on the do-not-contact list.' : 'The test lead could not be called.' } }

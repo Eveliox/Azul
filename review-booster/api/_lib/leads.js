@@ -270,7 +270,7 @@ export function ownerCallEmail({ lead, agent, outcome, report }) {
     stopped: `Asked not to be called again: ${who(lead)}`,
     handed_off: `Transferred to you: ${who(lead)}`,
     retry: `No answer (call ${lead.attempts} of ${max}): ${who(lead)}`,
-    no_answer: `No answer after ${lead.attempts} calls: ${who(lead)}`,
+    no_answer: `No answer after ${lead.attempts} call${lead.attempts === 1 ? '' : 's'}: ${who(lead)}`,
     needs_owner: `Call this lead back: ${who(lead)}`,
   }[outcome.status] || `Call ended: ${who(lead)}`
   const intro = {

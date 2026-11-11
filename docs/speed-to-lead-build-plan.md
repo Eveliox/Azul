@@ -156,6 +156,10 @@ Same flow as the walkthrough's Scenario E, in code:
 - **Owner first**: `POST /api/leads/owner?step=pressed|dial_done|owner_done&lead=…`. Every Twilio request is checked with `X-Twilio-Signature` (URL rebuilt from `LEAD_PUBLIC_URL`, default `https://app.azulwebdev.com`). Only before anyone was called for the lead; if Twilio fails, the AI calls immediately; the owner is never rung twice.
 - **Inbound callbacks**: a Vapi report with `call.type = inboundPhoneCall` is matched to the business by `vapi_phone_number_id`, recorded once per call id, and emailed to the owner. A booking or do-not-call updates the lead; any other callback stops queued retries and hands the lead to the owner. Setup per client: `ai-agents/clients/_template/inbound-prompt.md`.
 
+## Retry scheduler (2026-11-11)
+
+GitHub ran scheduled workflows here only a few times a day, so retries now run from Supabase: pg_cron job `azul-lead-retries` every 5 minutes, `net.http_post` to `/api/leads/retry` with `Authorization: Bearer` + the Vault secret `azul_lead_cron_secret` (same value as Vercel `LEAD_CRON_SECRET`). Check: `select created, status_code, content from net._http_response order by created desc limit 3;` (200 expected). Stop: `select cron.unschedule('azul-lead-retries');`.
+
 ## Part 3 (built 2026-11-10): Azul-built assistants
 
 - **Business details** (`rb_lead_profiles`, `POST /api/leads/profile`): the client's team fills in trade, area, services, questions, emergencies, booking days/hours, visit length, zip codes and shares their Google Calendar, on the Speed-to-Lead Agent page.

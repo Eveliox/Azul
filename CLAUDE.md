@@ -52,7 +52,7 @@ The landing site has no tests or linter. Run the checks for every app a change t
 - Smoke checks (GET only):
   - Landing site: `https://azulwebdev.com/` → 200
   - Review Booster: `https://app.azulwebdev.com/` → 200, and `https://app.azulwebdev.com/api/review/smoke-check-nonexistent` → 404 with body `{"error":"Not found"}` (a 500, or any other body, means env vars or Supabase are broken)
-- **Never** call these as a check, and never POST anything: `/api/send-due` (texts and emails real customers), `/api/agent-worker` (spends AI budget and emails customers), `/api/agents`, `/api/team`, `/api/leads/*` (`new` and `retry` place real AI phone calls). The "Speed-to-lead retries" workflow stays off unless the repo variable `LEAD_RETRY_ENABLED` is `true`.
+- **Never** call these as a check, and never POST anything: `/api/send-due` (texts and emails real customers), `/api/agent-worker` (spends AI budget and emails customers), `/api/agents`, `/api/team`, `/api/leads/*` (`new` and `retry` place real AI phone calls). Speed-to-lead retries run every 5 minutes from Supabase (pg_cron job `azul-lead-retries`, calling `/api/leads/retry` with the Vault secret `azul_lead_cron_secret` = Vercel `LEAD_CRON_SECRET`); stop with `select cron.unschedule('azul-lead-retries');`. The GitHub "Speed-to-lead retries" workflow is only a backup (GitHub runs schedules here a few times a day) and stays off unless the repo variable `LEAD_RETRY_ENABLED` is `true`.
 - The "Estimate follow-up worker" GitHub workflow stays off unless the repo variable `AGENT_WORKER_ENABLED` is `true`. Don't enable it without the user.
 - Rollback: Vercel dashboard → project → Deployments → previous deployment → Promote to Production. Migrations are additive and stay in place.
 
