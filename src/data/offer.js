@@ -31,22 +31,22 @@ export const offerCopy = {
     ctas: { book: 'Book a call' },
     how: {
       eyebrow: 'How it works',
-      title: 'Homeowners call three companies.\nThey hire the one that answers first.',
-      body: 'Azul makes sure that’s you, every time, even at 9pm.',
+      title: 'Set up for your business.\nManaged by Azul.',
+      body: 'We connect the website, calling rules, and calendar around the way your team works. You get one place to see what happened to every inquiry.',
       steps: [
-        { title: 'A homeowner submits your form.', body: 'A roof leak, an AC that stopped cooling, a new install. The request comes in the moment they hit send.' },
-        { title: 'The agent calls within seconds.', body: 'In English or Spanish, it asks what the problem is, the address, and how urgent it is.' },
-        { title: 'The estimate is booked on your calendar.', body: 'Nobody on your team has to pick up the phone. If the homeowner doesn’t answer, a text follows up.' },
+        { title: 'Start with your business.', body: 'We learn your services, service area, booking availability, and when a call should go straight to you.' },
+        { title: 'Connect the pieces.', body: 'We build or connect your website, configure the agent, and link your Google Calendar. Calling hours and retries follow your settings.' },
+        { title: 'Test, then go live.', body: 'We test the flow before turning it on. Once live, your dashboard shows new leads, call results, bookings, and anything that needs your attention.' },
       ],
     },
     included: {
       eyebrow: 'What’s included',
-      title: 'One package.\nFrom the first search to the booked estimate.',
+      title: 'Your website and agent.\nWorking together.',
       badge: 'Included',
       items: [
-        { title: 'Website build', body: 'A fast, mobile-first site in English and Spanish, with a page for each service (roof repair, roof replacement, AC repair, AC installation) and for each city you serve. We set up your Google Business Profile and wire your lead form to the agent.' },
-        { title: 'Speed-to-lead agent', body: 'An AI voice agent that calls every new lead within seconds, in English or Spanish. It asks the key questions (what the problem is, the address, how urgent it is) and books the estimate directly on your calendar. No human needed. If the homeowner doesn’t pick up, a text follows up.' },
-        { title: 'Automatic review requests', body: 'After a job, your customer gets a text with a one-tap link to leave a Google review, plus one reminder a few days later.' },
+        { title: 'Website build', body: 'A fast, bilingual website built around your services and the areas you serve. Every inquiry arrives in your lead workspace, ready for the next step.' },
+        { title: 'Speed-to-lead agent', body: 'An AI voice agent that responds during your calling hours, asks about the job, and books available visits. Configure retries, lead alerts, and transfers to your team.' },
+        { title: 'Your lead workspace', body: 'See who inquired, what the agent learned, and what happens next. Search leads, review call summaries, and find the conversations that need a personal response.' },
       ],
     },
     pricing: {
@@ -100,8 +100,8 @@ export const offerCopy = {
     },
     final: {
       eyebrow: 'Get started',
-      title: 'Be the first call\nevery homeowner gets.',
-      body: 'Book a call with the Azul team and see how it works for your business.',
+      title: 'See Azul working\nfor your business.',
+      body: 'Walk through your website, your lead flow, and how the agent would work for your team. No long-term contracts.',
     },
     contact: {
       eyebrow: 'Contact',
@@ -126,22 +126,22 @@ export const offerCopy = {
     ctas: { book: 'Agenda una llamada' },
     how: {
       eyebrow: 'Cómo funciona',
-      title: 'Los dueños de casa llaman a tres compañías.\nContratan a la que contesta primero.',
-      body: 'Con Azul, esa compañía es la tuya. Siempre, incluso a las 9 de la noche.',
+      title: 'A su medida.\nAdministrado por Azul.',
+      body: 'Conectamos su sitio, las reglas de llamadas y su calendario según la forma de trabajar de su equipo. Usted ve qué pasó con cada solicitud en un solo panel.',
       steps: [
-        { title: 'Un cliente llena tu formulario.', body: 'Una filtración en el techo, un aire acondicionado que dejó de enfriar, una instalación nueva. La solicitud llega en cuanto presiona enviar.' },
-        { title: 'El agente llama en segundos.', body: 'En inglés o en español, pregunta cuál es el problema, la dirección y qué tan urgente es.' },
-        { title: 'El estimado queda agendado en tu calendario.', body: 'Nadie de tu equipo tiene que contestar el teléfono. Si el cliente no contesta, le llega un mensaje de texto de seguimiento.' },
+        { title: 'Empezamos con su negocio.', body: 'Conocemos sus servicios, las áreas que atiende, los horarios disponibles y cuándo una llamada debe pasar directamente a usted.' },
+        { title: 'Conectamos cada parte.', body: 'Creamos o conectamos su sitio, configuramos el agente y enlazamos Google Calendar. Los horarios y reintentos siguen sus ajustes.' },
+        { title: 'Probamos y activamos.', body: 'Probamos todo antes de activarlo. Después, su panel muestra solicitudes, resultados de llamadas, citas y lo que necesita su atención.' },
       ],
     },
     included: {
       eyebrow: 'Qué incluye',
-      title: 'Un solo paquete.\nDesde la primera búsqueda hasta el estimado agendado.',
+      title: 'Su sitio y su agente.\nTrabajando juntos.',
       badge: 'Incluido',
       items: [
-        { title: 'Sitio web', body: 'Un sitio rápido, pensado para el celular, en inglés y en español, con una página para cada servicio (reparación de techos, reemplazo de techos, reparación de aire acondicionado, instalación de aire acondicionado) y para cada ciudad donde trabajas. Configuramos tu Perfil de Empresa en Google y conectamos tu formulario al agente.' },
-        { title: 'Agente de respuesta inmediata', body: 'Un agente de voz con IA que llama a cada nuevo cliente en segundos, en inglés o en español. Hace las preguntas clave (cuál es el problema, la dirección, qué tan urgente es) y agenda el estimado directamente en tu calendario. Sin intervención humana. Si el cliente no contesta, le llega un mensaje de texto de seguimiento.' },
-        { title: 'Solicitudes de reseñas automáticas', body: 'Después de cada trabajo, tu cliente recibe un mensaje de texto con un enlace para dejar una reseña en Google con un solo toque, y un recordatorio unos días después.' },
+        { title: 'Sitio web', body: 'Un sitio rápido y bilingüe, creado para sus servicios y las áreas que atiende. Cada solicitud llega a su panel, lista para el próximo paso.' },
+        { title: 'Agente de respuesta inmediata', body: 'Un agente de voz con IA que responde dentro de su horario, pregunta por el trabajo y agenda visitas disponibles. Configure reintentos, avisos y transferencias a su equipo.' },
+        { title: 'Su panel de clientes', body: 'Vea quién solicitó un servicio, qué aprendió el agente y cuál es el próximo paso. Busque clientes, revise resúmenes e identifique las conversaciones que necesitan una respuesta personal.' },
       ],
     },
     pricing: {
@@ -195,8 +195,8 @@ export const offerCopy = {
     },
     final: {
       eyebrow: 'Empieza hoy',
-      title: 'Sé la primera llamada\nque recibe cada cliente.',
-      body: 'Agenda una llamada con el equipo de Azul y descubre cómo funciona para tu negocio.',
+      title: 'Vea cómo funciona Azul\npara su negocio.',
+      body: 'Revisemos su sitio, sus solicitudes y cómo trabajaría el agente para su equipo. Sin contratos a largo plazo.',
     },
     contact: {
       eyebrow: 'Contacto',

@@ -2,7 +2,7 @@
 // npm run build && npx vite preview --port 4173, then
 // LANDING_URL=http://127.0.0.1:4173 node tests/landing-browser.cjs
 // Requires Playwright + Chromium in the test environment; optional CHROME_PATH.
-const { chromium } = require('playwright')
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const { pathToFileURL } = require('node:url')
 const path = require('node:path')
 const assert = require('node:assert/strict')
@@ -36,13 +36,13 @@ async function checkToggle(page, selector, en, es) {
   assert.equal(await page.locator('.offer-items > li').count(), 3)
   assert.equal(await page.locator('#pricing, .site-banner-price').count(), 0, 'prices stay hidden')
   assert.equal(await page.locator('#faq .faq button').count(), 5)
-  assert.ok(await page.locator('#how-it-works a', { hasText: 'Book a call' }).count())
+  assert.ok(await page.locator('#get-started a', { hasText: 'Book a call' }).count())
   assert.equal(await page.locator('a[href="#demo"], a:has-text("Try the demo"), .ai-pill').count(), 0, 'no demo CTAs until a real demo exists')
 
-  await checkToggle(page, '#how-it-works h2', 'They hire the one that answers first', 'Contratan a la que contesta primero')
+  await checkToggle(page, '#how-it-works h2', 'Managed by Azul', 'Administrado por Azul')
   await checkToggle(page, '#included h3', 'Speed-to-lead agent', 'Agente de respuesta inmediata')
   await checkToggle(page, '#faq button', 'Does it speak Spanish?', '¿Habla español?')
-  await checkToggle(page, '#get-started h2', 'every homeowner gets', 'que recibe cada cliente')
+  await checkToggle(page, '#get-started h2', 'for your business', 'para su negocio')
   await checkToggle(page, '.site-banner-headline', 'speed-to-lead agent', 'agente de respuesta inmediata')
   await page.locator('.site-header .languages button', { hasText: 'ES' }).click()
   await page.waitForFunction(() => document.title.includes('respuesta inmediata') && document.documentElement.lang === 'es')

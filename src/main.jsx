@@ -11,7 +11,6 @@ import './hero-refinements.css'
 import './hero-reference.css'
 import './growth-dashboard.css'
 import './home.css'
-import './connected-journey.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -27,3 +26,5 @@ import './service-visuals.css'
 
 import './services.css'
 import './startup.css'
+
+import './lead-demo.css'

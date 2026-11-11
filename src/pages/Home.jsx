@@ -13,7 +13,7 @@ function HowItWorks() {
   const { c } = useLanguage()
   const t = c.offer.how
   return <section className="section offer-how" id="how-it-works">
-    <StudioLabel>{t.eyebrow}</StudioLabel><div className="section-intro"><StudioTitle>{t.title}</StudioTitle><div><p>{t.body}</p><OfferCtas /></div></div>
+    <StudioLabel>{t.eyebrow}</StudioLabel><div className="section-intro"><StudioTitle>{t.title}</StudioTitle><div><p>{t.body}</p></div></div>
     <ol className="offer-steps">{t.steps.map((step, i) => <li key={step.title}><span className="service-index">0{i + 1}</span><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>
   </section>
 }
