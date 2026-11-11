@@ -24,9 +24,10 @@ export const config = { maxDuration: 60 }
 const METHODS = { new: ['POST'], 'call-ended': ['POST'], retry: ['POST'], owner: ['POST'], list: ['GET'], agent: ['GET', 'POST'], stop: ['POST'], profile: ['POST'], 'test-call': ['POST'] }
 
 // Its own secret, separate from CRON_SECRET (which also guards /api/send-due).
+// Stray spaces or line breaks from copy-pasting the secret (into Vercel or Supabase Vault) are ignored.
 function bearerMatches(req, secret) {
-  const given = Buffer.from(String(req.headers.authorization || '').match(/^Bearer (.+)$/)?.[1] || '')
-  const expected = Buffer.from(String(secret || ''))
+  const given = Buffer.from(String(req.headers.authorization || '').match(/^Bearer\s+(.+)$/)?.[1]?.trim() || '')
+  const expected = Buffer.from(String(secret || '').trim())
   return expected.length >= 32 && given.length === expected.length && timingSafeEqual(given, expected)
 }
 // Twilio posts form fields; Vercel usually parses them already.
