@@ -7,8 +7,8 @@ import { Icon } from './DashboardVisuals.jsx'
 const HOURS = Array.from({ length: 13 }, (_, i) => i + 8)
 const hour = (h) => { const n = Number(h) % 24; return `${n % 12 || 12} ${n < 12 ? 'AM' : 'PM'}` }
 
-export default function AgentControls({ client, agent, demo, onSaved }) {
-  const [open, setOpen] = useState(false)
+export default function AgentControls({ client, agent, demo, onSaved, initiallyOpen = false }) {
+  const [open, setOpen] = useState(initiallyOpen)
   const [f, setF] = useState({ mode: agent.mode, call_start_hour: agent.call_start_hour, call_end_hour: agent.call_end_hour, call_sundays: agent.call_sundays, owner_email: agent.owner_email || '', owner_cell: agent.owner_cell || '', owner_first: agent.owner_first, weekly_email: agent.weekly_email !== false })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')

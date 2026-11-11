@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../api.js'
 import { Icon } from './DashboardVisuals.jsx'
 import BusinessDetails from './BusinessDetails.jsx'
@@ -33,7 +33,10 @@ function firstCall(l) {
   return Math.max(0, Math.round((new Date(l.first_call_at) - new Date(l.received_at)) / 1000))
 }
 
-export default function LeadsPanel({ client, demo, isMaster }) {
+export default function LeadsPanel({ client, demo, isMaster, setupContent }) {
+  const [tab, setTab] = useState('overview')
+  const [query, setQuery] = useState('')
+  const [selectedId, setSelectedId] = useState(null)
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [reload, setReload] = useState(0)
@@ -61,62 +64,92 @@ export default function LeadsPanel({ client, demo, isMaster }) {
   const agent = data?.agent
   const tz = agent?.timezone || 'America/New_York'
   const leads = data?.leads || []
-  const visible = leads.filter((l) => filter === 'all' || (filter === 'needs' ? NEEDS_YOU.includes(l.status) : filter === 'booked' ? l.status === 'booked' || l.booked : QUEUED.includes(l.status)))
+  const matches = (l, id) => id === 'all' || (id === 'needs' ? NEEDS_YOU.includes(l.status) : id === 'booked' ? l.status === 'booked' || l.booked : QUEUED.includes(l.status))
+  const visible = leads.filter((l) => matches(l, filter) && [l.name, l.phone, formatPhone(l.phone), l.service, l.email].filter(Boolean).join(' ').toLowerCase().includes(query.trim().toLowerCase()))
   const stats = data?.stats || {}
-  const [modeName, modeNote] = agent ? MODES[agent.mode] || ['Unknown', ''] : ['Not set up', isMaster ? 'Fill in the agent setup below' : 'Azul is setting up your agent']
+  const selected = leads.find(l => l.id === selectedId)
+  const needs = leads.filter(l => NEEDS_YOU.includes(l.status)).length
+  const [modeName, modeNote] = agent ? MODES[agent.mode] || ['Unknown', ''] : ['Not set up', isMaster ? 'Open Setup to connect your agent' : 'Azul is setting up your agent']
+  const callsOff = data?.calls_enabled === false
+  const period = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: tz })
+  const openLead = (id) => { setMessage(''); setSelectedId(id) }
+  const showNeeds = () => { setTab('leads'); setFilter('needs'); setQuery('') }
+  const inbox = <section className="panel lead-inbox">
+    <div className="panel-heading"><div><h2>{tab === 'overview' ? 'Recent leads' : 'Leads'}</h2><p>{tab === 'overview' ? 'Your latest conversations and their next steps.' : 'Search and manage your latest 100 website leads.'}</p></div><span className="lead-sync">Updates every 20 seconds</span></div>
+    <div className="lead-inbox-toolbar">
+      <div className="lead-filter-group" role="group" aria-label="Filter leads">{FILTERS.map(([id, label]) => <button key={id} className={filter === id ? 'selected' : ''} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}<span>{leads.filter(l => matches(l, id)).length}</span></button>)}</div>
+      <label className="lead-search"><Icon name="search" size={16}/><input aria-label="Search leads" placeholder="Search name, phone, or service" value={query} onChange={e => setQuery(e.target.value)}/></label>
+    </div>
+    {!visible.length ? <div className="empty-state"><span className="icon-tile blue"><Icon name="phone"/></span><h3>{leads.length ? 'No leads match your search' : 'Your first lead will show up here'}</h3><p>{leads.length ? 'Try another search or filter.' : 'New website leads and their call results will appear here.'}</p>{leads.length > 0 && <button className="text-button" onClick={() => { setFilter('all'); setQuery('') }}>Clear filters</button>}</div> : <>
+      <div className="lead-table-scroll"><table className="lead-table"><thead><tr>{['Lead', 'Service', 'Status', 'Received', 'Next step'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{(tab === 'overview' ? visible.slice(0, 5) : visible).map(l => <tr key={l.id}>
+        <td><button className="lead-open" onClick={() => openLead(l.id)} aria-label={`View lead ${l.name}`}>{l.name}<span>{formatPhone(l.phone)}{l.is_test && ' · Test'}</span></button></td>
+        <td>{l.service || 'Not specified'}{l.language === 'es' && <small>Spanish</small>}</td>
+        <td><LeadStatus lead={l}/></td>
+        <td><time dateTime={l.received_at}>{when(l.received_at, tz)}</time></td>
+        <td><span className={NEEDS_YOU.includes(l.status) ? 'lead-attention-text' : ''}>{nextStep(l, tz, callsOff, agent?.mode)}</span></td>
+      </tr>)}</tbody></table></div>
+      <div className="lead-mobile-list">{(tab === 'overview' ? visible.slice(0, 5) : visible).map(l => <button className="lead-mobile-card" key={l.id} onClick={() => openLead(l.id)} aria-label={`Open lead ${l.name}`}><span className="lead-mobile-top"><strong>{l.name}</strong><LeadStatus lead={l}/></span><span>{l.service || 'Website inquiry'} · {when(l.received_at, tz)}</span><span className="lead-mobile-next">{nextStep(l, tz, callsOff, agent?.mode)} <span aria-hidden="true">↗</span></span></button>)}</div>
+    </>}
+    <div className="lead-inbox-footer"><span>{tab === 'overview' ? Math.min(visible.length, 5) : visible.length} of {leads.length} latest leads</span>{tab === 'overview' && <button className="text-button" onClick={() => setTab('leads')}>View all leads →</button>}</div>
+  </section>
 
-  return <div className="leads-panel">
-    {error && <p className="error-banner" role="alert">Could not load leads: {error} <button onClick={() => setReload((n) => n + 1)}>Retry</button></p>}
+  return <div className="leads-panel lead-workspace">
+    {error && <p className="error-banner" role="alert">Could not load leads: {error} <button onClick={() => setReload(n => n + 1)}>Retry</button></p>}
     {message && <p className="form-note" role="status">{message}</p>}
     {data && <>
-      <section className={`leads-status mode-${agent?.mode || 'none'}`}>
-        <div className="leads-status-main"><span className="leads-dot" aria-hidden="true"/><div><span className="eyebrow">YOUR AGENT</span><strong>{modeName}</strong><p>{modeNote}</p></div></div>
-        {agent && <dl>
-          <div><dt>Calling hours</dt><dd>{hour(agent.call_start_hour)}–{hour(agent.call_end_hour)} · {agent.call_sundays ? 'every day' : 'Mon–Sat'}</dd></div>
-          <div><dt>Unanswered leads</dt><dd>Up to {agent.max_attempts} calls, {seconds(agent.retry_gap_minutes * 60)} apart</dd></div>
-          <div><dt>Owner first</dt><dd>{agent.owner_first ? 'Your phone rings first' : 'Off · the agent calls first'}</dd></div>
-        </dl>}
-        {agent && <AgentControls key={`${client.client_id}:${agent.updated_at || ''}`} client={client} agent={agent} demo={demo} onSaved={(msg) => { setMessage(msg); setReload((n) => n + 1) }}/>}
-        {!data.calls_enabled && <p className="leads-warning"><Icon name="shield" size={15}/>Automatic calls are switched off for every business right now. Leads are saved and emailed.</p>}
-      </section>
-
-      {isMaster && data.costs && <p className="leads-cost"><Icon name="key" size={14}/>Azul only · Call cost this month: <b>${data.costs.month_usd.toFixed(2)}</b> over {data.costs.calls} calls{stats.leads ? ` · $${(data.costs.month_usd / stats.leads).toFixed(2)} per lead` : ''}{data.costs.priced < data.costs.calls ? ` · ${data.costs.calls - data.costs.priced} without a cost yet` : ''}</p>}
-      <div className="leads-stats">
-        {[['Leads this month', stats.leads ?? 0, 'From your website'], ['Time to first call', seconds(stats.median_seconds_to_call), stats.within_minute == null ? 'Median, during calling hours' : `${stats.within_minute}% called within a minute`], ['Booked this month', stats.booked ?? 0, 'Visits on your calendar'], ['Need you', stats.needs_you ?? 0, 'Call these leads back']]
-          .map(([label, value, note]) => <div className="panel" key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></div>)}
-      </div>
-
-      <section className="panel table-panel">
-        <div className="panel-heading"><div><h2>Leads</h2><p>Every website lead, what the agent did, and what's next. Updates every 20 seconds.</p></div><span className="count-badge">{visible.length} of {leads.length}</span></div>
-        <div className="service-filters leads-filters" role="group" aria-label="Filter leads">{FILTERS.map(([id, label]) => <button key={id} className={filter === id ? 'selected' : ''} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}</div>
-        {!visible.length ? <div className="empty-state"><span className="icon-tile green"><Icon name="phone"/></span><h3>{leads.length ? 'No leads match this filter' : 'Your first lead will show up here'}</h3><p>{leads.length ? 'Try another filter.' : 'When someone fills in your website form, the agent calls them within seconds and the result appears here.'}</p></div>
-          : <ul className="lead-list">{visible.map((l) => {
-            const [label, tone] = LEAD_STATUS[l.status] || [l.status, 'cancelled']
-            const speed = firstCall(l)
-            return <li key={l.id} className="lead-row">
-              <div className="lead-who"><strong>{l.name}{l.is_test && <span className="test-badge">Test</span>}</strong><small><a href={`tel:${l.phone}`}>{formatPhone(l.phone)}</a>{l.service ? ` · ${l.service}` : ''}{l.language === 'es' ? ' · ES' : ''}</small></div>
-              <div className="lead-state"><span className={`status-pill status-${tone}`}><i/>{label}</span>{l.attempts > 0 && <small>{l.attempts} call{l.attempts > 1 ? 's' : ''}</small>}</div>
-              <div className="lead-time"><small>Received {when(l.received_at, tz)}</small>
-                <small>{speed != null ? `First call after ${seconds(speed)}` : l.status === 'retry' && l.next_attempt_at ? `Next call ${when(l.next_attempt_at, tz)}` : l.consent ? 'Not called yet' : 'No call permission'}</small>
-                {l.appointment_time && <small className="lead-booked"><Icon name="check" size={13}/>Visit {when(l.appointment_time, tz) || l.appointment_time}</small>}</div>
-              <div className="lead-actions">{['retry', 'new'].includes(l.status) && <button className="text-button" disabled={busy === l.id} onClick={() => stop(l)}>Stop calling</button>}</div>
-              {(l.summary || l.notes || l.last_error || l.details || l.address) && <details className="lead-detail"><summary>Details</summary>
-                {l.summary && <p><b>Call summary.</b> {l.summary}</p>}
-                {l.details && <p><b>From the form.</b> {l.details}</p>}
-                {l.address && <p><b>Address.</b> {[l.address, l.zip].filter(Boolean).join(' ')}</p>}
-                {l.notes && <p><b>Note.</b> {l.notes}</p>}
-                {l.last_error && <p className="lead-error"><b>Problem.</b> {l.last_error}</p>}
-                {l.email && <p><b>Email.</b> <a href={`mailto:${l.email}`}>{l.email}</a></p>}
-              </details>}
-            </li>
-          })}</ul>}
-        <p className="chart-footnote leads-footnote">The list shows the latest 100 leads; the numbers count every lead this month. "Time to first call" counts leads that arrived during calling hours; after-hours leads are called when hours start. You get an email after every call.</p>
-      </section>
-
-      <BusinessDetails key={client.client_id} client={client} profile={data.profile} updatedAt={data.profile_updated_at} shareEmail={data.calendar_share_email} demo={demo} onSaved={() => setReload((n) => n + 1)}/>
-      {isMaster && <AgentSetup key={`${client.client_id}:${agent?.updated_at || 'new'}`} client={client} agent={agent} profile={data.profile} gaps={data.gaps || []} demo={demo} onSaved={(msg) => { setMessage(msg); setReload((n) => n + 1) }}/>}
+      {callsOff && <div className="lead-global-alert" role="status"><Icon name="shield" size={20}/><div><strong>Automatic calls are switched off</strong><p>Leads are saved and emailed. No automatic calls will be placed while the global switch is off.</p></div></div>}
+      <header className="lead-agent-header"><div><p className="eyebrow">AZUL / LEAD OPERATIONS</p><div className="lead-title-line"><h1>Speed-to-Lead</h1><span className={`lead-mode ${callsOff ? 'mode-paused' : `mode-${agent?.mode || 'none'}`}`}><span className="leads-dot"/>{callsOff ? 'Calls off' : modeName}</span></div><p>{callsOff ? `Agent mode: ${modeName}. Leads are saved and emailed.` : modeNote}{agent && <> · {hour(agent.call_start_hour)}–{hour(agent.call_end_hour)} {agent.call_sundays ? 'every day' : 'Mon–Sat'} · {tz.replaceAll('_', ' ')}</>}</p></div><button className="btn-primary" onClick={() => setTab('settings')}><Icon name="clock" size={16}/>Agent settings</button></header>
+      <nav className="lead-tabs" aria-label="Speed-to-Lead sections">{[['overview','Overview'],['leads','Leads'],['settings','Agent settings'],['setup','Setup']].map(([id,label]) => <button key={id} aria-current={tab === id ? 'page' : undefined} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>{label}{id === 'leads' && <span>{leads.length}</span>}</button>)}</nav>
+      {(tab === 'overview' || tab === 'leads') && <>
+        {tab === 'overview' && <><div className="lead-section-label"><h2>Performance</h2><span>{period} · Month to date</span></div><div className="leads-stats">
+          {[['Leads', stats.leads ?? 0, 'From your website'], ['Median response time', seconds(stats.median_seconds_to_call), stats.within_minute == null ? 'During calling hours' : `${stats.within_minute}% called within a minute`], ['Booked visits', stats.booked ?? 0, 'Visits on your calendar'], ['Needs attention', stats.needs_you ?? 0, 'Across the last 32 days']].map(([label,value,note]) => <div className="panel" key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></div>)}
+        </div><p className="lead-metric-note">Response time measures the first call for leads received during calling hours. After-hours leads wait until calling hours begin.</p></>}
+        {needs > 0 && <div className="lead-callback-strip"><span className="lead-callback-icon"><Icon name="phone" size={19}/></span><div><strong>{needs} lead{needs === 1 ? ' needs' : 's need'} your attention</strong><p>Review call results and the recommended next step.</p></div><button onClick={showNeeds}>View leads <span aria-hidden="true">→</span></button></div>}
+        {inbox}
+      </>}
+      {tab === 'settings' && <div className="lead-settings-layout"><section className="panel"><div className="panel-heading"><div><h2>Agent controls</h2><p>Manage calling hours, transfers, and lead alerts.</p></div></div>{agent ? <AgentControls key={`${client.client_id}:${agent.updated_at || ''}`} initiallyOpen client={client} agent={agent} demo={demo} onSaved={msg => { setMessage(msg); setReload(n => n + 1) }}/> : <p className="form-note">Your agent needs to be connected first. Open Setup for next steps.</p>}</section><BusinessDetails key={client.client_id} client={client} profile={data.profile} updatedAt={data.profile_updated_at} shareEmail={data.calendar_share_email} demo={demo} onSaved={() => setReload(n => n + 1)}/></div>}
+      {tab === 'setup' && <div className="lead-setup-content">{isMaster && data.costs && <p className="leads-cost"><Icon name="key" size={14}/>Azul only · Call cost this month: <b>${data.costs.month_usd.toFixed(2)}</b> over {data.costs.calls} calls{data.costs.priced < data.costs.calls ? ` · ${data.costs.calls - data.costs.priced} without a cost yet` : ''}</p>}{isMaster && <AgentSetup key={`${client.client_id}:${agent?.updated_at || 'new'}`} client={client} agent={agent} profile={data.profile} gaps={data.gaps || []} demo={demo} onSaved={msg => { setMessage(msg); setReload(n => n + 1) }}/>}{setupContent}</div>}
+      {selected && <LeadDrawer lead={selected} tz={tz} callsOff={callsOff} mode={agent?.mode} busy={busy === selected.id} message={message} onStop={() => stop(selected)} onClose={() => setSelectedId(null)}/>}
     </>}
   </div>
+}
+
+function LeadStatus({ lead }) {
+  const [label, tone] = LEAD_STATUS[lead.status] || [lead.status, 'cancelled']
+  return <span className={`status-pill status-${tone}`}><i/>{label}</span>
+}
+
+function nextStep(lead, tz, callsOff, mode) {
+  if (lead.status === 'blocked' || lead.status === 'stopped') return 'Do not contact'
+  if (lead.status === 'not_called' && !lead.consent) return 'No call permission'
+  if (lead.appointment_time) return `Visit ${when(lead.appointment_time, tz) || lead.appointment_time}`
+  if (lead.status === 'booked' || lead.booked) return 'Visit booked'
+  if (NEEDS_YOU.includes(lead.status)) return 'Review and call back'
+  if (['calling','dialing','owner_ringing','owner_connecting'].includes(lead.status)) return 'Call in progress'
+  if (['retry','new'].includes(lead.status)) {
+    if (callsOff) return 'Waiting · automatic calls off'
+    if (mode === 'paused') return 'Waiting · agent paused'
+    if (mode === 'testing' && !lead.is_test) return 'Testing · test numbers only'
+    return lead.next_attempt_at ? `Next call ${when(lead.next_attempt_at, tz)}` : 'Waiting for first call'
+  }
+  if (['handed_off','owner_talked'].includes(lead.status)) return 'Continue with your team'
+  return 'Review lead details'
+}
+
+function LeadDrawer({ lead, tz, callsOff, mode, busy, message, onStop, onClose }) {
+  const dialog = useRef(null)
+  useEffect(() => { const el = dialog.current; el.showModal(); return () => { el.close() } }, [])
+  const speed = firstCall(lead)
+  const canContact = lead.consent && !['blocked','stopped'].includes(lead.status)
+  return <dialog ref={dialog} className="lead-drawer" aria-labelledby="lead-drawer-title" onClose={onClose} onClick={e => { if (e.target === e.currentTarget) e.currentTarget.close() }}>
+    <div className="lead-drawer-inner"><header><div><p className="eyebrow">LEAD DETAILS</p><h2 id="lead-drawer-title">{lead.name}</h2></div><button className="lead-close" aria-label="Close lead details" onClick={() => dialog.current.close()}>×</button></header>
+      <LeadStatus lead={lead}/><section><h3>Next step</h3><p className="lead-next-detail">{nextStep(lead, tz, callsOff, mode)}</p></section>
+      <section><h3>Contact details</h3><dl><div><dt>Phone</dt><dd>{canContact ? <a href={`tel:${lead.phone}`}>{formatPhone(lead.phone)}</a> : formatPhone(lead.phone)}</dd></div>{lead.email && <div><dt>Email</dt><dd>{canContact ? <a href={`mailto:${lead.email}`}>{lead.email}</a> : lead.email}</dd></div>}<div><dt>Service</dt><dd>{lead.service || 'Not specified'}</dd></div><div><dt>Language</dt><dd>{lead.language === 'es' ? 'Spanish' : 'English'}</dd></div>{lead.address && <div><dt>Address</dt><dd>{[lead.address,lead.zip].filter(Boolean).join(' ')}</dd></div>}<div><dt>Call permission</dt><dd>{lead.consent ? 'Provided on form' : 'Not provided'}</dd></div></dl></section>
+      <section><h3>Call summary</h3><p>{lead.summary || 'No call summary yet.'}</p>{lead.details && <p><b>From the form:</b> {lead.details}</p>}{lead.notes && <p><b>Note:</b> {lead.notes}</p>}{lead.last_error && <p className="lead-error"><b>Problem:</b> {lead.last_error}</p>}</section>
+      <section><h3>Activity & booking</h3><dl><div><dt>Received</dt><dd>{when(lead.received_at,tz)}</dd></div><div><dt>First call</dt><dd>{speed == null ? 'Not called yet' : `${seconds(speed)} after arrival`}</dd></div><div><dt>Attempts</dt><dd>{lead.attempts || 0}</dd></div>{lead.next_attempt_at && <div><dt>Scheduled retry</dt><dd>{when(lead.next_attempt_at,tz)}</dd></div>}{lead.appointment_time && <div><dt>Booked visit</dt><dd>{when(lead.appointment_time,tz) || lead.appointment_time}</dd></div>}</dl></section>
+      <footer>{canContact && <a className="btn-primary" href={`tel:${lead.phone}`}><Icon name="phone" size={15}/>Call lead</a>}{['retry','new'].includes(lead.status) && <button className="btn-ghost" disabled={busy} onClick={onStop}>{busy ? 'Stopping…' : 'Stop calling'}</button>}</footer>{message && <p className="form-note" role="status">{message}</p>}
+    </div>
+  </dialog>
 }
 
 const BLANK = { hosted_form: false, privacy_url: '', weekly_email: true, assistant_mode: 'vapi', calendar_id: '', calendar_tool_ids: '', business_name: '', mode: 'testing', vapi_assistant_id: '', vapi_phone_number_id: '', twilio_number: '', owner_email: '', owner_cell: '', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: '' }

@@ -137,11 +137,11 @@ createServer(async (req, res) => {
       return json(404, { error: 'This endpoint is not available in the local UI demo.' })
     }
     if (!['GET', 'HEAD'].includes(req.method)) return json(405, { error: 'Method not allowed' })
-    const asset = url.pathname.startsWith('/assets/')
+    const asset = url.pathname.startsWith('/assets/') || url.pathname.startsWith('/images/') || url.pathname === '/azul-logo.png'
     const path = asset ? resolve(root, '.' + decodeURIComponent(url.pathname)) : resolve(root, 'index.html')
     if (!path.startsWith(root + sep)) return json(403, { error: 'Forbidden' })
     const file = readFileSync(path)
-    const types = { '.js': 'application/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml' }
+    const types = { '.js': 'application/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp' }
     res.writeHead(200, { 'Content-Type': types[extname(path)] || 'application/octet-stream', 'Cache-Control': 'no-store' }); res.end(req.method === 'HEAD' ? undefined : file)
   } catch (e) { json(e.code === 'ENOENT' ? 404 : 400, { error: e.code === 'ENOENT' ? 'Build the preview first: npm run build' : 'Invalid demo request' }) }
 }).listen(port, '127.0.0.1', () => console.log(`Local UI demo: http://localhost:${port}/admin\nKey: ${adminKey}\nSample data only. No real messages. Stop with Ctrl+C.`))

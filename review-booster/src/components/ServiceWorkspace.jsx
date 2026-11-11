@@ -109,10 +109,9 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
         </aside>
       </div>
     </> : service && (() => { const d = DELIVERY[view]; return <>
-      <section className={`service-intro service-${service.color}`}><WindowBar title={`// ${service.name} / DELIVERY //`}/><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{d.intro}</p></div></section>
+      {view !== 'calls' && <section className={`service-intro service-${service.color}`}><WindowBar title={`// ${service.name} / DELIVERY //`}/><span className={`icon-tile ${service.color}`}><Icon name={service.icon} size={25}/></span><div><p className="eyebrow">{service.status}</p><h2>{service.description}</h2><p>{d.intro}</p></div></section>}
       {view === 'agents' && <AgentStudio/>}
-      {view === 'calls' && <LeadsPanel client={client} demo={demo} isMaster={isMaster}/>}
-      {storageNote}
+      {view === 'calls' ? <LeadsPanel client={client} demo={demo} isMaster={isMaster} setupContent={<>{storageNote}<TaskList title={d.setupTitle} tasks={SETUP[view]} state={setup}/><section className="panel"><h2>{d.sideTitle}</h2><p>{d.side}</p><div className="integration-note"><strong>{d.noteTitle}</strong><p>{d.note}</p></div><a className="btn-ghost" href={d.link} target="_blank" rel="noreferrer">{d.linkLabel}<Icon name="chevron" size={14}/></a><p className="chart-footnote">{d.linkNote || 'Opens a separate tool. Access and subscriptions are managed there.'}</p></section></>}/> : <>{storageNote}
       <div className="delivery-grid"><div className="delivery-main">
         <TaskList title={d.setupTitle} tasks={SETUP[view]} state={setup}/>
         {MONTHLY[view] && <section className="panel"><div className="panel-heading"><div><h2>{d.monthlyTitle}</h2><p>{d.monthlySub}</p></div><select className="input month-select" aria-label={`${service.name} planning month`} value={month} onChange={(e) => setMonth(e.target.value)}>{months.map((m) => <option key={m} value={m}>{new Date(`${m}-01T12:00:00`).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</option>)}</select></div><TaskList tasks={MONTHLY[view]} state={monthly} embedded/></section>}
@@ -121,7 +120,7 @@ function WorkspaceBody({ client, demo, isMaster, view, navigate, requests, loadi
         <div className="integration-note"><Icon name="shield" size={17}/><strong>{d.noteTitle}</strong><p>{d.note}</p></div>
         <a className="btn-ghost" href={d.link} target="_blank" rel="noreferrer">{d.linkLabel}<Icon name="chevron" size={14}/></a>
         <p className="chart-footnote">{d.linkNote || 'Opens a separate tool. Access and subscriptions are managed there.'}</p>
-      </aside></div>
+      </aside></div></>}
     </> })()}
   </div>
 }
