@@ -27,3 +27,8 @@ dist-ssr
 
 .vercel
 .env*
+
+# Local only: prospect research and screenshots (repo is public)
+reports/
+research/
+Screenshot *.png
