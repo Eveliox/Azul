@@ -7,6 +7,7 @@ import { PageTransition } from './components/motion/PageTransition'
 import { SmoothScroll } from './components/motion/SmoothScroll'
 import { ScrollTrigger } from './lib/gsap'
 import { useLenis } from './components/motion/SmoothScroll'
+import { useMetaPixel } from './lib/metaPixel'
 const AILeadAgent = lazy(() => import('./pages/AILeadAgent'))
 import Home from './pages/Home'
 const About = lazy(() => import('./pages/About'))
@@ -18,6 +19,7 @@ const Legal = lazy(() => import('./pages/Legal'))
 function RouteReady({ children }) {
   const { pathname, hash } = useLocation()
   const lenis = useLenis()
+  useMetaPixel()
   useLayoutEffect(() => {
     const frame = requestAnimationFrame(() => {
       ScrollTrigger.refresh()

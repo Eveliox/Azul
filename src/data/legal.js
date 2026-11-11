@@ -56,7 +56,8 @@ export const legalCopy = {
           'When we run a website form or AI lead follow-up for a contractor, we process that information on the contractor\'s behalf and their privacy policy also applies. The same rule holds: mobile numbers and text-message consent are never shared for marketing.',
         ] },
         { id: 'cookies', title: 'Cookies', body: [
-          'We save your language and cookie preferences in your browser. We do not run analytics or advertising cookies. If we add optional analytics, they stay off unless you accept them in the cookie banner.',
+          'We save your language and cookie preferences in your browser. Optional advertising analytics stay off unless you accept them in the cookie banner.',
+          'If you accept, we load the Meta Pixel (Facebook/Instagram) to measure which ads bring people to this site and improve them. The Pixel sets cookies and sends your IP address and browsing on this site to Meta. You can turn it off any time in the cookie banner.',
           'Calendly sets its own cookies when you open the booking page.',
         ] },
         { id: 'retention', title: 'How long we keep it', body: [
@@ -179,7 +180,8 @@ export const legalCopy = {
           'Cuando operamos un formulario web o el seguimiento con IA para un contratista, procesamos esa información en nombre del contratista y también aplica su política de privacidad. La misma regla se mantiene: los números móviles y el consentimiento para mensajes nunca se comparten con fines de marketing.',
         ] },
         { id: 'cookies', title: 'Cookies', body: [
-          'Guardamos sus preferencias de idioma y de cookies en su navegador. No usamos cookies de analítica ni de publicidad. Si añadimos analítica opcional, permanecerá desactivada hasta que usted la acepte en el aviso de cookies.',
+          'Guardamos sus preferencias de idioma y de cookies en su navegador. La analítica publicitaria opcional permanece desactivada hasta que usted la acepte en el aviso de cookies.',
+          'Si usted acepta, cargamos el Meta Pixel (Facebook/Instagram) para medir qué anuncios traen visitas a este sitio y mejorarlos. El Pixel coloca cookies y envía a Meta su dirección IP y su navegación en este sitio. Puede desactivarlo cuando quiera desde el aviso de cookies.',
           'Calendly coloca sus propias cookies cuando usted abre la página de reservas.',
         ] },
         { id: 'retention', title: 'Cuánto tiempo la guardamos', body: [
