@@ -59,7 +59,7 @@ export function profileGaps(profile, agent) {
   if (!profile) return ['Business details not filled in']
   if (!validateProfile(profile).data) gaps.push('Business details incomplete')
   if (!profile.calendar_shared) gaps.push('Calendar not shared yet')
-  if (!(agent?.calendar_tool_ids || []).length) gaps.push('Calendar tools not linked (Azul)')
+  if (!agent?.calendar_id && !(agent?.calendar_tool_ids || []).length) gaps.push('Calendar ID not set (Azul)')
   if (!agent?.owner_cell) gaps.push('Owner cell missing (needed for transfers)')
   if (!templateReady()) gaps.push('Voice settings not copied into the template yet (Azul)')
   return gaps
@@ -195,12 +195,24 @@ export function firstMessage({ direction, agent, lead }) {
 }
 
 // ── The assistant Vapi runs ─────────────────────────────────────────
-// Model, voice and transcriber: copy from the working Test AC assistant (Vapi export) before enabling the template.
-// templateReady() refuses the template until `voice` is set.
+// Copied from the working Test AC assistant (Vapi export, 2026-11-11): same model, voice and transcriber.
 export const ASSISTANT_BASE = {
-  model: { provider: 'openai', model: 'gpt-4o', temperature: 0.4 },
-  voice: null,
-  transcriber: { provider: 'deepgram', model: 'nova-3', language: 'multi' },
+  model: { provider: 'openai', model: 'gpt-4.1' },
+  voice: { provider: '11labs', model: 'eleven_turbo_v2_5', voiceId: 'SAz9YHcvj6GT2YYXdXww' },
+  transcriber: { provider: 'deepgram', model: 'nova-2', language: 'multi', confidenceThreshold: 0.4, fallbackPlan: { autoFallback: { enabled: true } } },
+  startSpeakingPlan: { smartEndpointingPlan: { provider: 'vapi' } },
+}
+const quietStart = [{ type: 'request-start', blocking: false }]
+// Calendar tools built per call, pointed at the business's calendar (same shape as Test AC's saved tools).
+export function calendarTools(calendarId, profile, tz = NY) {
+  const p = { ...PROFILE_DEFAULTS, ...profile }
+  const params = { type: 'object', properties: {}, required: [] }
+  return [
+    { type: 'google.calendar.availability.check', messages: quietStart, metadata: { calendarId },
+      function: { name: 'check_availability', description: `Checks whether one exact hour is free on the service calendar. Use before offering or booking any time. Always pass timeZone ${tz}.`, parameters: params } },
+    { type: 'google.calendar.event.create', messages: quietStart, metadata: { calendarId },
+      function: { name: 'book_visit', description: `Books the ${p.visit_name}. Use only after the caller agreed to a specific hour that check_availability said is free, and the address is in the service area. ${p.visit_minutes}-minute event, timeZone ${tz}, summary "${p.visit_name} - name - address - callback phone".`, parameters: params } },
+  ]
 }
 // The template can't run until the voice is set (Vapi's default voice may not speak Spanish well).
 export const templateReady = (base = ASSISTANT_BASE) => Boolean(base.voice && base.model && base.transcriber)
@@ -209,18 +221,27 @@ export const DEFAULT_STRUCTURED_OUTPUT_ID = '72953866-f21f-47e4-8ae3-dee0fb60fb8
 export function buildAssistant({ direction, profile, agent, lead, now, serverUrl, secret, structuredOutputId = DEFAULT_STRUCTURED_OUTPUT_ID, base = ASSISTANT_BASE }) {
   const business = clean(agent.business_name, 120)
   const content = direction === 'inbound' ? inboundPrompt({ profile, agent, now }) : outboundPrompt({ profile, agent, lead, now })
-  const tools = agent.owner_cell ? [{
-    type: 'transferCall',
-    function: { name: 'transfer_to_owner', description: 'Transfers the call to a person at the company. Use for emergencies, an upset caller, a price question, or anyone asking for a person.' },
-    destinations: [{ type: 'number', number: agent.owner_cell, message: "I'm connecting you with someone now. / Le comunico ahora.", description: `The owner of ${business}` }],
-  }] : []
+  const tz = agent.timezone || NY
+  const tools = [
+    ...(agent.calendar_id ? calendarTools(agent.calendar_id, profile, tz) : []),
+    ...(agent.owner_cell ? [{
+      type: 'transferCall', messages: quietStart,
+      function: { name: 'transfer_to_owner', description: 'Transfers the call to a person at the company. Use for emergencies, an upset caller, a price question, or anyone asking for a person.' },
+      destinations: [{ type: 'number', number: agent.owner_cell, message: "I'm connecting you with someone now. / Le comunico ahora.", description: `The owner of ${business}`, transferPlan: { mode: 'blind-transfer', sipVerb: 'refer' } }],
+    }] : []),
+  ]
   const assistant = {
     name: `${business}`.slice(0, 32) + (direction === 'inbound' ? ' · in' : ' · out'),
     firstMessage: firstMessage({ direction, agent, lead }),
     firstMessageMode: 'assistant-speaks-first',
-    model: { ...base.model, messages: [{ role: 'system', content }], tools, toolIds: [...(agent.calendar_tool_ids || [])] },
+    // Saved calendar tools are only used when no calendar ID is set.
+    model: { ...base.model, messages: [{ role: 'system', content }], tools, ...(agent.calendar_id ? {} : { toolIds: [...(agent.calendar_tool_ids || [])] }) },
     transcriber: base.transcriber,
     ...(base.voice ? { voice: base.voice } : {}),
+    ...(base.startSpeakingPlan ? { startSpeakingPlan: base.startSpeakingPlan } : {}),
+    firstMessageInterruptionsEnabled: false,
+    // A short summary for the owner email (Test AC had it off, so its emails had only the transcript).
+    analysisPlan: { summaryPlan: { enabled: true } },
     voicemailDetection: direction === 'inbound' ? 'off' : { provider: 'vapi' },
     endCallMessage: 'Thanks, have a great day. / Gracias, que tenga un buen día.',
     maxDurationSeconds: 300,

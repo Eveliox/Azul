@@ -97,7 +97,7 @@ createServer(async (req, res) => {
         if (url.pathname === '/api/leads/list' && req.method === 'GET') {
           const visible = agent && !master ? Object.fromEntries(['client_id', 'mode', 'business_name', 'timezone', 'call_start_hour', 'call_end_hour', 'call_sundays', 'max_attempts', 'retry_gap_minutes', 'owner_first', 'updated_at'].map((k) => [k, agent[k]])) : agent
           const profile = leadProfiles[c.client_id] || null
-          return json(200, { agent: visible, leads: agent ? leads : [], stats: agent ? leadStatsDemo() : { leads: 0, called: 0, booked: 0, needs_you: 0, median_seconds_to_call: null, within_minute: null }, calls_enabled: true, profile, profile_updated_at: profile ? minutesAgo(3000) : null, gaps: profile ? ['Calendar tools not linked (Azul)'] : ['Business details not filled in'], calendar_share_email: 'calendar@azulwebdev.com' })
+          return json(200, { agent: visible, leads: agent ? leads : [], stats: agent ? leadStatsDemo() : { leads: 0, called: 0, booked: 0, needs_you: 0, median_seconds_to_call: null, within_minute: null }, calls_enabled: true, profile, profile_updated_at: profile ? minutesAgo(3000) : null, gaps: profile ? ['Calendar ID not set (Azul)'] : ['Business details not filled in'], calendar_share_email: 'calendar@azulwebdev.com' })
         }
         if (url.pathname === '/api/leads/stop' && req.method === 'POST') {
           const lead = leads.find((l) => l.id === body.lead_id && ['retry', 'new'].includes(l.status))

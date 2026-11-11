@@ -14,6 +14,9 @@ await db.exec(part2)
 const part3 = await readFile(new URL('../supabase/migrations/20261112_speed_to_lead_profiles.sql', import.meta.url), 'utf8')
 await db.exec(part3)
 await db.exec(part3)
+const part4 = await readFile(new URL('../supabase/migrations/20261113_speed_to_lead_calendar.sql', import.meta.url), 'utf8')
+await db.exec(part4)
+await db.exec(part4)
 
 const c1 = '11111111-1111-4111-8111-111111111111', c2 = '22222222-2222-4222-8222-222222222222'
 await db.query('insert into rb_clients(id,name) values($1,$2),($3,$4)', [c1, 'One', c2, 'Two'])
@@ -164,6 +167,8 @@ assert.ok(!(await claimRetries()).some((l) => l.id === t2.lead.id), 'test leads 
 assert.equal((await create(c1, lead('+13055550300'))).created, false, 'normal leads still are')
 await assert.rejects(() => db.query("update rb_lead_agents set assistant_mode='other' where client_id=$1", [c1]))
 await db.query("update rb_lead_agents set assistant_mode='azul', vapi_assistant_id=null, calendar_tool_ids=array['t1','t2'] where client_id=$1", [c1])
+await db.query("update rb_lead_agents set calendar_id='5477abc@group.calendar.google.com' where client_id=$1", [c1])
+await assert.rejects(() => db.query("update rb_lead_agents set calendar_id='not a calendar' where client_id=$1", [c1]))
 await db.query(`insert into rb_lead_profiles(client_id,data) values($1,'{"trade":"air conditioning"}')`, [c1])
 
 // No browser access to tables or functions.

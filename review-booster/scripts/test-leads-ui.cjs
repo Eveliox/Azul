@@ -21,7 +21,7 @@ const overflow=(page)=>page.evaluate(()=>document.documentElement.scrollWidth>in
   await page.getByText('Your business details',{exact:true}).waitFor();
   await page.getByText('Agent setup',{exact:true}).click();
   await page.getByLabel('Call script').selectOption('azul');
-  await page.getByText('Calendar tools not linked (Azul)',{exact:true}).waitFor();
+  await page.getByText('Calendar ID not set (Azul)',{exact:true}).waitFor();
   await page.getByText('Preview the call script',{exact:true}).click();
   await page.getByText('You are calling Maria',{exact:false}).waitFor();
   await page.getByRole('button',{name:'Answering a callback'}).click();

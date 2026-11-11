@@ -373,7 +373,7 @@ test('business details: validated and saved with who changed them', async () => 
 
 test('dashboard includes business details and what is missing', async () => {
   const d = await getLeadDashboard({ clientId: 'c1', isMaster: false, database: fakeDb({ agentRow: azulAgent, tables: { rb_leads: [], rb_lead_profiles: { data: goodProfile, updated_at: 'x' } } }), env: { ...env, LEAD_CALENDAR_SHARE_EMAIL: 'calendar@azul.test' }, now: NOW })
-  assert.equal(d.profile.trade, 'air conditioning'); assert.ok(d.gaps.every((g) => g.startsWith('Voice settings'))); assert.equal(d.calendar_share_email, 'calendar@azul.test')
+  assert.equal(d.profile.trade, 'air conditioning'); assert.deepEqual(d.gaps, []); assert.equal(d.calendar_share_email, 'calendar@azul.test')
   assert.equal(d.agent.calendar_tool_ids, undefined, 'tool IDs stay Azul-only')
 })
 
@@ -382,6 +382,10 @@ test('switching to the Azul template is refused until the voice is set', async (
   const body = { business_name: 'Test AC Co.', assistant_mode: 'azul', calendar_tool_ids: 't1, t2', vapi_phone_number_id: 'pn-1', owner_email: 'owner@example.com', mode: 'testing', test_numbers: '786 424 9866' }
   const r = await saveLeadAgent({ clientId: 'c1', body, database: fakeDb({ tables: { rb_clients: { id: 'c1', services: ['calls'] } } }), env, now: NOW })
   assert.equal(r.status, templateReady() ? 200 : 400)
+  const cal = await saveLeadAgent({ clientId: 'c1', body: { ...body, calendar_tool_ids: '', calendar_id: 'abc@group.calendar.google.com' }, database: fakeDb({ tables: { rb_clients: { id: 'c1', services: ['calls'] } } }), env, now: NOW })
+  assert.equal(cal.status, 200)
+  assert.equal((await saveLeadAgent({ clientId: 'c1', body: { ...body, calendar_tool_ids: '' }, database: fakeDb({ tables: { rb_clients: { id: 'c1', services: ['calls'] } } }), env, now: NOW })).status, 400, 'template needs a calendar')
+  assert.equal((await saveLeadAgent({ clientId: 'c1', body: { ...body, calendar_id: 'not a calendar' }, database: fakeDb({ tables: { rb_clients: { id: 'c1', services: ['calls'] } } }), env, now: NOW })).status, 400)
 })
 
 test('test calls: never ring the owner, never retried, failures stay on the dashboard', async () => {

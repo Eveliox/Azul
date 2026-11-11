@@ -116,10 +116,10 @@ export default function LeadsPanel({ client, demo, isMaster }) {
   </div>
 }
 
-const BLANK = { assistant_mode: 'vapi', calendar_tool_ids: '', business_name: '', mode: 'testing', vapi_assistant_id: '', vapi_phone_number_id: '', twilio_number: '', owner_email: '', owner_cell: '', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: '' }
+const BLANK = { assistant_mode: 'vapi', calendar_id: '', calendar_tool_ids: '', business_name: '', mode: 'testing', vapi_assistant_id: '', vapi_phone_number_id: '', twilio_number: '', owner_email: '', owner_cell: '', owner_first: false, timezone: 'America/New_York', call_start_hour: 8, call_end_hour: 20, call_sundays: false, max_attempts: 3, retry_gap_minutes: 120, test_numbers: '' }
 
 function AgentSetup({ client, agent, profile, gaps, demo, onSaved }) {
-  const [f, setF] = useState(() => agent ? { ...BLANK, ...agent, vapi_assistant_id: agent.vapi_assistant_id || '', twilio_number: agent.twilio_number || '', owner_cell: agent.owner_cell || '', test_numbers: (agent.test_numbers || []).join(', '), calendar_tool_ids: (agent.calendar_tool_ids || []).join(', ') } : { ...BLANK, business_name: client.name })
+  const [f, setF] = useState(() => agent ? { ...BLANK, ...agent, vapi_assistant_id: agent.vapi_assistant_id || '', twilio_number: agent.twilio_number || '', owner_cell: agent.owner_cell || '', test_numbers: (agent.test_numbers || []).join(', '), calendar_tool_ids: (agent.calendar_tool_ids || []).join(', '), calendar_id: agent.calendar_id || '' } : { ...BLANK, business_name: client.name })
   const [testNumber, setTestNumber] = useState(agent?.test_numbers?.[0] || '')
   const [testResult, setTestResult] = useState('')
   const [preview, setPreview] = useState('outbound')
@@ -164,7 +164,8 @@ function AgentSetup({ client, agent, profile, gaps, demo, onSaved }) {
       <fieldset><legend>Vapi & phone</legend>
         <label className="label">Call script<select className="input" value={f.assistant_mode} onChange={set('assistant_mode')}><option value="vapi">Vapi assistant (saved in Vapi)</option><option value="azul">Azul template (built from business details)</option></select></label>
         {field('vapi_assistant_id', f.assistant_mode === 'vapi' ? 'Vapi assistant ID' : 'Vapi assistant ID (not used in Azul template mode)', { required: f.assistant_mode === 'vapi', placeholder: '92a1a4d7-…', spellCheck: false })}
-        {field('calendar_tool_ids', 'Calendar tool IDs (check availability, book)', { required: f.assistant_mode === 'azul', placeholder: 'tool-id-1, tool-id-2', spellCheck: false })}
+        {field('calendar_id', 'Google Calendar ID (Azul template)', { required: f.assistant_mode === 'azul' && !String(f.calendar_tool_ids).trim(), placeholder: '…@group.calendar.google.com', spellCheck: false })}
+        <small className="field-hint">Google Calendar → the client's calendar → Settings and sharing → Integrate calendar → Calendar ID. The calendar must be shared with the Google account connected to Vapi.</small>
         {field('vapi_phone_number_id', 'Vapi phone number ID (the imported Twilio number)', { required: true, placeholder: '90e9e838-…', spellCheck: false })}
         {field('twilio_number', 'Business number (Twilio)', { type: 'tel', placeholder: '(305) 555-0000' })}
       </fieldset>

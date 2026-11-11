@@ -11,6 +11,7 @@ const profileInput = {
 }
 const profile = validateProfile(profileInput).data
 const agent = { client_id: 'c1', business_name: 'Test AC Co.', owner_cell: '+13055559999', calendar_tool_ids: ['tool-check', 'tool-book'], timezone: 'America/New_York' }
+const CAL = 'abc123@group.calendar.google.com'
 const lead = { id: 'lead-1', name: 'Maria Lopez', phone: '+13055550100', service: 'AC repair', address: '1100 W 49th St', language: 'en' }
 const NOW = new Date('2026-11-10T19:00:00Z')
 
@@ -37,8 +38,9 @@ test('profile validation: lists, zips, defaults and errors', () => {
 
 test('gaps tell Azul what is missing before switching a business to the template', () => {
   assert.deepEqual(profileGaps(null, agent), ['Business details not filled in'])
-  assert.deepEqual(profileGaps(profile, agent), templateReady() ? [] : ['Voice settings not copied into the template yet (Azul)'])
-  assert.deepEqual(profileGaps({ ...profile, calendar_shared: false }, { ...agent, calendar_tool_ids: [], owner_cell: null }).slice(0, 3), ['Calendar not shared yet', 'Calendar tools not linked (Azul)', 'Owner cell missing (needed for transfers)'])
+  assert.deepEqual(profileGaps(profile, agent), [])
+  assert.equal(templateReady(), true)
+  assert.deepEqual(profileGaps({ ...profile, calendar_shared: false }, { ...agent, calendar_tool_ids: [], owner_cell: null }).slice(0, 3), ['Calendar not shared yet', 'Calendar ID not set (Azul)', 'Owner cell missing (needed for transfers)'])
 })
 
 test('outbound prompt carries the lead, the business rules and the date', () => {
@@ -84,4 +86,17 @@ test('scripts use the business timezone, not Miami', () => {
   const p = outboundPrompt({ profile, agent: chicago, lead, now: NOW })
   assert.match(p, /Always use time zone America\/Chicago\./); assert.match(p, /1:00 PM \(local time, America\/Chicago\)/)
   assert.doesNotMatch(p + inboundPrompt({ profile, agent: chicago, now: NOW }), /Miami time|America\/New_York/)
+})
+
+test('calendar ID: tools are built per call, pointed at the business calendar', () => {
+  const a = buildAssistant({ direction: 'outbound', profile, agent: { ...agent, calendar_id: CAL }, lead, now: NOW, serverUrl: 'u', secret: 's' })
+  assert.equal(a.model.toolIds, undefined, 'saved tools not used when a calendar ID is set')
+  const [check, book, transfer] = a.model.tools
+  assert.equal(check.type, 'google.calendar.availability.check'); assert.equal(check.function.name, 'check_availability'); assert.deepEqual(check.metadata, { calendarId: CAL })
+  assert.equal(book.type, 'google.calendar.event.create'); assert.equal(book.function.name, 'book_visit')
+  assert.match(book.function.description, /Books the AC service visit\..*60-minute event, timeZone America\/New_York, summary "AC service visit - name - address - callback phone"/)
+  assert.equal(transfer.type, 'transferCall'); assert.deepEqual(transfer.destinations[0].transferPlan, { mode: 'blind-transfer', sipVerb: 'refer' })
+  assert.deepEqual(a.voice, { provider: '11labs', model: 'eleven_turbo_v2_5', voiceId: 'SAz9YHcvj6GT2YYXdXww' })
+  assert.equal(a.model.model, 'gpt-4.1'); assert.equal(a.transcriber.language, 'multi'); assert.deepEqual(a.analysisPlan, { summaryPlan: { enabled: true } })
+  assert.deepEqual(profileGaps(profile, { ...agent, calendar_tool_ids: [], calendar_id: CAL }), [])
 })

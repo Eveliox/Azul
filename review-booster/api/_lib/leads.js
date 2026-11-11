@@ -396,13 +396,15 @@ export function validateAgentSettings(b = {}) {
     retry_gap_minutes: int(b.retry_gap_minutes ?? 120),
     owner_first: b.owner_first === true,
     assistant_mode: b.assistant_mode === 'azul' ? 'azul' : 'vapi',
+    calendar_id: text(b.calendar_id, 260) || null,
     calendar_tool_ids: (Array.isArray(b.calendar_tool_ids) ? b.calendar_tool_ids : String(b.calendar_tool_ids || '').split(/[,\s]+/)).map((s) => String(s).trim()).filter(Boolean),
   }
   if (!row.vapi_assistant_id) row.vapi_assistant_id = null
   if (!row.business_name) return { error: 'Business name (as callers hear it) is required.' }
   if (row.assistant_mode === 'vapi' ? !ID.test(row.vapi_assistant_id || '') : row.vapi_assistant_id && !ID.test(row.vapi_assistant_id)) return { error: 'Vapi assistant ID is required in "Vapi assistant" mode (letters, numbers and dashes).' }
   if (row.calendar_tool_ids.length > 5 || row.calendar_tool_ids.some((t) => !ID.test(t))) return { error: 'Calendar tool IDs: up to 5, letters, numbers and dashes.' }
-  if (row.assistant_mode === 'azul' && !row.calendar_tool_ids.length) return { error: 'Azul template mode needs the calendar tool IDs (check availability and book).' }
+  if (row.calendar_id && !/^[A-Za-z0-9._%+-]{1,150}@[A-Za-z0-9.-]{3,100}$/.test(row.calendar_id)) return { error: 'Calendar ID looks wrong. Copy it from Google Calendar → the calendar\'s Settings → Integrate calendar (it ends in @group.calendar.google.com or @gmail.com).' }
+  if (row.assistant_mode === 'azul' && !row.calendar_id && !row.calendar_tool_ids.length) return { error: 'Azul template mode needs the business\'s Google Calendar ID.' }
   if (!ID.test(row.vapi_phone_number_id || '')) return { error: 'Vapi phone number ID is required (letters, numbers and dashes).' }
   if (!row.mode) return { error: 'Choose a mode.' }
   try { new Intl.DateTimeFormat('en-US', { timeZone: row.timezone }) } catch { return { error: 'Unknown timezone.' } }
