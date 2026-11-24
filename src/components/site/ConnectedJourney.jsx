@@ -20,7 +20,6 @@ function DemoIcon({ name, ...props }) {
     clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
     phone: <path d="M8 3H4v5c0 6.6 5.4 12 12 12h5v-4l-5-2-2 2-6-6 2-2-2-5Z"/>,
     globe: <><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c4 4.5 4 13.5 0 18-4-4.5-4-13.5 0-18Z"/></>,
-    transfer: <path d="M4 8h13m-4-4 4 4-4 4M20 16H7m4 4-4-4 4-4"/>,
     grid: <path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z"/>,
     key: <><circle cx="8" cy="8" r="4"/><path d="m11 11 9 9m-4-4 2-2m-5-1 2-2"/></>,
     search: <><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></>,
@@ -557,7 +556,5 @@ export function ConnectedJourney({ lang }) {
       <span className="service-index">0{chapter + 1}</span>
       <div><h2>{stage.title}</h2><p>{stage.body}</p></div>
     </div>
-
-    <ul className="lead-demo-capabilities" aria-label={t.capabilitiesTitle}>{t.capabilities.map(([title, body], index) => <li key={title}><DemoIcon name={['globe', 'calendar', 'transfer'][index]}/><div><h3>{title}</h3><p>{body}</p></div></li>)}</ul>
   </div>
 }
