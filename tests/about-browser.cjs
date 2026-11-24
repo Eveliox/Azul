@@ -1,6 +1,7 @@
-// ABOUT_URL=http://127.0.0.1:5173 PLAYWRIGHT_PATH=/path/to/playwright node tests/about-browser.cjs
+// ABOUT_URL=http://127.0.0.1:5173 PLAYWRIGHT_MODULE=/path/to/playwright node tests/about-browser.cjs
+// Optional CHROME_PATH=/path/to/chrome when Playwright's own Chromium isn't installed.
 // Uses the existing browser test environment; no project dependency is required.
-const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright')
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || process.env.PLAYWRIGHT_PATH || 'playwright')
 const assert = require('node:assert/strict')
 const { pathToFileURL } = require('node:url')
 const path = require('node:path')
@@ -8,7 +9,7 @@ const path = require('node:path')
 ;(async () => {
   const { translations } = await import(pathToFileURL(path.resolve(__dirname, '../src/data/translations.js')))
   const base = process.env.ABOUT_URL || 'http://127.0.0.1:5173'
-  const browser = await chromium.launch()
+  const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {})
   try {
     const page = await browser.newPage({ reducedMotion: 'reduce' })
     const errors = []
